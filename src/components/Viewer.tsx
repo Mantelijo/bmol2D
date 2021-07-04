@@ -1,9 +1,9 @@
 import React from "react";
 
-export function Viewer(){
+export function Viewer() {
     return (
-        <div>
-            This is the viewer
+        <div className="p-5">
+            This is the graphical viewer
         </div>
     );  
 }
