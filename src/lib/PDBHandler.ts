@@ -19,6 +19,14 @@ export class PDBHandler{
         }
     }
 
+    /**
+     * PDB File keywords:
+     * ATOM - atom information
+     * TER - terminates sequence of previously provided ATOMs
+     * 
+     * @param text 
+     * @returns 
+     */
     formatAtoms(text: string): Atom[]{
         let result: Atom[] = [];
         text.split("\n").forEach(line=>{

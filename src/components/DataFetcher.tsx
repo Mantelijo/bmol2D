@@ -1,10 +1,24 @@
-import React, { useState, ChangeEventHandler, ChangeEvent } from "react";
+import React, { useState, ChangeEventHandler, ChangeEvent, useEffect } from "react";
 import { PDBHandler } from "../lib/PDBHandler";
-import { PDBFile } from "../lib/format/atoms";
+import { Atom, PDBFile } from "../lib/format/atoms";
 
-export function DataFetcher(){
+type AtomsArray = Atom[]
 
+type Props = {
+    atoms: Atom[]
+    setAtoms: any
+}
+
+export function DataFetcher({atoms, setAtoms}: Props){
     const [pdb, setPDB] = useState<PDBFile |undefined>(undefined);
+
+    useEffect(()=>{
+        console.log("I have been started!");
+
+        return ()=>{
+            console.log("I have been deleted")
+        }
+    }, [])
 
     const handleFileChange: ChangeEventHandler<HTMLInputElement> = async (event: ChangeEvent)=>{
         console.log(event)
@@ -14,8 +28,14 @@ export function DataFetcher(){
             setPDB(
                 await new PDBHandler(f as File).readData()
             )
+          
         }
     }
+    useEffect(()=>{
+        if(pdb?.atoms){
+            setAtoms((pdb as PDBFile).atoms)
+        }
+    })
 
     let pdbText: JSX.Element|undefined;
     if(pdb !== undefined && pdb.atoms.length > 0){
@@ -33,6 +53,11 @@ export function DataFetcher(){
                 <input type="file" onChange={handleFileChange}/> 
             </div>
             {pdbText}
+            {(pdb !== undefined && pdb.atoms.length > 0)&&
+                <div>
+                    Number of atoms: {pdb.atoms.length}
+                </div>
+            }
         </div>
     );
 }
