@@ -9,6 +9,7 @@ type Props = {
 export function Viewer({atoms}: Props) {
 
     let ref = React.createRef<SVGSVGElement>()
+    let tooltip = React.createRef<HTMLDivElement>()
 
     function initD3(){
         if(!ref){
@@ -24,20 +25,50 @@ export function Viewer({atoms}: Props) {
         const y = atoms.map(a=>a.coords.y)
         const z = atoms.map(a=>a.coords.z)
 
-        let scale = d3.scaleLinear([d3.min(x), d3.max(x)])
+        let yScale = d3.scaleLinear()
+            .domain([Math.min(...y), Math.max(...y)])
+            .range([0, h])
+
+        let xScale = d3.scaleLinear()
+            .domain([Math.min(...x), Math.max(...x)])
+            .range([0, w])
+        
+        const tooltipEl = d3.select(tooltip.current)
 
         let barWidth = w/x.length;
-        d3.select(ref.current)
+        const chart = d3.select(ref.current)
             .attr('width', w)
             .attr('height', h)
-            .selectAll('rect')
-            .data(x)
+            .selectAll('circle')
+            .data(atoms)
             .enter()
-                .append('rect')
-                .attr('y', (d:number)=>w-d)
-                .attr('height', (d)=>d)
-                .attr('width', barWidth)
-                .attr('x', (d, nth)=>barWidth*nth)
+                .append('circle')
+                .attr('cx', (a:Atom)=>xScale(a.coords.x))
+                .attr('cy', (a:Atom)=>yScale(a.coords.y))
+                .attr('style', 'fill:#867;')
+                .on('mouseover', async function( event:MouseEvent, atom:Atom){
+                    d3.select(this).attr('r', 15)
+                    await tooltipEl
+                        .html(atom.kind)
+                        .transition()
+                        .delay(500)
+                        .style('left', event.pageX+"px")
+                        .style('top', event.pageY+"px")
+                        .end();
+
+                    tooltipEl.style('opacity', 1)
+                })
+                .on('mouseout', function(d:Atom){
+                    tooltipEl.style('opacity', 0)
+                    d3.select(this).attr('r', 7)
+                });
+
+        chart.transition()
+            .attr('r', 7)
+            .delay(function(a: Atom, i){
+                return i * 5
+            })
+            .duration(500)
     }
 
     useEffect(initD3, [atoms])
@@ -46,6 +77,7 @@ export function Viewer({atoms}: Props) {
         <div className="p-5 flex items-center flex-col">
             <div>Total number of atoms: {atoms.length}</div>
             <svg ref={ref}></svg>
+            <div ref={tooltip} style={{position:"absolute", opacity:0, background:"#fff"}}></div>
         </div>
     );  
 }

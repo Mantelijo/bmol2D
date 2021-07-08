@@ -14,9 +14,15 @@ export class PDBHandler{
 
     format(text: string): PDBFile{
         return {
-            raw: text,
+            raw: this.formatText(text),
             atoms: this.formatAtoms(text)
         }
+    }
+
+    formatText(text: string): string{
+        return text.split('\n')
+            .map((line, index)=>index.toString()+". "+line)
+            .join("\n")
     }
 
     /**
