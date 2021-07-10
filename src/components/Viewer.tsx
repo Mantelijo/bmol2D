@@ -1,22 +1,32 @@
 import React, { useEffect } from "react";
 import * as d3 from 'd3'
-import { Atom } from "../lib/format/atoms";
+import { Atom, Polymer } from "../lib/format/atoms";
 
 type Props = {
-    atoms: Atom[]
+    polymers: Polymer[]
 }
 
-export function Viewer({atoms}: Props) {
+export function Viewer({polymers}: Props) {
 
     let ref = React.createRef<SVGSVGElement>()
     let tooltip = React.createRef<HTMLDivElement>()
+
+    // Construct atoms from polymer
+    const atoms: Atom[] = [];
+    polymers.map(({residues})=>{
+        residues.map((r)=>atoms.push(...r.atoms))
+    })
 
     function initD3(){
         if(!ref){
             return;
         }
 
-        console.log("Atoms were recalculated: ", atoms.length)
+        // Clean up svg initially
+        d3.select(ref.current).selectAll('*').remove();
+
+        // Start generating new chart
+        console.log("Polymenrs were recalculated: ", polymers.length)
 
         // Width and height of svg
         const [w, h] = [500,500];
@@ -35,6 +45,7 @@ export function Viewer({atoms}: Props) {
         
         const tooltipEl = d3.select(tooltip.current)
 
+        const rSize = 3;
         let barWidth = w/x.length;
         const chart = d3.select(ref.current)
             .attr('width', w)
@@ -45,26 +56,33 @@ export function Viewer({atoms}: Props) {
                 .append('circle')
                 .attr('cx', (a:Atom)=>xScale(a.coords.x))
                 .attr('cy', (a:Atom)=>yScale(a.coords.y))
-                .attr('style', 'fill:#867;')
+                .style('fill', '#867')
                 .on('mouseover', async function( event:MouseEvent, atom:Atom){
                     d3.select(this).attr('r', 15)
-                    await tooltipEl
-                        .html(atom.kind)
+                        .style('fill', '#5ef');
+
+                    try{
+                        await tooltipEl
+                        .html(`Residue: ${atom.residueName} Atom name: ${atom.name} Atom element: ${atom.element}`)
                         .transition()
-                        .delay(500)
+                        .duration(50)
                         .style('left', event.pageX+"px")
                         .style('top', event.pageY+"px")
                         .end();
+                    }catch(e){
+                        console.log("Something went wrong: ",e);
+                    }
 
                     tooltipEl.style('opacity', 1)
                 })
                 .on('mouseout', function(d:Atom){
                     tooltipEl.style('opacity', 0)
-                    d3.select(this).attr('r', 7)
+                    d3.select(this).attr('r', rSize)
+                    .style('fill', '#867')
                 });
 
         chart.transition()
-            .attr('r', 7)
+            .attr('r', rSize)
             .delay(function(a: Atom, i){
                 return i * 5
             })

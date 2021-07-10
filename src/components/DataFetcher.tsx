@@ -1,15 +1,12 @@
 import React, { useState, ChangeEventHandler, ChangeEvent, useEffect } from "react";
 import { PDBHandler } from "../lib/PDBHandler";
-import { Atom, PDBFile } from "../lib/format/atoms";
-
-type AtomsArray = Atom[]
+import { PDBFile, Polymer } from "../lib/format/atoms";
 
 type Props = {
-    atoms: Atom[]
-    setAtoms: any
+    setPolymers: React.Dispatch<React.SetStateAction<Polymer[]>>
 }
 
-export function DataFetcher({atoms, setAtoms}: Props){
+export function DataFetcher({setPolymers}: Props){
     const [pdb, setPDB] = useState<PDBFile |undefined>(undefined);
 
     useEffect(()=>{
@@ -28,17 +25,16 @@ export function DataFetcher({atoms, setAtoms}: Props){
             setPDB(
                 await new PDBHandler(f as File).readData()
             )
-          
         }
     }
     useEffect(()=>{
-        if(pdb?.atoms){
-            setAtoms((pdb as PDBFile).atoms)
+        if(pdb?.polymers){
+            setPolymers((pdb as PDBFile).polymers)
         }
     })
 
     let pdbText: JSX.Element|undefined;
-    if(pdb !== undefined && pdb.atoms.length > 0){
+    if(pdb !== undefined && pdb.polymers.length > 0){
         pdbText = (
             <div className="mt-5">
                 <div className="mb-1">Provided input file</div>
@@ -53,9 +49,21 @@ export function DataFetcher({atoms, setAtoms}: Props){
                 <input type="file" onChange={handleFileChange}/> 
             </div>
             {pdbText}
-            {(pdb !== undefined && pdb.atoms.length > 0)&&
+            {(pdb !== undefined && pdb.polymers.length > 0)&&
                 <div>
-                    Number of atoms: {pdb.atoms.length}
+                   Polymers: 
+                   {pdb.polymers.map(({residues, chainIdentifier}, k)=>
+                       <div className="ml-2" key={k}>
+                            Chain: <b>{chainIdentifier}</b>
+                            <div className="ml-2">
+                                {residues.map(
+                                    (residue, key)=>{
+                                        return <span key={key}>{residue.name} &nbsp;</span> 
+                                    })
+                                }
+                            </div>
+                       </div>
+                   )}
                 </div>
             }
         </div>
