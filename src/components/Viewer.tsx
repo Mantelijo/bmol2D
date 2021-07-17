@@ -1,21 +1,21 @@
-import React, { useEffect } from "react";
+import React, { useContext, useEffect } from "react";
 import * as d3 from 'd3'
-import { Atom, Polymer } from "../lib/format/atoms";
+import { Atom, Polymer, PolymerKind } from "../lib/format/atoms";
+import {context} from '../Store';
 
-type Props = {
-    polymers: Polymer[]
-}
-
-export function Viewer({polymers}: Props) {
+export function Viewer() {
+    const state = useContext(context)[0]
+    const polymers = state.polymers;
 
     let ref = React.createRef<SVGSVGElement>()
     let tooltip = React.createRef<HTMLDivElement>()
 
-    // Construct atoms from polymer
+    // Construct atoms from polymers that are either DNA or RNA, as we only visualize these
     const atoms: Atom[] = [];
-    polymers.map(({residues})=>{
-        residues.map((r)=>atoms.push(...r.atoms))
-    })
+    polymers.filter((p)=>[PolymerKind.DNA, PolymerKind.RNA].indexOf(p.kind)!==-1)
+        .map(({residues})=>{
+            residues.map((r)=>atoms.push(...r.atoms))
+        })
 
     function initD3(){
         if(!ref){
@@ -26,7 +26,6 @@ export function Viewer({polymers}: Props) {
         d3.select(ref.current).selectAll('*').remove();
 
         // Start generating new chart
-        console.log("Polymenrs were recalculated: ", polymers.length)
 
         // Width and height of svg
         const [w, h] = [500,500];
@@ -89,7 +88,7 @@ export function Viewer({polymers}: Props) {
             .duration(500)
     }
 
-    useEffect(initD3, [atoms])
+    useEffect(initD3, [polymers])
 
     return (
         <div className="p-5 flex items-center flex-col">

@@ -1,21 +1,20 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { Viewer } from './components/Viewer';
 import { DataFetcher } from './components/DataFetcher';
-import { Polymer } from './lib/format/atoms';
+import {StoreComponent} from './Store'
 
 function App() {
-
-  let [polymers, setPolymer] = useState<Polymer[]>([])
-
   return (
-    <div className="w-full flex flex-row">
-      <div className="w-9/12 bg-indigo-300 min-h-full h-screen">
-        <Viewer polymers={polymers}/>
+    <StoreComponent>
+      <div className="w-full flex flex-row">
+        <div className="w-9/12 bg-indigo-300 min-h-full h-screen">
+          <Viewer/>
+        </div>
+        <div className="w-3/12">
+          <DataFetcher/>
+        </div>
       </div>
-      <div className="w-3/12">
-        <DataFetcher  setPolymers={setPolymer}  />
-      </div>
-    </div>
+    </StoreComponent>
   );
 }
 

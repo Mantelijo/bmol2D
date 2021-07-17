@@ -42,14 +42,40 @@ export interface Residue{
     sequenceNumber: number,
 }
 
-export type PolymerKind = string;
+/**
+ * Residue types for DNA, RNA and Proteins
+ * DNA - deoxynucleotides
+ * RNA - nucleotides
+ * PROTEIN - standard amino acids
+ */
+export enum DNAResidues{
+    DA, DG, DC, DT,
+}
+export enum RNAResidues{
+    A, C, G, I, U
+}
+export enum ProteinResidues{
+    Ala, Arg, Asn, Asp, Cys, Glu, Gln, Gly, His, Ile, Leu, Lys, Met, Phe, Pro, Ser, Thr, Trp, Tyr, Val,
+}
+
+/**
+ * Type of polymer
+ */
+export enum PolymerKind {
+    DNA ="DNA",
+    RNA = "RNA",
+    Protein = "Protein",
+
+    // Undefined polymer kind 
+    Unknown = "Unknown",
+}
 
 /**
  * Polymer contains all residues until a TER in PDB is found
  */
 export interface Polymer{
     residues: Residue[],
-    kind?: PolymerKind,
+    kind: PolymerKind,
     chainIdentifier: string, // Name of the chain (A,B,C, ... <etc>)
 }
 
@@ -60,3 +86,21 @@ export interface PDBFile{
     polymers: Polymer[],
     raw: string,
 }
+
+
+/**
+ * Determines polymer kind from atom's residue name
+ * 
+ * @param atom 
+ * @returns
+ */
+export function polymerKindFromAtom(atom: Atom): PolymerKind{
+    switch (true){
+        case atom.residueName in DNAResidues:
+            return PolymerKind.DNA;
+        case atom.residueName in RNAResidues:
+            return PolymerKind.RNA;
+        default:
+            return PolymerKind.Protein;
+    }
+}   

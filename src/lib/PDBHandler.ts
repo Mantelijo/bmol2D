@@ -1,5 +1,4 @@
-import { polygonArea } from "d3"
-import { Atom, AtomRemoteness, PDBFile, Polymer, Residue } from "./format/atoms"
+import { Atom, DNAResidues, PDBFile, Polymer, PolymerKind, polymerKindFromAtom, Residue, RNAResidues } from "./format/atoms"
 
 export class PDBHandler{
     file: File
@@ -27,7 +26,7 @@ export class PDBHandler{
     }
 
     /**
-     * formatAtoms parses PDB strting into data structure
+     * formatAtoms parses PDB strting into Polymer[] data structure
      * 
      * PDB File keywords:
      * ATOM - atom information
@@ -39,11 +38,12 @@ export class PDBHandler{
     formatPolymers(text: string): Polymer[]{
         let result: Polymer[] = [];
 
-        // Helper functions 
+        // Helper functions to quickly create objects
         const newPolymer = ():Polymer=>{
             return {
                 chainIdentifier: '',
-                residues: []
+                residues: [],
+                kind:PolymerKind.Unknown,
             }
         }
         const newResidue = ():Residue=>{
@@ -57,6 +57,27 @@ export class PDBHandler{
         let currentPolymer = newPolymer()
         let currentResidue = newResidue()
 
+        // Polymer kind determination functionality
+        type currentPolymerKind = {
+            [key in PolymerKind|number|string]:number
+        };
+        const determinePolymerKindAndReset = (c?:currentPolymerKind): [currentPolymerKind, PolymerKind] | currentPolymerKind=>{
+            let obj = {
+                [PolymerKind.DNA]:0,
+                [PolymerKind.RNA]:0,
+                [PolymerKind.Protein]:0           
+            }
+            if(c===undefined){
+                return obj;
+            }
+            return [
+                obj,
+                Object.keys(c).reduce((a:any,b:any)=>c[a]>c[b]?a:b) as unknown as PolymerKind
+            ]
+        }
+        let currentPolymerKindCounter = determinePolymerKindAndReset() as currentPolymerKind;
+
+        // Here we will process the pdb text
         text.split("\n").forEach(line=>{
             // Parse ATOM lines
             if(line.startsWith("ATOM")){
@@ -70,10 +91,11 @@ export class PDBHandler{
                 let element = line.slice(76,78).trim();
                 let residueSequenceNumber = parseInt(line.slice(22,26).trim());
 
-                // Chain identifier for current polymer
+                // Chain identifier for current polymer - 1 letter
                 let chainIdentifier = line.slice(21,22);
                 currentPolymer.chainIdentifier = chainIdentifier;
 
+                // Construct atom entry
                 const atom: Atom = {
                     coords:{
                         x,y,z
@@ -82,8 +104,11 @@ export class PDBHandler{
                     element,
                     residueName,
                 }
+                
+                // Increment probable polymer kind from residue
+                currentPolymerKindCounter[polymerKindFromAtom(atom)]++
 
-                // Set residue sequence number for first time
+                // Set residue sequence number and residue name for first time
                 if (currentResidue.sequenceNumber === -1){
                     currentResidue.name = atom.residueName;
                     currentResidue.sequenceNumber = residueSequenceNumber;
@@ -100,6 +125,11 @@ export class PDBHandler{
             }   
             // TER indicates the end of current polymer (chain of residues)
             if(line.startsWith("TER")){
+                // Get polymer kind and reset counter
+                let [c, kind] = determinePolymerKindAndReset(currentPolymerKindCounter) as [currentPolymerKind, PolymerKind]
+                currentPolymerKindCounter = c;
+                currentPolymer.kind = kind;
+
                 // Save polymer
                 result.push(currentPolymer);
 
@@ -111,4 +141,5 @@ export class PDBHandler{
         
         return result;
     }
+
 }
