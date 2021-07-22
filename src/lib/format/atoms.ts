@@ -15,7 +15,8 @@ export interface Atom{
     coords: Coordinate,
     name: string,
     residueName: string,
-    element: string
+    element: string,
+    residueSequenceNumber: number,
 }
 
 /**

@@ -53,6 +53,10 @@ export class PDBHandler{
                 sequenceNumber: -1,
             }
         }
+        // Helper to push currentResidue to currentPolymer
+        const pushResidue = ():void=>{
+            currentPolymer.residues.push(currentResidue);
+        }
         
         let currentPolymer = newPolymer()
         let currentResidue = newResidue()
@@ -95,7 +99,7 @@ export class PDBHandler{
                 let chainIdentifier = line.slice(21,22);
                 currentPolymer.chainIdentifier = chainIdentifier;
 
-                // Construct atom entry
+                // Construct new atom entry
                 const atom: Atom = {
                     coords:{
                         x,y,z
@@ -103,6 +107,7 @@ export class PDBHandler{
                     name,
                     element,
                     residueName,
+                    residueSequenceNumber,
                 }
                 
                 // Increment probable polymer kind from residue
@@ -114,17 +119,21 @@ export class PDBHandler{
                     currentResidue.sequenceNumber = residueSequenceNumber;
                 }
 
-                // If residue name or sequence number does not match with current atom's - add residue to polymer and reset residue
-                if (residueName !== currentResidue.name && residueSequenceNumber !== currentResidue.sequenceNumber){
-                    currentPolymer.residues.push(currentResidue);
+                // If residue sequence number does not match with current atom's - add residue to polymer and reset currentResidue to a new one
+                if (residueSequenceNumber !== currentResidue.sequenceNumber){
+                    pushResidue();
                     currentResidue = newResidue();
                     currentResidue.name = atom.residueName;
+                    currentResidue.sequenceNumber = residueSequenceNumber;
                 }
 
                 currentResidue.atoms.push(atom)
             }   
             // TER indicates the end of current polymer (chain of residues)
             if(line.startsWith("TER")){
+                // Don't forget to push residue
+                pushResidue();
+
                 // Get polymer kind and reset counter
                 let [c, kind] = determinePolymerKindAndReset(currentPolymerKindCounter) as [currentPolymerKind, PolymerKind]
                 currentPolymerKindCounter = c;

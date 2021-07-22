@@ -7,7 +7,8 @@ import {PDBFile} from './lib/format/atoms'
  */
 const initialState: State = {
     polymers:[],
-    pdb: undefined
+    pdb: undefined,
+    isLoading: false,
 };
 
 /**
@@ -17,6 +18,9 @@ interface State{
     [key:string]:any
     polymers: Polymer[],
     pdb: PDBFile | undefined
+
+    // Determine if process is currently loading or not
+    isLoading: boolean
 }
 
 /**

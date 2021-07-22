@@ -9,7 +9,9 @@ export function DataFetcher(){
     const handleFileChange: ChangeEventHandler<HTMLInputElement> = async (event: ChangeEvent)=>{
         let f = (event.target as HTMLInputElement).files?.item(0);
         if(f !== null){
+            console.time("TIME_TO_PARSE_PDB");
             const pdb = await new PDBHandler(f as File).readData()
+            console.timeEnd("TIME_TO_PARSE_PDB");
             dispatch({
                 type:'pdb',
                 payload:pdb,
@@ -39,9 +41,11 @@ export function DataFetcher(){
 
     return (
         <div className="p-5 max-h-screen overflow-auto break-words">
-            <div>
-                <input type="file" onChange={handleFileChange}/> 
-            </div>
+            {!state.isLoading &&
+                <div>
+                    <input type="file" onChange={handleFileChange}/> 
+                </div>
+            }
             {pdbText}
             {(state.pdb)&&
                 <div>
