@@ -27,7 +27,7 @@ interface State{
  * Actions structure
  */
 interface Action{
-    type: string,
+    type: keyof State,
     payload:any,
 }
 

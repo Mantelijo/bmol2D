@@ -94,11 +94,7 @@ export function Viewer() {
                     d3.select(this).attr('r', rSize)
                     .style('fill', '#867')
                 });
-
-        
-
-
-            
+                
 
         // const x = atoms.map(a=>a.coords.x)
         // const y = atoms.map(a=>a.coords.y)
