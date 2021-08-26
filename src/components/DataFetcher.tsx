@@ -5,16 +5,31 @@ import {context} from '../Store';
 export function DataFetcher(){
     const [state, dispatch] = useContext(context)
 
-    // Updates pbd file information from uploaded file
+    // Updates pbd file information from uploaded file, parses pdb data and performs interaction calculations
     const handleFileChange: ChangeEventHandler<HTMLInputElement> = async (event: ChangeEvent)=>{
         let f = (event.target as HTMLInputElement).files?.item(0);
         if(f !== null){
-            console.time("TIME_TO_PARSE_PDB");
-            const pdb = await new PDBHandler(f as File).readData()
-            console.timeEnd("TIME_TO_PARSE_PDB");
+            // Show spinner while loading
             dispatch({
-                type:'pdb',
-                payload:pdb,
+                type: 'isLoading',
+                payload: true,
+            });
+
+            setTimeout(async ()=>{
+                console.time("TIME_TO_PARSE_PDB");
+                const pdb = await new PDBHandler(f as File).readData()
+                console.timeEnd("TIME_TO_PARSE_PDB");
+                dispatch({
+                    type:'pdb',
+                    payload:pdb,
+                });
+            }, 40500)
+
+
+            // Stop loading
+            dispatch({
+                type: 'isLoading',
+                payload: false,
             });
         }
     }
@@ -24,7 +39,6 @@ export function DataFetcher(){
             dispatch({
                 type:'polymers',
                 payload: state.pdb.polymers
-         
             });
         }
     }, [state.pdb])
@@ -39,6 +53,7 @@ export function DataFetcher(){
         )
     }
 
+    // Render data fetcher box
     return (
         <div className="p-5 max-h-screen overflow-auto break-words">
             {!state.isLoading &&

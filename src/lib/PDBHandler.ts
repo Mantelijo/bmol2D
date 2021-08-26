@@ -65,6 +65,8 @@ export class PDBHandler{
         type currentPolymerKind = {
             [key in PolymerKind|number|string]:number
         };
+        // Realistically - there should be only 1 PolymerKind for given polymer, but in case it is not, we can
+        // check which kind appears more often than others to determine true PolymerKind.
         const determinePolymerKindAndReset = (c?:currentPolymerKind): [currentPolymerKind, PolymerKind] | currentPolymerKind=>{
             let obj = {
                 [PolymerKind.DNA]:0,
@@ -75,7 +77,8 @@ export class PDBHandler{
                 return obj;
             }
             return [
-                obj,
+                obj, // reset obj
+                // Get the PolymerKind that has the largest number of occurrences
                 Object.keys(c).reduce((a:any,b:any)=>c[a]>c[b]?a:b) as unknown as PolymerKind
             ]
         }

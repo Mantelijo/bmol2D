@@ -1,13 +1,13 @@
 import { Residue } from "./atoms";
 
 export enum InteractionType{
-    // Threshold based interaction. Distance is the only factos
+    // Threshold based interaction. Distance is the only factor
     Threshold,
 
     // Hydrogen bond interactions
     HBond,
 
-    // Watson crick pair interactions
+    // Watson crick pair interactions, primarily between DNA, RNA nucleotides
     WatsonCrickPairs,
 }
 
@@ -18,7 +18,7 @@ export interface Interaction{
     // Helpful for quick lookup when performing visualizations
     nucleoAcidResidueSequenceNumber: number,
     nucleoAcidChainIdentifier: string,
-    
+        
     nucleoAcid: {
         residue: Residue,
     },

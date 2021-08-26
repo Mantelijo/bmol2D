@@ -15,7 +15,6 @@ const initialState: State = {
  * State structure
  */
 interface State{
-    [key:string]:any
     polymers: Polymer[],
     pdb: PDBFile | undefined
 
@@ -33,6 +32,7 @@ interface Action{
 
 const context = createContext<[State, React.Dispatch<Action>]>([initialState, ()=>{}]);
 
+// Reducer mutates the state
 const reducer = (state: State, {type, payload}:Action): State => {
 
     switch(type) {
