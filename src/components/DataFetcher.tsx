@@ -20,7 +20,7 @@ export function DataFetcher(){
             const pdb = await new PDBHandler(f as File).readData()
             console.timeEnd("TIME_TO_PARSE_PDB");
             
-            // Update state with calculated values
+            // Update state with parsed values
             dispatch({
                 type:'pdb',
                 payload:pdb,
