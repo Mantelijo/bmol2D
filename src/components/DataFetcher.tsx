@@ -15,33 +15,30 @@ export function DataFetcher(){
                 payload: true,
             });
 
-            setTimeout(async ()=>{
-                console.time("TIME_TO_PARSE_PDB");
-                const pdb = await new PDBHandler(f as File).readData()
-                console.timeEnd("TIME_TO_PARSE_PDB");
-                dispatch({
-                    type:'pdb',
-                    payload:pdb,
-                });
-            }, 40500)
-
-
-            // Stop loading
+            // Read and parse the file
+            console.time("TIME_TO_PARSE_PDB");
+            const pdb = await new PDBHandler(f as File).readData()
+            console.timeEnd("TIME_TO_PARSE_PDB");
+            
+            // Update state with calculated values
             dispatch({
-                type: 'isLoading',
-                payload: false,
+                type:'pdb',
+                payload:pdb,
             });
-        }
-    }
-
-    useEffect(()=>{
-        if(state.pdb?.polymers){
             dispatch({
                 type:'polymers',
-                payload: state.pdb.polymers
+                payload: pdb.polymers
             });
+
+            // Some fake loading time, so we get to see the spinner :)
+            setTimeout(async ()=>{
+                dispatch({
+                    type: 'isLoading',
+                    payload: false,
+                });
+            }, 2000)
         }
-    }, [state.pdb])
+    }
 
     let pdbText: JSX.Element|undefined;
     if(state.polymers.length > 0){

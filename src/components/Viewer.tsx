@@ -150,10 +150,15 @@ export function Viewer() {
     useEffect(initD3, [polymers])
 
     return (
-        <div className="p-5 flex items-center flex-col">
-            <div>Total number of atoms: {atoms.length}</div>
-            <svg ref={ref}></svg>
-            <div ref={tooltip} style={{position:"absolute", opacity:0, background:"#fff"}}></div>
-        </div>
+        <>
+            <div>
+                {state.simpleStuffy}
+            </div>
+            <div className="p-5 flex items-center flex-col">
+                <div>Total number of atoms: {atoms.length}</div>
+                <svg ref={ref}></svg>
+                <div ref={tooltip} style={{position:"absolute", opacity:0, background:"#fff"}}></div>
+            </div>
+        </>
     );  
 }

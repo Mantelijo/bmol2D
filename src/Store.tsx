@@ -9,6 +9,7 @@ const initialState: State = {
     polymers:[],
     pdb: undefined,
     isLoading: false,
+    simpleStuffy:'',
 };
 
 /**
@@ -16,10 +17,12 @@ const initialState: State = {
  */
 interface State{
     polymers: Polymer[],
-    pdb: PDBFile | undefined
+    pdb: PDBFile | undefined,
 
     // Determine if process is currently loading or not
-    isLoading: boolean
+    isLoading: boolean,
+
+    simpleStuffy: string,
 }
 
 /**
@@ -39,7 +42,7 @@ const reducer = (state: State, {type, payload}:Action): State => {
         // Default case works when type is equal state property name
         default:
             if (type in state){
-                state[type] = payload;
+                (state as any)[type] = payload;
             }else{
                 throw new Error(`${type} not found in state`);
             }
