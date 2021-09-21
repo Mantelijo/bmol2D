@@ -1,5 +1,5 @@
 import React, {createContext, useReducer, ReactElement} from "react";
-import { Polymer } from "./lib/format/atoms";
+import { Polymer, Residue } from "./lib/format/atoms";
 import {PDBFile} from './lib/format/atoms'
 
 /**
@@ -10,12 +10,15 @@ const initialState: State = {
     pdb: undefined,
     isLoading: false,
     simpleStuffy:'',
+    hashedNucleicAcidResidues:{},
 };
 
-/**
- * State structure
- */
-interface State{
+export type HashedResidue = {
+    [key: string]: Residue
+}
+
+// State structure
+export interface State{
     polymers: Polymer[],
     pdb: PDBFile | undefined,
 
@@ -23,12 +26,17 @@ interface State{
     isLoading: boolean,
 
     simpleStuffy: string,
+
+    // This is used for faster lookups of nucleic acid residues. 
+    // Since nucleic acids are the central parts of visualization,
+    // we might need to do many lookups, when searching for interactions.
+    hashedNucleicAcidResidues: HashedResidue
 }
 
 /**
  * Actions structure
  */
-interface Action{
+export interface Action{
     type: keyof State,
     payload:any,
 }

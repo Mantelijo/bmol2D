@@ -1,4 +1,5 @@
 import React, { useState, ChangeEventHandler, ChangeEvent, useEffect, useContext } from "react";
+import { InteractionsFinder } from "../lib/InteractionsFinder";
 import { PDBHandler } from "../lib/PDBHandler";
 import {context} from '../Store';
 
@@ -16,6 +17,7 @@ export function DataFetcher(){
             });
 
             // Read and parse the file
+            console.time("TIME_TO_PARSE_EVERYTHING");
             console.time("TIME_TO_PARSE_PDB");
             const pdb = await new PDBHandler(f as File).readData()
             console.timeEnd("TIME_TO_PARSE_PDB");
@@ -30,7 +32,12 @@ export function DataFetcher(){
                 payload: pdb.polymers
             });
 
+            const iFinder = new InteractionsFinder(pdb.polymers, dispatch);
+            iFinder.thresholdInteractions()
+
+
             // Some fake loading time, so we get to see the spinner :)
+            console.timeEnd("TIME_TO_PARSE_EVERYTHING");
             setTimeout(async ()=>{
                 dispatch({
                     type: 'isLoading',
@@ -55,7 +62,14 @@ export function DataFetcher(){
         <div className="p-5 max-h-screen overflow-auto break-words">
             {!state.isLoading &&
                 <div>
-                    <input type="file" onChange={handleFileChange}/> 
+                    { state.pdb === undefined &&
+                        <div className="text-sm text-gray-600 mb-4 bg-red-200 p-2">
+                            Choose a PDB file which contains DNA/RNA with Proteins
+                        </div>
+                    }
+                    <div>
+                        <input type="file" onChange={handleFileChange}/> 
+                    </div>
                 </div>
             }
             {pdbText}

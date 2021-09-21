@@ -33,7 +33,8 @@ export function Viewer() {
         // Margins x and y
         const [mX, mY] = [200, 40];
 
-        let nucleoAcids = new InteractionsFinder(polymers).findNucleoAcids()
+        const iFinder = new InteractionsFinder(polymers, dispatch);
+        let nucleoAcids = iFinder.nucleicAcids;
         let nucleoAcidsData:any = []; 
         nucleoAcids.map((n, index)=>{
             n.residues.map((r, index2)=>{

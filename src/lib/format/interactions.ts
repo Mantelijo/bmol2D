@@ -1,5 +1,8 @@
 import { Residue } from "./atoms";
 
+// Defines the distance threshold value for Threshold interaction type
+export const THRESHOLD_DISTANCE: number = 5;
+
 export enum InteractionType{
     // Threshold based interaction. Distance is the only factor
     Threshold,
@@ -19,12 +22,11 @@ export interface Interaction{
     nucleoAcidResidueSequenceNumber: number,
     nucleoAcidChainIdentifier: string,
         
-    nucleoAcid: {
-        residue: Residue,
-    },
-    protein: {
-        residue: Residue,
-    },
+    // Two residues that interact. These might be a 
+    // Nucleotide-AminoAcid; Nucleotide-Nucleotide
+    residue1: Residue,
+    residue2: Residue,
+
     type: InteractionType,
     meta: any
 }

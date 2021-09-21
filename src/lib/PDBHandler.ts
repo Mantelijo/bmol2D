@@ -51,6 +51,10 @@ export class PDBHandler{
                 atoms: [],
                 name: '',
                 sequenceNumber: -1,
+                center: {
+                    x:-1,y:-1,z:-1
+                },
+                interactions:[],
             }
         }
         // Helper to push currentResidue to currentPolymer

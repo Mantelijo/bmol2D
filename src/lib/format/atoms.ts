@@ -2,6 +2,8 @@
  * Formats of spatial data for visualization
  */
 
+import { Interaction } from "./interactions";
+
 export type Coordinate = {
     x: number,
     y: number,
@@ -41,6 +43,13 @@ export interface Residue{
     name: string,
     atoms: Atom[],
     sequenceNumber: number,
+    
+    // Center defines the arithmetic average of all atoms coordinates in residue
+    // All coordinates are set to -1 if center is not calculated
+    center: Coordinate,
+
+    // Contains all interactions for given residue
+    interactions: Interaction[],
 }
 
 /**
