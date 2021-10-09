@@ -4,15 +4,14 @@
 
 import { Interaction } from "./interactions";
 
+// Coordinate represents a 3-dimensional coordinate set
 export type Coordinate = {
     x: number,
     y: number,
     z: number, 
 }
 
-/**
- * Structure for ATOM records in pdb file
- */
+// Structure for ATOM records in pdb file
 export interface Atom{
     coords: Coordinate,
     name: string,
@@ -36,20 +35,26 @@ export enum AtomRemoteness {
     H='η',	
 }
 
+// Met information about residue, not helpful for calculations
+export interface ResidueMeta{
+    hash: string,
+    name: string,
+    sequenceNumber: number,
+}
+
 /**
  *  @see https://proteopedia.org/wiki/index.php/Standard_Residues
  */
-export interface Residue{
-    name: string,
-    atoms: Atom[],
-    sequenceNumber: number,
-    
+export interface Residue extends ResidueMeta{
     // Center defines the arithmetic average of all atoms coordinates in residue
     // All coordinates are set to -1 if center is not calculated
     center: Coordinate,
 
-    // Contains all interactions for given residue
+    // List of interactions with this residue
     interactions: Interaction[],
+
+    // Residue atoms
+    atoms: Atom[],
 }
 
 /**

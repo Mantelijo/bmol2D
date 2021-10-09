@@ -33,6 +33,8 @@ export function DataFetcher(){
             });
 
             const iFinder = new InteractionsFinder(pdb.polymers, dispatch);
+            
+            // Load all needed interactions
             iFinder.thresholdInteractions()
 
 

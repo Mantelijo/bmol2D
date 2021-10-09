@@ -1,4 +1,5 @@
 import { Atom, DNAResidues, PDBFile, Polymer, PolymerKind, polymerKindFromAtom, Residue, RNAResidues } from "./format/atoms"
+import hash from 'object-hash';
 
 export class PDBHandler{
     file: File
@@ -54,11 +55,13 @@ export class PDBHandler{
                 center: {
                     x:-1,y:-1,z:-1
                 },
+                hash:"",
                 interactions:[],
             }
         }
         // Helper to push currentResidue to currentPolymer
         const pushResidue = ():void=>{
+            currentResidue.hash = hash(currentResidue);
             currentPolymer.residues.push(currentResidue);
         }
         

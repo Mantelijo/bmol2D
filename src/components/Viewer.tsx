@@ -38,7 +38,7 @@ export function Viewer() {
         let nucleoAcidsData:any = []; 
         nucleoAcids.map((n, index)=>{
             n.residues.map((r, index2)=>{
-                nucleoAcidsData.push({ x: index, y: index2, data: r})
+                nucleoAcidsData.push({ x: index, y: index2, data: r, chainId: n.chainIdentifier})
             });
         });
 
@@ -78,7 +78,7 @@ export function Viewer() {
 
                     try{
                         await tooltipEl
-                        .html(`Residue: ${b.name} seqno: ${b.sequenceNumber}`)
+                        .html(`Residue: ${b.name} seqno: ${b.sequenceNumber} ChainID: ${a.chainId}`)
                         .transition()
                         .duration(50)
                         .style('left', event.pageX+"px")

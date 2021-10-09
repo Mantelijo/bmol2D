@@ -1,14 +1,16 @@
-import { Polymer, PolymerKind } from "./format/atoms";
+import { Polymer, PolymerKind, ResidueMeta } from "./format/atoms";
 import {Action} from "../Store";
 import { calculateCenters, distanceBetween2Points } from "./AtomsFunctions";
 import { InteractionType, THRESHOLD_DISTANCE } from "./format/interactions";
-
-
+import { Visualization } from "./format/visualization";
 
 export class InteractionsFinder{
 
     nucleicAcids: Polymer[] = [];
     proteins: Polymer[] = [];
+
+    // This will be used to generate visualization
+    visualization: Visualization = {chain1:null, chain2:null};
 
     constructor(
         public polymers: Polymer[],
@@ -38,6 +40,17 @@ export class InteractionsFinder{
         })
     }
 
+    // Generates visualization.chain1 and if possible visualization.chain2
+    generateVisualizationScaffold(){
+        let currentIndex = 0;
+        this.nucleicAcids.forEach(a=>{
+            a.residues.forEach(resA=>{
+
+                // const dist = distanceBetween2Points(resA.center,)
+            })
+        });
+    }
+
     // Compares residue centers of nucleic acid and proteins
     // If distance between centers is smaller than defined THRESHOLD_DISTANCE times 2,
     // we can try to search for THRESHOLD_DISTANCE distance between nucleic acid 
@@ -50,22 +63,20 @@ export class InteractionsFinder{
                         const distanceResidues = distanceBetween2Points(nacidResidue.center, pResidue.center);
 
                         // Residues might contain atoms that are less than THRESHOLD_DISTANCE 
-                        // amount apart
+                        // amount apart even if residues themselves are 2 times further.
                         if(distanceResidues <= THRESHOLD_DISTANCE*2){
                             nacidResidue.atoms.forEach(nacidAtom=>{
                                 pResidue.atoms.forEach(pAtom=>{
                                     const distanceAtoms = distanceBetween2Points(nacidAtom.coords, pAtom.coords);
                                     if(distanceAtoms <= THRESHOLD_DISTANCE){
 
-                                        // Here we have a possible interaction 
-                                        console.log("INTERACTION WAS FOUND", distanceAtoms, nacidAtom, pAtom);
+                                        //  Remove non ResidueMeta properties for performance
+                                        let {hash, name, sequenceNumber} = pResidue;
                                         this.nucleicAcids[nacidI].residues[nacidResidueI].interactions.push({
-                                            residue1:nacidResidue,
-                                            residue2:pResidue,
+                                            residue:{hash, name, sequenceNumber},
                                             type: InteractionType.Threshold,
+                                            polymerKind: p.kind,
                                             meta: {distance:distanceAtoms},
-                                            nucleoAcidChainIdentifier: nacid.chainIdentifier,
-                                            nucleoAcidResidueSequenceNumber: nacidResidue.sequenceNumber,
                                         })
                                     }
                                 });

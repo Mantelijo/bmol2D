@@ -1,6 +1,7 @@
 import React, {createContext, useReducer, ReactElement} from "react";
 import { Polymer, Residue } from "./lib/format/atoms";
 import {PDBFile} from './lib/format/atoms'
+import { Visualization } from "./lib/format/visualization";
 
 /**
  * Initial State object structure 
@@ -11,6 +12,7 @@ const initialState: State = {
     isLoading: false,
     simpleStuffy:'',
     hashedNucleicAcidResidues:{},
+    viz: {chain1:null, chain2:null},
 };
 
 export type HashedResidue = {
@@ -31,6 +33,9 @@ export interface State{
     // Since nucleic acids are the central parts of visualization,
     // we might need to do many lookups, when searching for interactions.
     hashedNucleicAcidResidues: HashedResidue
+
+    // Data to be visualized
+    viz: Visualization
 }
 
 /**

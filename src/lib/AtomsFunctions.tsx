@@ -1,6 +1,6 @@
 /**
  * This file defines some helper functions which are used to 
- * process atoms, residues, polymers. 
+ * process atoms, residues, polymers and related functionality.
  */
 
 import { Coordinate, Polymer } from "./format/atoms";
