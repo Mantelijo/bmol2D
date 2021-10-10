@@ -15,7 +15,7 @@ export type Coordinate = {
 export interface Atom{
     coords: Coordinate,
     name: string,
-    residueName: string,
+    residueName: ResidueName,
     element: string,
     residueSequenceNumber: number,
 }
@@ -35,11 +35,14 @@ export enum AtomRemoteness {
     H='η',	
 }
 
+export type ResidueName = string | DNAResidues | RNAResidues | ProteinResidues;
+
 // Met information about residue, not helpful for calculations
 export interface ResidueMeta{
     hash: string,
-    name: string,
+    name: ResidueName,
     sequenceNumber: number,
+    polymerChainIdentifier: string,
 }
 
 /**

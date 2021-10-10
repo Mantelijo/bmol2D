@@ -1,11 +1,13 @@
-import { PolymerKind, Residue, ResidueMeta } from "./atoms";
-import { Interaction } from "./interactions";
-
 /**
  * Interfaces and types defined in this file are for visualizations only.
  * Interactions or other calculations should not happen with objects which
  * implement these interfaces.
  */
+
+import { PolymerKind, Residue, ResidueMeta } from "./atoms";
+import { Interaction } from "./interactions";
+
+
 
 // Single chain residue to visualize, includes residue information along
 // with all the interactions info. Usually this will be a DNA or RNA,
@@ -18,7 +20,7 @@ export interface VisualizationResidue {
     // Watson-Crick pair (AT,GC). If this residue does not have a pair,
     // that means that it is either RNA (and chain2 will be null in
     // Visualization), or data contains DNA protrusions and simply this
-    // residue is a lonely protrusion in the chain.
+    // residue is a lonely protrusion in the chain. (Example 1zaa ends)
     index: number,
 
     // A list of interactions for this residue

@@ -1,7 +1,7 @@
 import React, {createContext, useReducer, ReactElement} from "react";
-import { Polymer, Residue } from "./lib/format/atoms";
-import {PDBFile} from './lib/format/atoms'
-import { Visualization } from "./lib/format/visualization";
+import { Polymer, Residue } from "./lib/types/atoms";
+import {PDBFile} from './lib/types/atoms'
+import { Visualization } from "./lib/types/visualization";
 
 /**
  * Initial State object structure 

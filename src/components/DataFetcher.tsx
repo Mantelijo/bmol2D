@@ -37,6 +37,12 @@ export function DataFetcher(){
             // Load all needed interactions
             iFinder.thresholdInteractions()
 
+            // Generate visualization data structure
+            dispatch({
+                type:'viz',
+                payload: iFinder.generateVisualizationScaffold()
+            })
+
 
             // Some fake loading time, so we get to see the spinner :)
             console.timeEnd("TIME_TO_PARSE_EVERYTHING");

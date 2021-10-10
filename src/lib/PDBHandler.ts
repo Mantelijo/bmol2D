@@ -1,4 +1,4 @@
-import { Atom, DNAResidues, PDBFile, Polymer, PolymerKind, polymerKindFromAtom, Residue, RNAResidues } from "./format/atoms"
+import { Atom, DNAResidues, PDBFile, Polymer, PolymerKind, polymerKindFromAtom, Residue, RNAResidues } from "./types/atoms"
 import hash from 'object-hash';
 
 export class PDBHandler{
@@ -57,6 +57,7 @@ export class PDBHandler{
                 },
                 hash:"",
                 interactions:[],
+                polymerChainIdentifier:"",
             }
         }
         // Helper to push currentResidue to currentPolymer
@@ -105,7 +106,7 @@ export class PDBHandler{
                 let element = line.slice(76,78).trim();
                 let residueSequenceNumber = parseInt(line.slice(22,26).trim());
 
-                // Chain identifier for current polymer - 1 letter
+                // Chain identifier for current polymer is 1 letter
                 let chainIdentifier = line.slice(21,22);
                 currentPolymer.chainIdentifier = chainIdentifier;
 
@@ -127,6 +128,7 @@ export class PDBHandler{
                 if (currentResidue.sequenceNumber === -1){
                     currentResidue.name = atom.residueName;
                     currentResidue.sequenceNumber = residueSequenceNumber;
+                    currentResidue.polymerChainIdentifier = chainIdentifier;
                 }
 
                 // If residue sequence number does not match with current atom's - add residue to polymer and reset currentResidue to a new one

@@ -15,3 +15,11 @@ Schematic 2D biomolecule interactions visualizer.
     - Double Stranded DNA - protein interactions
     - Single Stranded RNA - protein interactions
     - Double stranded RNA (TBD)
+- Ignore engineered chains DNA/RNA (examples: 5x11)
+- Searching for PDB files via API
+  - Example: https://files.rcsb.org/download/3L1P.pdb (No CORS restrictions, so can be fetched)
+
+
+## Questions
+- 2dgc - only 1 strand in PDB file (too old format maybe?)
+- Do we always need to reverse the second DNA strand?

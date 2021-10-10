@@ -1,6 +1,6 @@
 import React, { useContext, useEffect } from "react";
 import * as d3 from 'd3'
-import { Atom, Polymer, Residue, PolymerKind } from "../lib/format/atoms";
+import { Atom, Polymer, Residue, PolymerKind } from "../lib/types/atoms";
 import {context} from '../Store';
 import { InteractionsFinder } from "../lib/InteractionsFinder";
 
@@ -34,6 +34,9 @@ export function Viewer() {
         const [mX, mY] = [200, 40];
 
         const iFinder = new InteractionsFinder(polymers, dispatch);
+
+        iFinder.generateVisualizationScaffold();
+
         let nucleoAcids = iFinder.nucleicAcids;
         let nucleoAcidsData:any = []; 
         nucleoAcids.map((n, index)=>{

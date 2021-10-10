@@ -3,7 +3,7 @@
  * process atoms, residues, polymers and related functionality.
  */
 
-import { Coordinate, Polymer } from "./format/atoms";
+import { Coordinate, DNAResidues, Polymer, Residue, ResidueMeta } from "./types/atoms";
 
 // Calculate centers for residues and returns same polymer with
 // calculated center coordinates
@@ -32,5 +32,21 @@ export function distanceBetween2Points(p1: Coordinate, p2: Coordinate): number{
         Math.pow(p1.x - p2.x, 2) + 
         Math.pow(p1.y - p2.y, 2) + 
         Math.pow(p1.z - p2.z, 2) 
+    );
+}
+
+// Helper function, since I could not find a Typescript'y way to do this
+export function ResidueMetaFromResidue(r: Residue): ResidueMeta{
+    const {sequenceNumber, hash, name, polymerChainIdentifier}: ResidueMeta = r
+    return {sequenceNumber, hash, name, polymerChainIdentifier}
+}
+
+// Only for DNA
+export function isWatsonCrickPair(r1: Residue, r2: Residue): boolean{
+    return (
+        (r1.name === DNAResidues[DNAResidues.DA] && r2.name === DNAResidues[DNAResidues.DT]) || 
+        (r1.name === DNAResidues[DNAResidues.DT] && r2.name === DNAResidues[DNAResidues.DA]) || 
+        (r1.name === DNAResidues[DNAResidues.DC] && r2.name === DNAResidues[DNAResidues.DG]) || 
+        (r1.name === DNAResidues[DNAResidues.DG] && r2.name === DNAResidues[DNAResidues.DC])
     );
 }
