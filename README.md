@@ -5,7 +5,7 @@ Schematic 2D biomolecule interactions visualizer.
 - **src** project source code 
     - **components** react components
     - **lib**
-        -  **format** interfaces and types which define atoms, biomolecules, etc.
+        -  **types** interfaces and type definitions for atoms, polymers, visualization data structure etc.
 
 ## TODO List
 - Universal data structure to accommodate data for visualizations.
@@ -19,7 +19,9 @@ Schematic 2D biomolecule interactions visualizer.
 - Searching for PDB files via API
   - Example: https://files.rcsb.org/download/3L1P.pdb (No CORS restrictions, so can be fetched)
 
+## Done list
 
 ## Questions
 - 2dgc - only 1 strand in PDB file (too old format maybe?)
 - Do we always need to reverse the second DNA strand?
+- 1zs4 - long protrusions, is there any generic way to implement correctly?

@@ -43,6 +43,7 @@ export interface ResidueMeta{
     name: ResidueName,
     sequenceNumber: number,
     polymerChainIdentifier: string,
+    // polymerKind: PolymerKind,
 }
 
 /**
@@ -67,8 +68,12 @@ export interface Residue extends ResidueMeta{
  * PROTEIN - standard amino acids
  */
 export enum DNAResidues{
-    DA, DG, DC, DT,
+    DA = "DA",
+    DG = "DG",
+    DC = "DC",
+    DT = "DT",
 }
+
 export enum RNAResidues{
     A, C, G, I, U
 }

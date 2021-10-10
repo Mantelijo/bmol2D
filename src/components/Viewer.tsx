@@ -1,8 +1,18 @@
 import React, { useContext, useEffect } from "react";
 import * as d3 from 'd3'
-import { Atom, Polymer, Residue, PolymerKind } from "../lib/types/atoms";
+import { Atom, Polymer, Residue, PolymerKind, ResidueMeta, DNAResidues, RNAResidues } from "../lib/types/atoms";
 import {context} from '../Store';
 import { InteractionsFinder } from "../lib/InteractionsFinder";
+import { VisualizationResidue } from "../lib/types/visualization";
+import { Interaction } from "../lib/types/interactions";
+
+interface D3Element {
+    x: number,
+    y: number,
+    data: ResidueMeta,
+    chainId: string,
+    visualizationResidue: VisualizationResidue,
+}
 
 export function Viewer() {
     const [state, dispatch] = useContext(context)
@@ -23,6 +33,26 @@ export function Viewer() {
             return;
         }
 
+        // TODO Add RNA colors
+        type cmap = {
+            [key in DNAResidues]: string
+        };
+        const ColorMap: cmap = {
+            [DNAResidues.DA]: "#00897b",
+            [DNAResidues.DT]: "#c2185b",
+            [DNAResidues.DG]: "#3949ab",
+            [DNAResidues.DC]: "#ffa000",
+        }
+        const GetColor = (r: ResidueMeta): string=>{
+            if(r.name in DNAResidues){
+                return ColorMap[r.name as DNAResidues];
+            }
+            return "#95fe44";
+        };
+        const GetHoverColor = (r: ResidueMeta): string=>{
+            return "#95fe44";
+        };
+
         // Clean up svg initially
         d3.select(ref.current).selectAll('*').remove();
 
@@ -35,21 +65,27 @@ export function Viewer() {
 
         const iFinder = new InteractionsFinder(polymers, dispatch);
 
-        iFinder.generateVisualizationScaffold();
+        const visualizationData = iFinder.generateVisualizationScaffold();
+        let nucleoAcidsData:D3Element[] = []; 
 
-        let nucleoAcids = iFinder.nucleicAcids;
-        let nucleoAcidsData:any = []; 
-        nucleoAcids.map((n, index)=>{
-            n.residues.map((r, index2)=>{
-                nucleoAcidsData.push({ x: index, y: index2, data: r, chainId: n.chainIdentifier})
-            });
+        // Visualization not initialized
+        if(visualizationData.chain1 === null){
+            return 
+        }
+
+        visualizationData?.chain1.forEach(r => {
+            nucleoAcidsData.push({ x: 0, y: r.index, data: r.residue, chainId: r.residue.polymerChainIdentifier, visualizationResidue:r})
         });
 
-        let maxResidues = nucleoAcids.map(a=>a.residues.length)
-            .reduce((a, b)=>{
-                return a > b?a:b;
-            })
-        let numAcids = nucleoAcids.length;
+        if(visualizationData.chain2!==null){
+            visualizationData.chain2.forEach(r => {
+                nucleoAcidsData.push({ x: 1, y: r.index, data: r.residue, chainId: r.residue.polymerChainIdentifier, visualizationResidue:r})
+            });
+        }
+        
+
+        let maxResidues = Math.max(visualizationData.chain1.length, (visualizationData.chain2!== null?visualizationData.chain2.length:0))
+        let numAcids = visualizationData.chain2 !== null?2:1;
 
         let yScale = d3.scaleLinear()
             .domain([0, maxResidues])
@@ -62,7 +98,8 @@ export function Viewer() {
         const rSize = 10;
     
         const tooltipEl = d3.select(tooltip.current)
-        const chart =  d3.select(ref.current)
+        const svg = ref.current
+        const chart =  d3.select(svg)
             .attr('width', w)
             .attr('height', h)
             .selectAll()
@@ -71,17 +108,27 @@ export function Viewer() {
                 .append('circle')
                 .attr('cx', (a:any)=>xScale(a.x))
                 .attr('cy', (a:any)=>yScale(a.y))
-                .style('fill', '#867')
+                .style('fill', function(residue:D3Element){
+                    return GetColor(residue.data);
+                })
                 .attr('r', rSize)
-                .on('mouseover', async function( event:MouseEvent, a:any){
+                .on('mouseover', async function( event:MouseEvent, residue:D3Element){
                     d3.select(this).attr('r', 15)
-                        .style('fill', '#5ef');
+                        .style('fill', function(){
+                            return GetHoverColor(residue.data);
+                        });
                     
-                    let b = a.data as Residue
+                    let b = residue.data as Residue
 
                     try{
+
+                        let interactionsHtml = "<div><b>Interactions</b></div>";
+                        residue.visualizationResidue.interactions.forEach((i:Interaction)=>{
+                            interactionsHtml += `<div>${i.polymerKind}:${i.residue.name+":"+i.residue.sequenceNumber} ${i.meta?.distance}</div>`;
+                        });
+
                         await tooltipEl
-                        .html(`Residue: ${b.name} seqno: ${b.sequenceNumber} ChainID: ${a.chainId}`)
+                        .html(`<div>Residue: ${b.name} seqno: ${b.sequenceNumber} ChainID: ${residue.chainId}</div>${interactionsHtml}`)
                         .transition()
                         .duration(50)
                         .style('left', event.pageX+"px")
@@ -93,10 +140,12 @@ export function Viewer() {
 
                     tooltipEl.style('opacity', 1)
                 })
-                .on('mouseout', function(d:Atom){
+                .on('mouseout', function(event:MouseEvent, residue:D3Element){
                     tooltipEl.style('opacity', 0)
                     d3.select(this).attr('r', rSize)
-                    .style('fill', '#867')
+                    .style('fill', function(){
+                        return GetColor(residue.data);
+                    })
                 });
                 
 

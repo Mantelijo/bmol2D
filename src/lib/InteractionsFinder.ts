@@ -57,7 +57,6 @@ export class InteractionsFinder{
             const first = this.nucleicAcids[0];
             const second = this.nucleicAcids[1];
 
-
             // Smallest distances for first chain. Each item is for each
             // residue.
             const distancesFirst = new Array(first.residues.length).fill(+Infinity)
@@ -74,26 +73,27 @@ export class InteractionsFinder{
             // second strand must be reversed (5'-3' -> 3'->5') when matching 
             // with the first strand.
             
-            // Indices of residues that were last added to visualization
-            // object
-            let lastFirstIncluded = -Infinity, lastSecondIncluded = +Infinity; 
+            // Tracks the next index for visualization residue index property 
             let currentIndex = 0;
 
-            for(let i=0;i<first.residues.length;i++){
+            // Tracks the number of added residues from chain2, since we
+            // don't want to include already included chain2 residues, as
+            // this can happen in the inner loop
+            let secondChainIncludedAmount = 0
 
+            for(let i=0;i<first.residues.length;i++){
                 let res1 = first.residues[i];
                 // Second chain is reversed to 3'->5' to match first one
                 // We assume that chain lengths are identical (hence -1-i)
-                for(let j=second.residues.length-1;j>0;--j){
+                for(let j=second.residues.length-1-secondChainIncludedAmount;j>0;--j){
                     let res2 = second.residues[j]
-                    const distance = distanceBetween2Points(res1.center, res2.center);
 
                     // First residue from first chain might be a
                     // protrusion, so check if j-1 might match with i
                     // (Which would mean j is protrusion)
                     if(!isWatsonCrickPair(res1, res2) && j-1 > 0 && i === 0){
                         let newRes2 =  second.residues[j-1]
-                        if(distancesFirst[i] === distanceBetween2Points(res1.center, newRes2.center) && isWatsonCrickPair(res1, newRes2)){
+                        if(isWatsonCrickPair(res1, newRes2)){
                             // This case means that j is protrusion, so we
                             // add it as a lonely nucleotide to chain2 
                             this.visualization.chain2.push({
@@ -101,6 +101,7 @@ export class InteractionsFinder{
                                 residue: ResidueMetaFromResidue(newRes2),
                                 interactions: newRes2.interactions,
                             });
+                            secondChainIncludedAmount++;
                         }else{
                             // i is protrusion
                             this.visualization.chain1.push({
@@ -116,22 +117,49 @@ export class InteractionsFinder{
 
                     // Valid watson crick pair
                     if(isWatsonCrickPair(res1, res2)){
-                        console.log("Valid interaction found");
                         this.visualization.chain1.push({
                             index: currentIndex,
                             residue: ResidueMetaFromResidue(res1),
                             interactions: res1.interactions,
                         });
-                        this.visualization.chain2.push({
-                            index: currentIndex,
-                            residue: ResidueMetaFromResidue(res2),
-                            interactions: res2.interactions,
-                        });
+                        if(secondChainIncludedAmount <= second.residues.length){
+                            this.visualization.chain2.push({
+                                index: currentIndex,
+                                residue: ResidueMetaFromResidue(res2),
+                                interactions: res2.interactions,
+                            });
+                            secondChainIncludedAmount++;
+                        }
                         currentIndex++;
                         break;
                     }
+                }
+                
+                // If chain1 is longer than chain2 - fill in the
+                // leftover chain1 residues
+                if(secondChainIncludedAmount > second.residues.length){
+                    this.visualization.chain1.push({
+                        index: currentIndex,
+                        residue: ResidueMetaFromResidue(res1),
+                        interactions: res1.interactions,
+                    });
+                    currentIndex++;
+                    break;
+                }
+            }
 
-                    // Todo end case i or j protrusion
+            // If chain1 is done, but chain2 is still not completely
+            // included, then we need to include it.
+            console.log("secondChainIncludedAmount", secondChainIncludedAmount, second.residues.length)
+            if(secondChainIncludedAmount< second.residues.length){
+                for(let i=second.residues.length-secondChainIncludedAmount-1; i>=0; --i){
+                    this.visualization.chain2.push({
+                        index: currentIndex,
+                        residue: ResidueMetaFromResidue(second.residues[i]),
+                        interactions: second.residues[i].interactions,
+                    });
+                    currentIndex++;
+                    secondChainIncludedAmount++;
                 }
             }
 

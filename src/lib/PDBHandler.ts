@@ -137,6 +137,7 @@ export class PDBHandler{
                     currentResidue = newResidue();
                     currentResidue.name = atom.residueName;
                     currentResidue.sequenceNumber = residueSequenceNumber;
+                    currentResidue.polymerChainIdentifier = chainIdentifier;
                 }
 
                 currentResidue.atoms.push(atom)

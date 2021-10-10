@@ -27,8 +27,6 @@ export interface VisualizationResidue {
     interactions: Interaction[]
 }
 
-export type VisualizationChain = VisualizationResidue[];
-
 // Visualization is the final product, that our Viewer.tsx can use to
 // build the visualizations. There can be a single stranded RNA/DNA in
 // chain1 and additionally, if provided polymer is DNA, chain2 can be
@@ -36,8 +34,8 @@ export type VisualizationChain = VisualizationResidue[];
 export interface Visualization{
     // Only one case is possible where chain1 is null: data is not yet
     // initialized
-    chain1: null | VisualizationChain, 
+    chain1: null | VisualizationResidue[], 
     
     // No chain2 means molecule is single stranded
-    chain2: null | VisualizationChain
+    chain2: null | VisualizationResidue[]
 }
