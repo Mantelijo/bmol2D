@@ -2,13 +2,18 @@ import { Atom, DNAResidues, PDBFile, Polymer, PolymerKind, polymerKindFromAtom, 
 import hash from 'object-hash';
 
 export class PDBHandler{
-    file: File
+    file?: File
 
-    constructor(file: File){
-        this.file = file
+    constructor(file?: File){
+        if (file !== undefined){
+            this.file = file
+        }
     }
 
     async readData(): Promise<PDBFile>{
+        if(this.file == undefined){
+            throw Error("file not provided");
+        }
         let text = await this.file.text()
         return this.format(text)
     }

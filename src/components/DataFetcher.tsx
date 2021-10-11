@@ -1,20 +1,83 @@
 import React, { useState, ChangeEventHandler, ChangeEvent, useEffect, useContext } from "react";
 import { InteractionsFinder } from "../lib/InteractionsFinder";
 import { PDBHandler } from "../lib/PDBHandler";
-import {context} from '../Store';
+import { PDBFile, Polymer } from "../lib/types/atoms";
+import {context, Action} from '../Store';
+
+
+
+// Fetch PDB text for given id (if valid)
+const fetchPDBFile = async (id:string):Promise<string>=>{
+    const response = await fetch(`https://files.rcsb.org/download/${id}.pdb`);
+    const pdbText = await response.text();
+    return pdbText;
+}
 
 export function DataFetcher(){
     const [state, dispatch] = useContext(context)
+
+    const startLoading = ()=>{
+        dispatch({
+            type: 'isLoading',
+            payload: true,
+        });
+    };
+    const stopLoading = ()=>{
+        dispatch({
+            type: 'isLoading',
+            payload: false,
+        });
+    }
+    const updatePDBState = (pdb:PDBFile)=>{
+        dispatch({
+            type:'pdb',
+            payload:pdb,
+        });
+    }
+    // Update polymers in store, generate visualization data structure
+    const updatePolymers = (polymers: Polymer[])=>{
+        dispatch({
+            type:'polymers',
+            payload: polymers
+        });
+
+        const iFinder = new InteractionsFinder(polymers, dispatch);
+        
+        // Load all needed interactions
+        iFinder.thresholdInteractions()
+
+        // Generate visualization data structure
+        dispatch({
+            type:'viz',
+            payload: iFinder.generateVisualizationScaffold()
+        })
+    };
+
+
+    // Fetch PDB file by given id parameter. Must run only once
+    useEffect(()=>{
+        const url = new URLSearchParams(window.location.search);
+        const id = url.get('id');
+        console.log("ID", id)
+        if (id !== null){
+             (async()=>{
+                startLoading();
+                const pdb = new PDBHandler().format(
+                    await fetchPDBFile(id)
+                );
+                updatePDBState(pdb);
+                updatePolymers(pdb.polymers);
+                stopLoading();
+            })()
+        }    
+    }, []);
 
     // Updates pbd file information from uploaded file, parses pdb data and performs interaction calculations
     const handleFileChange: ChangeEventHandler<HTMLInputElement> = async (event: ChangeEvent)=>{
         let f = (event.target as HTMLInputElement).files?.item(0);
         if(f !== null){
             // Show spinner while loading
-            dispatch({
-                type: 'isLoading',
-                payload: true,
-            });
+            startLoading();
 
             // Read and parse the file
             console.time("TIME_TO_PARSE_EVERYTHING");
@@ -23,35 +86,12 @@ export function DataFetcher(){
             console.timeEnd("TIME_TO_PARSE_PDB");
             
             // Update state with parsed values
-            dispatch({
-                type:'pdb',
-                payload:pdb,
-            });
-            dispatch({
-                type:'polymers',
-                payload: pdb.polymers
-            });
-
-            const iFinder = new InteractionsFinder(pdb.polymers, dispatch);
-            
-            // Load all needed interactions
-            iFinder.thresholdInteractions()
-
-            // Generate visualization data structure
-            dispatch({
-                type:'viz',
-                payload: iFinder.generateVisualizationScaffold()
-            })
-
+            updatePDBState(pdb);
+            updatePolymers(pdb.polymers);
 
             // Some fake loading time, so we get to see the spinner :)
             console.timeEnd("TIME_TO_PARSE_EVERYTHING");
-            setTimeout(async ()=>{
-                dispatch({
-                    type: 'isLoading',
-                    payload: false,
-                });
-            }, 2000)
+            setTimeout(stopLoading, 2000)
         }
     }
 
