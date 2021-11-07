@@ -19,6 +19,16 @@ export class InteractionsFinder{
         this.prepareObjects();
     }
 
+    // Calculates watson crick pairs for DNA
+    // Chain1 and Chain2 must be DNA polymers
+    watsonCrickPairs(chain1: Polymer, chain2: Polymer){
+        chain1.residues.forEach(r1=>{
+            chain2.residues.forEach(r2=>{
+                const r1C2DistToR2VO = "";
+            });
+        });
+    }
+    
     // Finds polymers to work with, calculates centers for residues.
     prepareObjects(){
         this.nucleicAcids = this.findNucleoAcids();
@@ -53,9 +63,10 @@ export class InteractionsFinder{
         if(this.nucleicAcids.length >= 2 && this.nucleicAcids[0].kind === PolymerKind.DNA){
             this.visualization.chain1 = [];
             this.visualization.chain2 = [];
-
             const first = this.nucleicAcids[0];
             const second = this.nucleicAcids[1];
+
+            this.watsonCrickPairs(first, second);
 
             // Smallest distances for first chain. Each item is for each
             // residue.

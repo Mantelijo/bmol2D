@@ -25,3 +25,17 @@ Schematic 2D biomolecule interactions visualizer.
 - 2dgc - only 1 strand in PDB file (too old format maybe?)
 - Do we always need to reverse the second DNA strand?
 - 1zs4 - long protrusions, is there any generic way to implement correctly?
+
+
+## TODO
+- HETATM pasiziureti (gali buti grandines viduj)
+- 2dgc - biological assemblies MODEL keywordai
+- Pasiziureti su DSSR RNA kaip jie daro (http://wdssr.x3dna.org/index.php/doc/citation)
+
+
+# Aprasymas
+- Literaturos apzvalgai  - saveikos, amino r, nukleotidu strukturos, viskas kuo daugiau apie chemija o ne software developmentas.
+- Praktikos aprasymas - chemijos ziniu pritaikymas sprendziant ir vizualizuojant
+- Prie rezultatu - pavyzdziai kazokie tyrinejant saveikas
+
+C533

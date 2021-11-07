@@ -1,5 +1,7 @@
 import { Atom, DNAResidues, PDBFile, Polymer, PolymerKind, polymerKindFromAtom, Residue, RNAResidues } from "./types/atoms"
 import hash from 'object-hash';
+import {calculateNucleotidePlaneVectors} from "./NucleicAcids";
+import { Vector } from "./Vector";
 
 export class PDBHandler{
     file?: File
@@ -53,17 +55,7 @@ export class PDBHandler{
             }
         }
         const newResidue = ():Residue=>{
-            return {
-                atoms: [],
-                name: '',
-                sequenceNumber: -1,
-                center: {
-                    x:-1,y:-1,z:-1
-                },
-                hash:"",
-                interactions:[],
-                polymerChainIdentifier:"",
-            }
+            return new Residue();
         }
         // Helper to push currentResidue to currentPolymer
         const pushResidue = ():void=>{
@@ -156,6 +148,9 @@ export class PDBHandler{
                 let [c, kind] = determinePolymerKindAndReset(currentPolymerKindCounter) as [currentPolymerKind, PolymerKind]
                 currentPolymerKindCounter = c;
                 currentPolymer.kind = kind;
+
+                // This must be calculated beforehand. As these values will be used in watson crick search later.
+                currentPolymer = calculateNucleotidePlaneVectors(currentPolymer);
 
                 // Save polymer
                 result.push(currentPolymer);
