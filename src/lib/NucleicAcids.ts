@@ -1,6 +1,10 @@
-import { Atom, Coordinate, coordinateToArray, DNAResidues, Polymer, PolymerKind } from "./types/atoms"
+import { Atom, Coordinate, coordinateToArray, DNAResidues, Polymer, PolymerKind, Residue } from "./types/atoms"
 import { Vector } from "./Vector";
 
+/**
+ * A value that is used to check if watson crick pair i
+ */
+export const WATSON_CRICK_PAIR_CALCULATION_THRESHOLD = 1.42
 
 /**
  * Calculates and populates vectors v and o which define the plane of
@@ -39,4 +43,16 @@ export const calculateNucleotidePlaneVectors:(p:Polymer)=> Polymer = (p) =>{
         })
     }
     return p;
+}
+
+/**
+ *  Only for DNA
+ */
+export function isWatsonCrickPair(r1: Residue, r2: Residue): boolean{
+    return (
+        (r1.name === DNAResidues[DNAResidues.DA] && r2.name === DNAResidues[DNAResidues.DT]) || 
+        (r1.name === DNAResidues[DNAResidues.DT] && r2.name === DNAResidues[DNAResidues.DA]) || 
+        (r1.name === DNAResidues[DNAResidues.DC] && r2.name === DNAResidues[DNAResidues.DG]) || 
+        (r1.name === DNAResidues[DNAResidues.DG] && r2.name === DNAResidues[DNAResidues.DC])
+    );
 }

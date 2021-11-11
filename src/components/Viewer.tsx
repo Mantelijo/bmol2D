@@ -122,10 +122,10 @@ export function Viewer() {
 
                     try{
 
-                        let interactionsHtml = "<div><b>Interactions</b></div>";
-                        residue.visualizationResidue.interactions.forEach((i:Interaction)=>{
-                            interactionsHtml += `<div>${i.polymerKind}:${i.residue.name+":"+i.residue.sequenceNumber} ${i.meta?.distance}</div>`;
-                        });
+                        let interactionsHtml = "<div><b>Interactions are currently disabled</b></div>";
+                        // residue.visualizationResidue.interactions.forEach((i:Interaction)=>{
+                        //     interactionsHtml += `<div>${i.polymerKind}:${i.residue.name+":"+i.residue.sequenceNumber} ${i.meta?.distance}</div>`;
+                        // });
 
                         await tooltipEl
                         .html(`<div>Residue: ${b.name} seqno: ${b.sequenceNumber} ChainID: ${residue.chainId}</div>${interactionsHtml}`)

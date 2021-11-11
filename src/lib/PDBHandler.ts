@@ -1,4 +1,4 @@
-import { Atom, DNAResidues, PDBFile, Polymer, PolymerKind, polymerKindFromAtom, Residue, RNAResidues } from "./types/atoms"
+import { Atom, DNAResidues, PDBFile, Polymer, PolymerKind, polymerKindFromAtom, Residue, ResidueImplementation, RNAResidues, Coord } from "./types/atoms"
 import hash from 'object-hash';
 import {calculateNucleotidePlaneVectors} from "./NucleicAcids";
 import { Vector } from "./Vector";
@@ -55,7 +55,7 @@ export class PDBHandler{
             }
         }
         const newResidue = ():Residue=>{
-            return new Residue();
+            return new ResidueImplementation();
         }
         // Helper to push currentResidue to currentPolymer
         const pushResidue = ():void=>{
@@ -109,9 +109,7 @@ export class PDBHandler{
 
                 // Construct new atom entry
                 const atom: Atom = {
-                    coords:{
-                        x,y,z
-                    },
+                    coords:new Coord(x,y,z),
                     name,
                     element,
                     residueName,

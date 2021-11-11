@@ -6,10 +6,24 @@ import { Vector } from "../Vector";
 import { Interaction } from "./interactions";
 
 // Coordinate represents a 3-dimensional coordinate set
-export type Coordinate = {
+export interface Coordinate {
     x: number,
     y: number,
     z: number,
+
+    // Converts coordinate to vector
+    toVec: () => Vector,
+}
+
+export class Coord implements Coordinate {
+    constructor(
+        public x: number,
+        public y: number,
+        public z: number,
+    ) { }
+    toVec(): Vector {
+        return Vector.fromArray(coordinateToArray(this))
+    }
 }
 
 // Helper
@@ -58,7 +72,7 @@ export interface ResidueMeta {
 /**
  *  @see https://proteopedia.org/wiki/index.php/Standard_Residues
  */
-export interface ResidueInterface extends ResidueMeta {
+export interface Residue extends ResidueMeta {
     // Center defines the arithmetic average of all atoms coordinates in
     // residue All coordinates are set to -1 if center is not calculated
     center: Coordinate,
@@ -86,7 +100,7 @@ export interface ResidueInterface extends ResidueMeta {
 }
 
 // Generic residue implementation
-export class Residue implements ResidueInterface {
+export class ResidueImplementation implements Residue {
     public center: Coordinate;
     public interactions: Interaction[];
     public atoms: Atom[];
@@ -101,9 +115,7 @@ export class Residue implements ResidueInterface {
         this.atoms = [];
         this.name = '';
         this.sequenceNumber = -1;
-        this.center = {
-            x: -1, y: -1, z: -1,
-        };
+        this.center = new Coord(-1,-1,-1);
         this.hash = "";
         this.interactions = [];
         this.polymerChainIdentifier = "";
@@ -111,15 +123,20 @@ export class Residue implements ResidueInterface {
         this.o = Vector.infinity();
     }
 
-    findAtomsByNames(names: string[]): Atom[]{
+    findAtomsByNames(names: string[]): Atom[] {
         let ret: Atoms = [];
-        names.forEach(name => {
-            this.atoms.forEach(a => {
-                if (a.name === name) {
-                    ret.push(a);
-                }
-            });
+
+        this.atoms.forEach(a => {
+            if (names.indexOf(a.name) !== -1) {
+                ret.push(a);
+            }
         });
+
+        // Reorder based on names
+        ret.sort((a, b) => {
+            return names.indexOf(a.name) - names.indexOf(b.name);
+        })
+
         return ret;
     }
 }
