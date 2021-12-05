@@ -2,7 +2,7 @@ import { Atom, Coordinate, coordinateToArray, DNAResidues, Polymer, PolymerKind,
 import { Vector } from "./Vector";
 
 /**
- * A value that is used to check if watson crick pair i
+ * A value that is used to check if watson crick pair is
  */
 export const WATSON_CRICK_PAIR_CALCULATION_THRESHOLD = 1.42
 
@@ -23,8 +23,6 @@ export const calculateNucleotidePlaneVectors:(p:Polymer)=> Polymer = (p) =>{
 
             const atoms = residue.findAtomsByNames(cNames);
             atoms.forEach((a, i)=>{cAtoms[i] = a.coords});
-            console.log(cAtoms, atoms);
-
 
             // Calculate plane vector v and point o
             if(cAtoms.length === 3){

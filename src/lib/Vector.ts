@@ -1,5 +1,4 @@
 // Credit: https://github.com/evanw/lightgl.js
-
 // Provides a simple 3D vector class. Vector operations can be done using member
 // functions, which return new vectors, or static functions, which reuse
 // existing vectors to avoid generating garbage.

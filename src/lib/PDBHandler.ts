@@ -59,6 +59,7 @@ export class PDBHandler{
         }
         // Helper to push currentResidue to currentPolymer
         const pushResidue = ():void=>{
+            // hash will be useful to uniquely identify each residue.
             currentResidue.hash = hash(currentResidue);
             currentPolymer.residues.push(currentResidue);
         }
@@ -92,7 +93,7 @@ export class PDBHandler{
         // Here we will process the pdb text
         text.split("\n").forEach(line=>{
             // Parse ATOM lines
-            if(line.startsWith("ATOM")){
+            if(line.startsWith("ATOM") || line.startsWith("HETATM")){
                 // https://www.cgl.ucsf.edu/chimera/docs/UsersGuide/tutorials/pdbintro.html
                 let x = parseFloat(line.slice(30, 38).trim());
                 let y = parseFloat(line.slice(38, 46).trim());

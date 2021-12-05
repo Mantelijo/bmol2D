@@ -62,6 +62,7 @@ export type ResidueName = string | DNAResidues | RNAResidues | ProteinResidues;
 
 // Met information about residue, not helpful for calculations
 export interface ResidueMeta {
+    // hash allows to uniquely identify each residue
     hash: string,
     name: ResidueName,
     sequenceNumber: number,
