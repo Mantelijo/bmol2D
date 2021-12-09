@@ -13,13 +13,16 @@ import { VisualizationResidue } from '../lib/types/visualization';
 import { ForceGraph } from './../lib/viz/ForceGraph';
 import { useRef } from 'react';
 
-interface D3Element {
-	x: number;
-	y: number;
-	data: ResidueMeta;
-	chainId: string;
-	visualizationResidue: VisualizationResidue;
-}
+// Color map for DNA residues
+type cmap = {
+	[key in DNAResidues]: string;
+};
+const ColorMap: cmap = {
+	[DNAResidues.DA]: '#00897b',
+	[DNAResidues.DT]: '#c2185b',
+	[DNAResidues.DG]: '#3949ab',
+	[DNAResidues.DC]: '#ffa000',
+};
 
 export function Viewer() {
 	const [state, dispatch] = useContext(context);
@@ -38,6 +41,7 @@ export function Viewer() {
 			residues.map((r) => atoms.push(...r.atoms));
 		});
 
+	// Currently visualization works only for DNA residues
 	function initD3() {
 		if (!ref || polymers.length <= 0) {
 			return;
@@ -48,6 +52,7 @@ export function Viewer() {
 
 		interface Node {
 			id: string;
+			color: string;
 			group: number;
 		}
 
@@ -67,15 +72,20 @@ export function Viewer() {
 			return `${r.polymerChainIdentifier}:${r.name}${r.sequenceNumber}`;
 		};
 
+		const resColor: (r: Residue) => string = (r) => {
+			return ColorMap[r.name as DNAResidues];
+		};
+
 		// Collect nodes
 		const DNAResidueIndexes = Object.values(DNAResidues);
 		chain1.residues.forEach((r, index) => {
 			nodes.push({
 				id: resToId(r),
+				color: resColor(r),
 				group: DNAResidueIndexes.indexOf(r.name as DNAResidues) + 1,
 			});
 
-			// Collect links for same chain residues
+			// Collect links to previous residue in same chain
 			let residues = chain1.residues;
 			if (index > 0 && index < residues.length) {
 				links.push({
@@ -88,6 +98,7 @@ export function Viewer() {
 		chain2.residues.forEach((r, index) => {
 			nodes.push({
 				id: resToId(r),
+				color: resColor(r),
 				group: DNAResidueIndexes.indexOf(r.name as DNAResidues) + 1,
 			});
 

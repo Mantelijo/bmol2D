@@ -15,11 +15,13 @@ export function ForceGraph(
 		nodeGroup, // given d in nodes, returns an (ordinal) value for color
 		nodeGroups, // an array of ordinal values representing the node groups
 		nodeTitle, // given d in nodes, a title string
-		nodeFill = 'currentColor', // node stroke fill (if not using a group color encoding)
+		nodeFill = (d) => {
+			return d.color !== undefined ? d.color : 'currentColor';
+		}, // node stroke fill (if not using a group color encoding)
 		nodeStroke = '#fff', // node stroke color
 		nodeStrokeWidth = 1.5, // node stroke width, in pixels
 		nodeStrokeOpacity = 1, // node stroke opacity
-		nodeRadius = 5, // node radius, in pixels
+		nodeRadius = 10, // node radius, in pixels
 		nodeStrength,
 		linkSource = ({ source }) => source, // given d in links, returns a node identifier string
 		linkTarget = ({ target }) => target, // given d in links, returns a node identifier string
@@ -34,8 +36,12 @@ export function ForceGraph(
 		invalidation, // when this promise resolves, stop the simulation
 	} = opts;
 
+	// Save initial nodes for later usage
+	const initialNodes = nodes;
+
 	// Compute values.
 	const N = d3.map(nodes, nodeId).map(intern);
+	console.log(nodes, N);
 	const LS = d3.map(links, linkSource).map(intern);
 	const LT = d3.map(links, linkTarget).map(intern);
 	if (nodeTitle === undefined) nodeTitle = (_, i) => N[i];
@@ -47,7 +53,7 @@ export function ForceGraph(
 			: d3.map(links, linkStrokeWidth);
 
 	// Replace the input nodes and links with mutable objects for the simulation.
-	nodes = d3.map(nodes, (_, i) => ({ id: N[i] }));
+	nodes = d3.map(nodes, (_, i) => ({ id: N[i], color: initialNodes[i].color }));
 	links = d3.map(links, (_, i) => ({ source: LS[i], target: LT[i] }));
 
 	// Compute default domains.
@@ -92,14 +98,16 @@ export function ForceGraph(
 
 	const node = g
 		.append('g')
-		.attr('fill', nodeFill)
 		.attr('stroke', nodeStroke)
 		.attr('stroke-opacity', nodeStrokeOpacity)
 		.attr('stroke-width', nodeStrokeWidth)
 		.selectAll('circle')
 		.data(nodes)
 		.join('circle')
+		.attr('fill', nodeFill)
 		.attr('r', nodeRadius)
+		.join('text')
+		.text((d) => 'A')
 		.call(drag(simulation));
 
 	if (W) link.attr('stroke-width', ({ index: i }) => W[i]);
@@ -152,7 +160,7 @@ export function ForceGraph(
 	const zoom = d3.zoom().on('zoom', (e) => {
 		g.attr('transform', (transform = e.transform));
 		g.style('stroke-width', 3 / Math.sqrt(transform.k));
-		node.attr('r', 3 / Math.sqrt(transform.k));
+		node.attr('r', nodeRadius / Math.sqrt(transform.k));
 	});
 
 	svg.call(zoom).call(zoom.transform, d3.zoomIdentity);

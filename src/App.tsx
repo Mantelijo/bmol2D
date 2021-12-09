@@ -1,10 +1,4 @@
-import React, {
-	useEffect,
-	useState,
-	useContext,
-	ReactElement,
-	Children,
-} from 'react';
+import { useContext, ReactElement } from 'react';
 import { Viewer } from './components/Viewer';
 import { DataFetcher } from './components/DataFetcher';
 import Spinner from './components/Spinner';

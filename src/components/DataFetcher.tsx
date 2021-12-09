@@ -44,17 +44,6 @@ export function DataFetcher() {
 			type: 'polymers',
 			payload: polymers,
 		});
-
-		const iFinder = new InteractionsFinder(polymers, dispatch);
-
-		// Load all needed interactions
-		iFinder.thresholdInteractions();
-
-		// Generate visualization data structure
-		// dispatch({
-		//     type:'viz',
-		//     payload: iFinder.generateVisualizationScaffold()
-		// })
 	};
 
 	// Fetch PDB file by given id parameter. Must run only once
