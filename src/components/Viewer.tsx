@@ -1,21 +1,38 @@
 import React, { useContext, useEffect } from 'react';
-import * as d3 from 'd3';
-import { Atom, Residue, PolymerKind, DNAResidues } from '../lib/types/atoms';
+import {
+	Atom,
+	Polymer,
+	Residue,
+	PolymerKind,
+	DNAResidues,
+} from '../lib/types/atoms';
 import { context } from '../Store';
 import { InteractionsFinder } from '../lib/InteractionsFinder';
 import { ForceGraph } from './../lib/viz/ForceGraph';
 import { useRef } from 'react';
+import { Node, Link, LinkType } from './../lib/viz/ForceGraph';
 
 // Color map for DNA residues
 type cmap = {
 	[key in DNAResidues]: string;
 };
 const ColorMap: cmap = {
-	[DNAResidues.DA]: '#00897b',
-	[DNAResidues.DT]: '#c2185b',
-	[DNAResidues.DG]: '#3949ab',
-	[DNAResidues.DC]: '#ffa000',
+	[DNAResidues.DA]: '#fcb331',
+	[DNAResidues.DT]: '#5670fb',
+	[DNAResidues.DG]: '#f63c37',
+	[DNAResidues.DC]: '#03c907',
 };
+const AT_LINK = 'red';
+const GC_LINK = 'blue';
+const LinkColorMap: cmap = {
+	[DNAResidues.DA]: AT_LINK,
+	[DNAResidues.DT]: AT_LINK,
+	[DNAResidues.DG]: GC_LINK,
+	[DNAResidues.DC]: GC_LINK,
+};
+
+// For chain backbone
+const DefaultLinkColor = '#494949';
 
 export function Viewer() {
 	const [state, dispatch] = useContext(context);
@@ -44,18 +61,6 @@ export function Viewer() {
 		const pairs = iFinder.watsonCrickPairs();
 		const dna = iFinder.nucleicAcids;
 
-		interface Node {
-			id: string;
-			color: string;
-			group: number;
-		}
-
-		interface Link {
-			source: string;
-			target: string;
-			value: number;
-		}
-
 		let nodes: Node[] = [];
 		let links: Link[] = [];
 
@@ -65,58 +70,47 @@ export function Viewer() {
 		const resToId: (r: Residue) => string = (r) => {
 			return `${r.polymerChainIdentifier}:${r.name}${r.sequenceNumber}`;
 		};
+		const CollectNodes = (chain: Polymer) => {
+			chain.residues.forEach((r, index) => {
+				nodes.push({
+					...r,
+					hash: r.hash,
+					name: r.name.toString().slice(-1), // remove D from name
+					id: resToId(r),
+					color: ColorMap[r.name as DNAResidues],
+					group: DNAResidueIndexes.indexOf(r.name as DNAResidues) + 1,
+				});
 
-		const resColor: (r: Residue) => string = (r) => {
-			return ColorMap[r.name as DNAResidues];
+				// Collect links to previous residue in same chain
+				let residues = chain.residues;
+				if (index > 0 && index < residues.length) {
+					links.push({
+						source: resToId(residues[index - 1]),
+						target: resToId(r),
+						value: 1,
+						color: DefaultLinkColor,
+						linkType: LinkType.Backbone,
+					});
+				}
+			});
 		};
 
 		// Collect nodes
 		const DNAResidueIndexes = Object.values(DNAResidues);
-		chain1.residues.forEach((r, index) => {
-			nodes.push({
-				id: resToId(r),
-				color: resColor(r),
-				group: DNAResidueIndexes.indexOf(r.name as DNAResidues) + 1,
-			});
-
-			// Collect links to previous residue in same chain
-			let residues = chain1.residues;
-			if (index > 0 && index < residues.length) {
-				links.push({
-					source: resToId(residues[index - 1]),
-					target: resToId(r),
-					value: 1,
-				});
-			}
-		});
-		chain2.residues.forEach((r, index) => {
-			nodes.push({
-				id: resToId(r),
-				color: resColor(r),
-				group: DNAResidueIndexes.indexOf(r.name as DNAResidues) + 1,
-			});
-
-			// Collect links for same chain residues
-			let residues = chain2.residues;
-			if (index > 0 && index < residues.length) {
-				links.push({
-					source: resToId(residues[index - 1]),
-					target: resToId(r),
-					value: 1,
-				});
-			}
-		});
+		CollectNodes(chain1);
+		CollectNodes(chain2);
 
 		// Collect links for watson-crick pairs
 		pairs.forEach((p) => {
 			const r1 = p[0];
 			if (p.length === 2) {
 				const r2 = p[1];
-
 				links.push({
 					source: resToId(r2),
 					target: resToId(r1),
 					value: 1,
+					color: LinkColorMap[r1.name as DNAResidues],
+					linkType: LinkType.Pair,
 				});
 			}
 		});
@@ -129,205 +123,20 @@ export function Viewer() {
 			(containerRef.current as HTMLDivElement).offsetHeight,
 		];
 
+		// Draw the visualization
 		ForceGraph(
 			{
 				nodes,
 				links,
-				svgRef: ref.current,
+				svgRef: ref.current as SVGSVGElement,
 			},
 			{
 				width: w,
 				height: h,
-			}
+			} as any
 		);
 
 		console.timeEnd('DNA_VIZ');
-
-		// TODO Add RNA colors
-		// type cmap = {
-		// 	[key in DNAResidues]: string;
-		// };
-		// const ColorMap: cmap = {
-		// 	[DNAResidues.DA]: '#00897b',
-		// 	[DNAResidues.DT]: '#c2185b',
-		// 	[DNAResidues.DG]: '#3949ab',
-		// 	[DNAResidues.DC]: '#ffa000',
-		// };
-		// const GetColor = (r: ResidueMeta): string => {
-		// 	if (r.name in DNAResidues) {
-		// 		return ColorMap[r.name as DNAResidues];
-		// 	}
-		// 	return GetHoverColor(r);
-		// };
-		// const GetHoverColor = (r: ResidueMeta): string => {
-		// 	return '#95fe44';
-		// };
-
-		// // Clean up svg initially
-		// d3.select(ref.current).selectAll('*').remove();
-
-		// // Start generating new chart
-
-		// // Width and height of svg
-		// const [w, h] = [900, 500];
-		// // Margins x and y
-		// const [mX, mY] = [200, 40];
-
-		// const iFinder = new InteractionsFinder(polymers, dispatch);
-
-		// const pairs = iFinder.watsonCrickPairs();
-
-		// const visualizationData = iFinder.generateVisualizationScaffold();
-		// let nucleoAcidsData: D3Element[] = [];
-
-		// // Visualization not initialized
-		// if (visualizationData.chain1 === null) {
-		// 	return;
-		// }
-
-		// visualizationData?.chain1.forEach((r) => {
-		// 	nucleoAcidsData.push({
-		// 		x: 0,
-		// 		y: r.index,
-		// 		data: r.residue,
-		// 		chainId: r.residue.polymerChainIdentifier,
-		// 		visualizationResidue: r,
-		// 	});
-		// });
-
-		// if (visualizationData.chain2 !== null) {
-		// 	visualizationData.chain2.forEach((r) => {
-		// 		nucleoAcidsData.push({
-		// 			x: 1,
-		// 			y: r.index,
-		// 			data: r.residue,
-		// 			chainId: r.residue.polymerChainIdentifier,
-		// 			visualizationResidue: r,
-		// 		});
-		// 	});
-		// }
-
-		// let maxResidues = Math.max(
-		// 	visualizationData.chain1.length,
-		// 	visualizationData.chain2 !== null ? visualizationData.chain2.length : 0
-		// );
-		// let numAcids = visualizationData.chain2 !== null ? 2 : 1;
-
-		// let yScale = d3
-		// 	.scaleLinear()
-		// 	.domain([0, maxResidues])
-		// 	.range([0 + mY, h - mY]);
-
-		// let xScale = d3
-		// 	.scaleLinear()
-		// 	.domain([0, numAcids])
-		// 	.range([0 + mX, w - mX]);
-
-		// const rSize = 10;
-
-		// const tooltipEl = d3.select(tooltip.current);
-		// const svg = ref.current;
-		// const chart = d3
-		// 	.select(svg)
-		// 	.attr('width', w)
-		// 	.attr('height', h)
-		// 	.selectAll()
-		// 	.data(nucleoAcidsData)
-		// 	.enter()
-		// 	.append('circle')
-		// 	.attr('cx', (a: any) => xScale(a.x))
-		// 	.attr('cy', (a: any) => yScale(a.y))
-		// 	.style('fill', function (residue: D3Element) {
-		// 		return GetColor(residue.data);
-		// 	})
-		// 	.attr('r', rSize)
-		// 	.on('mouseover', async function (event: MouseEvent, residue: D3Element) {
-		// 		d3.select(this)
-		// 			.attr('r', 15)
-		// 			.style('fill', function () {
-		// 				return GetHoverColor(residue.data);
-		// 			});
-
-		// 		let b = residue.data as Residue;
-
-		// 		try {
-		// 			let interactionsHtml =
-		// 				'<div><b>Interactions are currently disabled</b></div>';
-		// 			// residue.visualizationResidue.interactions.forEach((i:Interaction)=>{
-		// 			//     interactionsHtml += `<div>${i.polymerKind}:${i.residue.name+":"+i.residue.sequenceNumber} ${i.meta?.distance}</div>`;
-		// 			// });
-
-		// 			await tooltipEl
-		// 				.html(
-		// 					`<div>Residue: ${b.name} seqno: ${b.sequenceNumber} ChainID: ${residue.chainId}</div>${interactionsHtml}`
-		// 				)
-		// 				.transition()
-		// 				.duration(50)
-		// 				.style('left', event.pageX + 'px')
-		// 				.style('top', event.pageY + 'px')
-		// 				.end();
-		// 		} catch (e) {
-		// 			console.log('Something went wrong: ', e);
-		// 		}
-
-		// 		tooltipEl.style('opacity', 1);
-		// 	})
-		// 	.on('mouseout', function (event: MouseEvent, residue: D3Element) {
-		// 		tooltipEl.style('opacity', 0);
-		// 		d3.select(this)
-		// 			.attr('r', rSize)
-		// 			.style('fill', function () {
-		// 				return GetColor(residue.data);
-		// 			});
-		// 	});
-
-		// const x = atoms.map(a=>a.coords.x)
-		// const y = atoms.map(a=>a.coords.y)
-		// const z = atoms.map(a=>a.coords.z)
-
-		// const tooltipEl = d3.select(tooltip.current)
-
-		// const rSize = 3;
-		// const chart = d3.select(ref.current)
-		//     .attr('width', w)
-		//     .attr('height', h)
-		//     .selectAll('circle')
-		//     .data(atoms)
-		//     .enter()
-		//         .append('circle')
-		//         .attr('cx', (a:Atom)=>xScale(a.coords.x))
-		//         .attr('cy', (a:Atom)=>yScale(a.coords.y))
-		//         .style('fill', '#867')
-		//         .on('mouseover', async function( event:MouseEvent, atom:Atom){
-		//             d3.select(this).attr('r', 15)
-		//                 .style('fill', '#5ef');
-
-		//             try{
-		//                 await tooltipEl
-		//                 .html(`Residue: ${atom.residueName} Atom name: ${atom.name} Atom element: ${atom.element}`)
-		//                 .transition()
-		//                 .duration(50)
-		//                 .style('left', event.pageX+"px")
-		//                 .style('top', event.pageY+"px")
-		//                 .end();
-		//             }catch(e){
-		//                 console.log("Something went wrong: ",e);
-		//             }
-
-		//             tooltipEl.style('opacity', 1)
-		//         })
-		//         .on('mouseout', function(d:Atom){
-		//             tooltipEl.style('opacity', 0)
-		//             d3.select(this).attr('r', rSize)
-		//             .style('fill', '#867')
-		//         });
-
-		// chart.transition()
-		//     .attr('r', rSize)
-		//     .delay(function(a: Atom, i){
-		//         return i * 5
-		//     })
-		//     .duration(500)
 	}
 
 	useEffect(initD3, [polymers]);

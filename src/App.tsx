@@ -17,7 +17,7 @@ export function App() {
 					<Spinner />
 				</div>
 			)}
-			<div className="z-10 w-9/12 bg-indigo-300 min-h-full h-screen">
+			<div className="z-10 w-9/12 bg-indigo-200 min-h-full h-screen">
 				<Viewer />
 			</div>
 			<div className="z-10 w-3/12">

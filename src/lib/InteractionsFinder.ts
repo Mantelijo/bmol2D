@@ -19,9 +19,7 @@ export class InteractionsFinder {
 	// This will be used to generate visualization
 	visualization: Visualization = { chain1: null, chain2: null };
 
-	constructor(
-		public polymers: Polymer[],
-	) {
+	constructor(public polymers: Polymer[]) {
 		this.prepareObjects();
 	}
 
@@ -150,8 +148,7 @@ export class InteractionsFinder {
 			} else {
 				pairs.push([r1]);
 				console.log(
-					'No pair for: ',
-					`${r1.polymerChainIdentifier}:${r1.sequenceNumber}${r1.name}`
+					`No pair for: ${r1.polymerChainIdentifier}:${r1.sequenceNumber}${r1.name}, smallest distance: ${smallestDistance}`
 				);
 			}
 		});
