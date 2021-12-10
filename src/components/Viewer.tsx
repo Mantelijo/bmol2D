@@ -1,15 +1,8 @@
 import React, { useContext, useEffect } from 'react';
 import * as d3 from 'd3';
-import {
-	Atom,
-	Residue,
-	PolymerKind,
-	ResidueMeta,
-	DNAResidues,
-} from '../lib/types/atoms';
+import { Atom, Residue, PolymerKind, DNAResidues } from '../lib/types/atoms';
 import { context } from '../Store';
 import { InteractionsFinder } from '../lib/InteractionsFinder';
-import { VisualizationResidue } from '../lib/types/visualization';
 import { ForceGraph } from './../lib/viz/ForceGraph';
 import { useRef } from 'react';
 
@@ -46,7 +39,8 @@ export function Viewer() {
 		if (!ref || polymers.length <= 0) {
 			return;
 		}
-		const iFinder = new InteractionsFinder(polymers, dispatch);
+		console.time('DNA_VIZ');
+		const iFinder = new InteractionsFinder(polymers);
 		const pairs = iFinder.watsonCrickPairs();
 		const dna = iFinder.nucleicAcids;
 
@@ -146,6 +140,8 @@ export function Viewer() {
 				height: h,
 			}
 		);
+
+		console.timeEnd('DNA_VIZ');
 
 		// TODO Add RNA colors
 		// type cmap = {

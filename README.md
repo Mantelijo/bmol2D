@@ -43,4 +43,6 @@ Schematic 2D biomolecule interactions visualizer.
 - Praktikos aprasymas - chemijos ziniu pritaikymas sprendziant ir vizualizuojant
 - Prie rezultatu - pavyzdziai kazokie tyrinejant saveikas
 
-C533
+# Sample structures
+
+- 5BK4 - very large structure, takes few minutes to load

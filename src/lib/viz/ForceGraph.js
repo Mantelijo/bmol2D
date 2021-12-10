@@ -27,7 +27,7 @@ export function ForceGraph(
 		linkTarget = ({ target }) => target, // given d in links, returns a node identifier string
 		linkStroke = '#999', // link stroke color
 		linkStrokeOpacity = 0.6, // link stroke opacity
-		linkStrokeWidth = 1.5, // given d in links, returns a stroke width in pixels
+		linkStrokeWidth = 2, // given d in links, returns a stroke width in pixels
 		linkStrokeLinecap = 'round', // link stroke linecap
 		linkStrength,
 		colors = d3.schemeTableau10, // an array of color strings, for the node groups
@@ -106,9 +106,13 @@ export function ForceGraph(
 		.join('circle')
 		.attr('fill', nodeFill)
 		.attr('r', nodeRadius)
-		.join('text')
-		.text((d) => 'A')
 		.call(drag(simulation));
+
+	// Append names
+	node
+		.append('text')
+		.text((d) => d.id)
+		.attr('text-anchor', 'middle');
 
 	if (W) link.attr('stroke-width', ({ index: i }) => W[i]);
 	if (G) node.attr('fill', ({ index: i }) => color(G[i]));

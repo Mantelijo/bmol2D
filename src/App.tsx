@@ -12,7 +12,7 @@ export function App() {
 			{state.isLoading === true && (
 				<div
 					className="fixed w-screen min-h-screen top-0 left-0 flex items-center justify-center z-50  h-full"
-					style={{ backgroundColor: 'rgba(0,0,0,0.35)' }}
+					style={{ backgroundColor: 'rgba(0,0,0,0.75)' }}
 				>
 					<Spinner />
 				</div>

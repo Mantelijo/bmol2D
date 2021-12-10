@@ -21,7 +21,6 @@ export class InteractionsFinder {
 
 	constructor(
 		public polymers: Polymer[],
-		public dispatch: React.Dispatch<Action>
 	) {
 		this.prepareObjects();
 	}
@@ -141,19 +140,19 @@ export class InteractionsFinder {
 				isWatsonCrickPair(bestR2, r1)
 			) {
 				pairs.push([r1, bestR2]);
-				// const r2 = bestR2;
-				// console.log(
-				// 	'Smallest distance: ',
-				// 	smallestDistance,
-				// 	`${r1.polymerChainIdentifier}:${r1.sequenceNumber}${r1.name}`,
-				// 	`${r2.polymerChainIdentifier}:${r2.sequenceNumber}${r2.name}`
-				// );
+				const r2 = bestR2;
+				console.log(
+					'Smallest distance: ',
+					smallestDistance,
+					`${r1.polymerChainIdentifier}:${r1.sequenceNumber}${r1.name}`,
+					`${r2.polymerChainIdentifier}:${r2.sequenceNumber}${r2.name}`
+				);
 			} else {
 				pairs.push([r1]);
-				// console.log(
-				// 	'No pair for: ',
-				// 	`${r1.polymerChainIdentifier}:${r1.sequenceNumber}${r1.name}`
-				// );
+				console.log(
+					'No pair for: ',
+					`${r1.polymerChainIdentifier}:${r1.sequenceNumber}${r1.name}`
+				);
 			}
 		});
 		return pairs;
