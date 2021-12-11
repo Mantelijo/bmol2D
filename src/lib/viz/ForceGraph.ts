@@ -1,4 +1,5 @@
 import * as d3 from "d3";
+import { Action } from "../../Store";
 import { Residue } from "../types/atoms";
 
 export interface Node extends Residue {
@@ -25,6 +26,7 @@ type ForceGraphParam = {
 	nodes: Node[];
 	links: Link[];
 	svgRef: SVGSVGElement;
+	dispatch: React.Dispatch<Action>;
 };
 
 type ForceGraphOpts = {
@@ -62,6 +64,7 @@ export function ForceGraph(
 		nodes, // an iterable of node objects (typically [{id}, …])
 		links, // an iterable of link objects (typically [{source, target}, …])
 		svgRef, // d3 svg object
+		dispatch,
 	}: ForceGraphParam,
 	opts: ForceGraphOpts,
 ) {
@@ -168,9 +171,26 @@ export function ForceGraph(
 		.attr("r", nodeRadius);
 
 	// Info
-	node.on("mouseover", (e, d) => {
-		console.log("Mouseover", e, d);
-	});
+	nodeGs
+		.on("mouseover", function (event, d: Node) {
+			console.log(this, event, d);
+			d3.select(this)
+				.select("circle")
+				.attr("r", nodeRadius * 2);
+			dispatch({
+				type: "selectedResidue",
+				payload: d,
+			});
+		})
+		.on("mouseout", function (event, d: Node) {
+			d3.select(this).select("circle").attr("r", nodeRadius);
+
+			dispatch({
+				type: "selectedResidue",
+				payload: undefined,
+			});
+		});
+
 	// Append names
 	const letters = nodeGs
 		.append("text")

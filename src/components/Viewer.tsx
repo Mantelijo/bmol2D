@@ -1,29 +1,29 @@
-import React, { useContext, useEffect } from 'react';
+import React, { useContext, useEffect } from "react";
 import {
 	Atom,
 	Polymer,
 	Residue,
 	PolymerKind,
 	DNAResidues,
-} from '../lib/types/atoms';
-import { context } from '../Store';
-import { InteractionsFinder } from '../lib/InteractionsFinder';
-import { ForceGraph } from './../lib/viz/ForceGraph';
-import { useRef } from 'react';
-import { Node, Link, LinkType } from './../lib/viz/ForceGraph';
+} from "../lib/types/atoms";
+import { context } from "../Store";
+import { InteractionsFinder } from "../lib/InteractionsFinder";
+import { ForceGraph } from "./../lib/viz/ForceGraph";
+import { useRef } from "react";
+import { Node, Link, LinkType } from "./../lib/viz/ForceGraph";
 
 // Color map for DNA residues
 type cmap = {
 	[key in DNAResidues]: string;
 };
 const ColorMap: cmap = {
-	[DNAResidues.DA]: '#fcb331',
-	[DNAResidues.DT]: '#5670fb',
-	[DNAResidues.DG]: '#f63c37',
-	[DNAResidues.DC]: '#03c907',
+	[DNAResidues.DA]: "#fcb331",
+	[DNAResidues.DT]: "#5670fb",
+	[DNAResidues.DG]: "#f63c37",
+	[DNAResidues.DC]: "#03c907",
 };
-const AT_LINK = 'red';
-const GC_LINK = 'blue';
+const AT_LINK = "red";
+const GC_LINK = "blue";
 const LinkColorMap: cmap = {
 	[DNAResidues.DA]: AT_LINK,
 	[DNAResidues.DT]: AT_LINK,
@@ -32,7 +32,7 @@ const LinkColorMap: cmap = {
 };
 
 // For chain backbone
-const DefaultLinkColor = '#494949';
+const DefaultLinkColor = "#494949";
 
 export function Viewer() {
 	const [state, dispatch] = useContext(context);
@@ -56,7 +56,7 @@ export function Viewer() {
 		if (!ref || polymers.length <= 0) {
 			return;
 		}
-		console.time('DNA_VIZ');
+		console.time("DNA_VIZ");
 		const iFinder = new InteractionsFinder(polymers);
 		const pairs = iFinder.watsonCrickPairs();
 		const dna = iFinder.nucleicAcids;
@@ -115,7 +115,7 @@ export function Viewer() {
 			}
 		});
 
-		console.log('Vizualization data:', nodes, links);
+		console.log("Vizualization data:", nodes, links);
 
 		// svg dimensions should fit the container
 		let [w, h] = [
@@ -129,14 +129,15 @@ export function Viewer() {
 				nodes,
 				links,
 				svgRef: ref.current as SVGSVGElement,
+				dispatch,
 			},
 			{
 				width: w,
 				height: h,
-			} as any
+			} as any,
 		);
 
-		console.timeEnd('DNA_VIZ');
+		console.timeEnd("DNA_VIZ");
 	}
 
 	useEffect(initD3, [polymers]);
@@ -145,12 +146,36 @@ export function Viewer() {
 		<>
 			<div>{state.simpleStuffy}</div>
 			<div className="p-5 flex items-center flex-col h-full" ref={containerRef}>
-				<div className="min-w-full h-full">
+				<div className="min-w-full h-full relative">
 					<svg ref={ref}></svg>
+					{state.selectedResidue && (
+						<div
+							className="
+								text-xs p-4
+								absolute bottom-[10px] right-[10px]
+								w-[50%] h-[100px] bg-indigo-900/10
+								overflow-auto text-white rounded-lg
+							"
+						>
+							<div>Chain: {state.selectedResidue.polymerChainIdentifier}</div>
+							<div>
+								Residue: {state.selectedResidue.name}:
+								{state.selectedResidue.sequenceNumber}
+							</div>
+							<div>
+								Interactions:{" "}
+								{state.selectedResidue.interactions.map((i) => (
+									<div>
+										{i.polymerKind} - {i.residue}
+									</div>
+								))}
+							</div>
+						</div>
+					)}
 				</div>
 				<div
 					ref={tooltip}
-					style={{ position: 'absolute', opacity: 0, background: '#fff' }}
+					style={{ position: "absolute", opacity: 0, background: "#fff" }}
 				></div>
 			</div>
 		</>

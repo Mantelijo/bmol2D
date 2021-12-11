@@ -1,7 +1,7 @@
-import React, { createContext, useReducer, ReactElement } from 'react';
-import { Polymer, Residue } from './lib/types/atoms';
-import { PDBFile } from './lib/types/atoms';
-import { Visualization } from './lib/types/visualization';
+import React, { createContext, useReducer, ReactElement } from "react";
+import { Polymer, Residue } from "./lib/types/atoms";
+import { PDBFile } from "./lib/types/atoms";
+import { Visualization } from "./lib/types/visualization";
 
 /**
  * Initial State object structure
@@ -10,10 +10,11 @@ const initialState: State = {
 	polymers: [],
 	pdb: undefined,
 	isLoading: false,
-	simpleStuffy: '',
+	simpleStuffy: "",
 	hashedNucleicAcidResidues: {},
 	viz: { chain1: null, chain2: null },
-	currentPDBId: '',
+	currentPDBId: "",
+	selectedResidue: undefined,
 };
 
 export type HashedResidue = {
@@ -40,6 +41,8 @@ export interface State {
 
 	// Currently displayed pdb id
 	currentPDBId: string;
+
+	selectedResidue?: Residue;
 }
 
 /**
