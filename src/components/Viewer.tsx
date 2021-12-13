@@ -153,7 +153,7 @@ export function Viewer() {
 							className="
 								text-xs p-4
 								absolute bottom-[10px] right-[10px]
-								w-[50%] h-[100px] bg-indigo-900/10
+								w-[50%] h-[100px] bg-indigo-400
 								overflow-auto text-white rounded-lg
 							"
 						>

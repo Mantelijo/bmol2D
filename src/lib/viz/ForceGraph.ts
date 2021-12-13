@@ -57,8 +57,7 @@ const Letters = {
 	size: 10,
 	y: 4,
 };
-// Example taken from
-// https://observablehq.com/@d3/force-directed-graph
+// Example taken from https://observablehq.com/@d3/force-directed-graph
 export function ForceGraph(
 	{
 		nodes, // an iterable of node objects (typically [{id}, …])
@@ -84,10 +83,9 @@ export function ForceGraph(
 			return d.color !== undefined ? d.color : "#444";
 		}, // link stroke color
 		linkStrokeOpacity = 0.6, // link stroke opacity
-		linkStrokeWidth = 2, // given d in links, returns a stroke width in pixels
+		linkStrokeWidth = 1.5, // given d in links, returns a stroke width in pixels
 		linkStrokeLinecap = "round", // link stroke linecap
-		linkStrength,
-		colors = d3.schemeTableau10, // an array of color strings, for the node groups
+		linkStrength = 2,
 		width = 640, // outer width, in pixels
 		height = 400, // outer height, in pixels
 		invalidation, // when this promise resolves, stop the simulation
@@ -99,21 +97,39 @@ export function ForceGraph(
 
 	// Compute values.
 	const N = d3.map(nodes, nodeId).map(intern);
-	console.log(nodes, N);
 	if (nodeTitle === undefined) nodeTitle = (_: never, i: number) => N[i];
-	const T = nodeTitle == null ? null : d3.map(nodes, nodeTitle);
 	const W =
 		typeof linkStrokeWidth !== "function"
 			? null
 			: d3.map(links, linkStrokeWidth);
 
-	// Replace the input nodes and links with mutable objects for the simulation.
+	// Replace the input nodes and links with mutable objects for the
+	// simulation.
 	nodes = initialNodes;
 	links = initialLinks;
 
 	// Construct the forces.
 	const forceNode = d3.forceManyBody();
-	const forceLink = d3.forceLink(links).id(({ index: i }) => N[i as any]);
+
+	const forceLink = d3
+		.forceLink(links)
+		.id(({ index: i }) => N[i as any])
+		.distance((d, i) => {
+			// Smaller distance values for backbone provide a better
+			// structure with better separation between chains
+			if (initialLinks[i].linkType === LinkType.Backbone) {
+				return 5;
+			}
+			return 70;
+		})
+		.strength((d, i) => {
+			// Larger values for backbone provide a better
+			// structure with better separation between chains
+			if (initialLinks[i].linkType === LinkType.Backbone) {
+				return 5000;
+			}
+			return 1;
+		});
 	if (nodeStrength !== undefined) forceNode.strength(nodeStrength);
 	if (linkStrength !== undefined) forceLink.strength(linkStrength);
 
@@ -121,7 +137,6 @@ export function ForceGraph(
 		.forceSimulation(nodes as any)
 		.force("link", forceLink)
 		.force("charge", forceNode)
-		.force("center", d3.forceCenter())
 		.on("tick", ticked);
 
 	const svg = d3
@@ -157,9 +172,10 @@ export function ForceGraph(
 
 	const nodeGs = g
 		.append("g")
-		.selectAll("circle")
+		.selectAll("g")
 		.data(nodes)
-		.join("g")
+		.enter()
+		.append("g")
 		.call(drag(simulation) as any);
 
 	const node = nodeGs
@@ -170,25 +186,31 @@ export function ForceGraph(
 		.attr("fill", nodeFill)
 		.attr("r", nodeRadius);
 
-	// Info
+	// Tooltip information
+	let lastEvent = new Date();
 	nodeGs
 		.on("mouseover", function (event, d: Node) {
-			console.log(this, event, d);
 			d3.select(this)
 				.select("circle")
-				.attr("r", nodeRadius * 2);
-			dispatch({
-				type: "selectedResidue",
-				payload: d,
-			});
+				.attr("r", transformAdjusted(nodeRadius * 2));
+			if (new Date().getTime() - lastEvent.getTime() > 250) {
+				dispatch({
+					type: "selectedResidue",
+					payload: d,
+				});
+				lastEvent = new Date();
+			}
 		})
 		.on("mouseout", function (event, d: Node) {
-			d3.select(this).select("circle").attr("r", nodeRadius);
+			// transform adjusted radius if needed
+			d3.select(this).select("circle").attr("r", transformAdjusted(nodeRadius));
 
-			dispatch({
-				type: "selectedResidue",
-				payload: undefined,
-			});
+			if (new Date().getTime() - lastEvent.getTime() > 250) {
+				dispatch({
+					type: "selectedResidue",
+					payload: undefined,
+				});
+			}
 		});
 
 	// Append names
@@ -201,7 +223,7 @@ export function ForceGraph(
 		.attr("class", "svg-graph-text");
 
 	if (W) link.attr("stroke-width", (d: any) => W[d.index] as any);
-	if (T) node.append("title").text((d: any) => T[d.index] as any);
+	// if (T) node.append("title").text((d: any) => T[d.index] as any);
 	if (invalidation != null) invalidation.then(() => simulation.stop());
 
 	function intern(value: any) {
@@ -218,10 +240,9 @@ export function ForceGraph(
 			.attr("y2", (d: any) => d.target.y);
 
 		nodeGs.attr("transform", (d: any) => `translate(${d.x}, ${d.y})`);
-		// node.attr('cx', (d) => d.x).attr('cy', (d) => d.y);
 	}
 
-	function drag(simulation: any) {
+	function drag(simulation: d3.Simulation<d3.SimulationNodeDatum, undefined>) {
 		function dragstarted(event: any) {
 			if (!event.active) simulation.alphaTarget(0.3).restart();
 			event.subject.fx = event.subject.x;
@@ -246,15 +267,26 @@ export function ForceGraph(
 			.on("end", dragended);
 	}
 
-	// Zoom-in recalculations
+	// Zoom-in functionality
+	const transformAdjusted: (val: number) => number = (val) => {
+		if (transformK) {
+			return val / transformK;
+		}
+		return val;
+	};
 	let transform = undefined;
+	let transformK: undefined | number = undefined;
 	const zoom = d3.zoom().on("zoom", (e) => {
 		g.attr("transform", (transform = e.transform));
 		if (transform) {
-			const k = Math.sqrt(transform.k);
-			g.style("stroke-width", 3 / k);
-			node.attr("r", nodeRadius / k).attr("stroke-width", nodeStrokeWidth / k);
-			letters.attr("font-size", Letters.size / k).attr("y", Letters.y / k);
+			transformK = Math.sqrt(transform.k);
+			g.style("stroke-width", 3 / transformK);
+			node
+				.attr("r", nodeRadius / transformK)
+				.attr("stroke-width", nodeStrokeWidth / transformK);
+			letters
+				.attr("font-size", Letters.size / transformK)
+				.attr("y", Letters.y / transformK);
 		}
 	});
 
