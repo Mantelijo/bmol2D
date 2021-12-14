@@ -15,6 +15,7 @@ const initialState: State = {
 	viz: { chain1: null, chain2: null },
 	currentPDBId: "",
 	selectedResidue: undefined,
+	error: "",
 };
 
 export type HashedResidue = {
@@ -42,14 +43,18 @@ export interface State {
 	// Currently displayed pdb id
 	currentPDBId: string;
 
+	// Currently displayed residue information
 	selectedResidue?: Residue;
+
+	// Error text to display
+	error: string;
 }
 
 /**
  * Actions structure
  */
 export interface Action {
-	type: keyof State;
+	type: keyof State | "resetState";
 	payload: any;
 }
 
@@ -61,6 +66,8 @@ const context = createContext<[State, React.Dispatch<Action>]>([
 // Reducer mutates the state
 const reducer = (state: State, { type, payload }: Action): State => {
 	switch (type) {
+		case "resetState":
+			return { ...initialState };
 		// Default case works when type is equal state property name
 		default:
 			if (type in state) {

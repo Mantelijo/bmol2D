@@ -58,7 +58,17 @@ export function Viewer() {
 		}
 		console.time("DNA_VIZ");
 		const iFinder = new InteractionsFinder(polymers);
-		const pairs = iFinder.watsonCrickPairs();
+		let pairs: Residue[][];
+		try {
+			pairs = iFinder.watsonCrickPairs();
+		} catch (e) {
+			console.log(e);
+			dispatch({
+				type: "error",
+				payload: (e as any).toString() as string,
+			});
+			return;
+		}
 		const dna = iFinder.nucleicAcids;
 
 		let nodes: Node[] = [];

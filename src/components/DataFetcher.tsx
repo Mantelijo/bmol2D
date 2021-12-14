@@ -4,10 +4,10 @@ import {
 	useEffect,
 	useContext,
 	useRef,
-} from 'react';
-import { PDBHandler } from '../lib/PDBHandler';
-import { PDBFile, Polymer } from '../lib/types/atoms';
-import { context } from '../Store';
+} from "react";
+import { PDBHandler } from "../lib/PDBHandler";
+import { PDBFile, Polymer } from "../lib/types/atoms";
+import { context } from "../Store";
 
 // Fetch PDB text for given id (if valid)
 const fetchPDBFile = async (id: string): Promise<string> => {
@@ -21,38 +21,45 @@ export function DataFetcher() {
 
 	const startLoading = () => {
 		dispatch({
-			type: 'isLoading',
+			type: "isLoading",
 			payload: true,
 		});
 	};
 	const stopLoading = () => {
 		dispatch({
-			type: 'isLoading',
+			type: "isLoading",
 			payload: false,
 		});
 	};
 	const updatePDBState = (pdb: PDBFile) => {
 		dispatch({
-			type: 'pdb',
+			type: "pdb",
 			payload: pdb,
 		});
 	};
 	const updateCurrentPDBId = (id: string) => {
 		dispatch({
-			type: 'currentPDBId',
+			type: "currentPDBId",
 			payload: id,
 		});
 	};
 	// Update polymers in store, generate visualization data structure
 	const updatePolymers = (polymers: Polymer[]) => {
 		dispatch({
-			type: 'polymers',
+			type: "polymers",
 			payload: polymers,
+		});
+	};
+	const resetState = () => {
+		dispatch({
+			type: "resetState",
+			payload: null,
 		});
 	};
 
 	// Process fetching and loading PDB file from rcsb
 	const loadPDBID = async (id: string) => {
+		resetState();
 		startLoading();
 		const pdb = new PDBHandler().format(await fetchPDBFile(id));
 		updatePDBState(pdb);
@@ -64,8 +71,8 @@ export function DataFetcher() {
 	// Fetch PDB file by given id parameter. Must run only once
 	useEffect(() => {
 		const url = new URLSearchParams(window.location.search);
-		const id = url.get('id');
-		console.log('ID', id);
+		const id = url.get("id");
+		console.log("ID", id);
 		if (id !== null) {
 			loadPDBID(id);
 		}
@@ -73,25 +80,26 @@ export function DataFetcher() {
 
 	// Updates pbd file information from uploaded file, parses pdb data and performs interaction calculations
 	const handleFileChange: ChangeEventHandler<HTMLInputElement> = async (
-		event: ChangeEvent
+		event: ChangeEvent,
 	) => {
 		let f = (event.target as HTMLInputElement).files?.item(0);
 		if (f !== null) {
+			resetState();
 			// Show spinner while loading
 			startLoading();
 
 			// Read and parse the file
-			console.time('TIME_TO_PARSE_EVERYTHING');
-			console.time('TIME_TO_PARSE_PDB');
+			console.time("TIME_TO_PARSE_EVERYTHING");
+			console.time("TIME_TO_PARSE_PDB");
 			const pdb = await new PDBHandler(f as File).readData();
-			console.timeEnd('TIME_TO_PARSE_PDB');
+			console.timeEnd("TIME_TO_PARSE_PDB");
 
 			// Update state with parsed values
 			updatePDBState(pdb);
 			updatePolymers(pdb.polymers);
 
 			// Some fake loading time, so we get to see the spinner :)
-			console.timeEnd('TIME_TO_PARSE_EVERYTHING');
+			console.timeEnd("TIME_TO_PARSE_EVERYTHING");
 			setTimeout(stopLoading, 2000);
 		}
 	};
@@ -123,6 +131,13 @@ export function DataFetcher() {
 		<div className="p-5 max-h-screen overflow-auto break-words">
 			{!state.isLoading && (
 				<div>
+					{state.error.length > 0 && (
+						<div className="mb-4">
+							<div className="text-red-700 font-bold text-lg">
+								Something went wrong: {state.error}
+							</div>
+						</div>
+					)}
 					{state.pdb === undefined && (
 						<div className="text-sm text-gray-600 mb-4 bg-red-200 p-2">
 							Choose a PDB file which contains DNA/RNA with Proteins
@@ -145,7 +160,7 @@ export function DataFetcher() {
 							<div className="flex flex-row max-w-full">
 								<input
 									onKeyPress={(e) => {
-										if (e.key === 'Enter') {
+										if (e.key === "Enter") {
 											handlePDBIdChange();
 										}
 									}}
@@ -181,7 +196,7 @@ export function DataFetcher() {
 					Polymers from input:
 					{state.polymers.map(({ residues, chainIdentifier, kind }, k) => (
 						<div className="ml-2" key={k}>
-							Chain:{' '}
+							Chain:{" "}
 							<b>
 								{chainIdentifier} ({kind})
 							</b>

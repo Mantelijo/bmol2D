@@ -1,13 +1,11 @@
 import {
-	Atom,
 	Coordinate,
-	coordinateToArray,
 	DNAResidues,
 	Polymer,
 	PolymerKind,
 	Residue,
-} from './types/atoms';
-import { Vector } from './Vector';
+} from "./types/atoms";
+import { Vector } from "./Math";
 
 /**
  * A value that is used to check if watson crick pair is
@@ -23,7 +21,7 @@ export const calculateNucleotidePlaneVectors: (p: Polymer) => Polymer = (p) => {
 	if ([PolymerKind.DNA, PolymerKind.RNA].indexOf(p.kind) != -1) {
 		// Dna/Rna residue atoms containing these names will be selected as c2, c4, c6
 		// C's with single quote ' are of ribose so we only want specifically these.
-		let cNames = ['C2', 'C4', 'C6'];
+		let cNames = ["C2", "C4", "C6"];
 
 		p.residues.forEach((residue) => {
 			// Find C2, C4, C6 coordinates
@@ -36,9 +34,9 @@ export const calculateNucleotidePlaneVectors: (p: Polymer) => Polymer = (p) => {
 
 			// Calculate plane vector v and point o
 			if (cAtoms.length === 3) {
-				const c2 = Vector.fromArray(coordinateToArray(cAtoms[0]));
-				const c4 = Vector.fromArray(coordinateToArray(cAtoms[1]));
-				const c6 = Vector.fromArray(coordinateToArray(cAtoms[2]));
+				const c2 = Vector.fromArray(cAtoms[0].toArray());
+				const c4 = Vector.fromArray(cAtoms[1].toArray());
+				const c6 = Vector.fromArray(cAtoms[2].toArray());
 				const v = c4.subtract(c2).cross(c6.subtract(c2)).normalize();
 
 				const o = c2.add(c4).add(c6).divide(3);
