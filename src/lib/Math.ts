@@ -15,23 +15,19 @@ export class Vector {
 		return new Vector(-this.x, -this.y, -this.z);
 	}
 	add(v: Vector | number) {
-		if (v instanceof Vector)
-			return new Vector(this.x + v.x, this.y + v.y, this.z + v.z);
+		if (v instanceof Vector) return new Vector(this.x + v.x, this.y + v.y, this.z + v.z);
 		else return new Vector(this.x + v, this.y + v, this.z + v);
 	}
 	subtract(v: Vector | number) {
-		if (v instanceof Vector)
-			return new Vector(this.x - v.x, this.y - v.y, this.z - v.z);
+		if (v instanceof Vector) return new Vector(this.x - v.x, this.y - v.y, this.z - v.z);
 		else return new Vector(this.x - v, this.y - v, this.z - v);
 	}
 	multiply(v: Vector | number) {
-		if (v instanceof Vector)
-			return new Vector(this.x * v.x, this.y * v.y, this.z * v.z);
+		if (v instanceof Vector) return new Vector(this.x * v.x, this.y * v.y, this.z * v.z);
 		else return new Vector(this.x * v, this.y * v, this.z * v);
 	}
 	divide(v: Vector | number) {
-		if (v instanceof Vector)
-			return new Vector(this.x / v.x, this.y / v.y, this.z / v.z);
+		if (v instanceof Vector) return new Vector(this.x / v.x, this.y / v.y, this.z / v.z);
 		else return new Vector(this.x / v, this.y / v, this.z / v);
 	}
 	equals(v: Vector) {
@@ -104,6 +100,13 @@ export class Vector {
 				this.z = val;
 				break;
 		}
+	}
+
+	// Distance to given vector
+	distanceTo(v: Vector): number {
+		return Math.sqrt(
+			Math.pow(this.x - v.x, 2) + Math.pow(this.y - v.y, 2) + Math.pow(this.z - v.z, 2),
+		);
 	}
 
 	static negative(a: Vector, b: Vector, c: Vector) {
@@ -181,24 +184,13 @@ export class Vector {
 		);
 	}
 	static randomDirection() {
-		return Vector.fromAngles(
-			Math.random() * Math.PI * 2,
-			Math.asin(Math.random() * 2 - 1),
-		);
+		return Vector.fromAngles(Math.random() * Math.PI * 2, Math.asin(Math.random() * 2 - 1));
 	}
 	static min(a: Vector, b: Vector, c: Vector) {
-		return new Vector(
-			Math.min(a.x, b.x),
-			Math.min(a.y, b.y),
-			Math.min(a.z, b.z),
-		);
+		return new Vector(Math.min(a.x, b.x), Math.min(a.y, b.y), Math.min(a.z, b.z));
 	}
 	static max(a: Vector, b: Vector, c: Vector) {
-		return new Vector(
-			Math.max(a.x, b.x),
-			Math.max(a.y, b.y),
-			Math.max(a.z, b.z),
-		);
+		return new Vector(Math.max(a.x, b.x), Math.max(a.y, b.y), Math.max(a.z, b.z));
 	}
 	static lerp(a: Vector, b: Vector, fraction: number) {
 		return b.subtract(a).multiply(fraction).add(a);

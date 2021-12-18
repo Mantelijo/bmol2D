@@ -1,16 +1,9 @@
 import { Polymer, PolymerKind, Residue } from "./types/atoms";
 import { Action } from "../Store";
-import {
-	calculateCenters,
-	distanceBetween2Points,
-	ResidueMetaFromResidue,
-} from "./AtomsFunctions";
+import { calculateCenters, distanceBetween2Points, ResidueMetaFromResidue } from "./AtomsFunctions";
 import { InteractionType, THRESHOLD_DISTANCE } from "./types/interactions";
 import { Visualization } from "./types/visualization";
-import {
-	isWatsonCrickPair,
-	WATSON_CRICK_PAIR_CALCULATION_THRESHOLD,
-} from "./NucleicAcids";
+import { isWatsonCrickPair, WATSON_CRICK_PAIR_CALCULATION_THRESHOLD } from "./NucleicAcids";
 
 export class InteractionsFinder {
 	nucleicAcids: Polymer[] = [];
@@ -31,12 +24,7 @@ export class InteractionsFinder {
 		if (this.nucleicAcids.length <= 0) {
 			throw Error("Nucleic acids are not initialized");
 		}
-		if (
-			!(
-				this.nucleicAcids.length >= 2 &&
-				this.nucleicAcids[0].kind === PolymerKind.DNA
-			)
-		) {
+		if (!(this.nucleicAcids.length >= 2 && this.nucleicAcids[0].kind === PolymerKind.DNA)) {
 			throw Error("Correct DNA molecules were not found in provided structure");
 		}
 
@@ -100,10 +88,7 @@ export class InteractionsFinder {
 	 * be included. Most often, lone pairs of chain2 won't be included in
 	 * the result.
 	 */
-	calculateWatsonCrickPairs(
-		chain1: Polymer,
-		chain2: Polymer,
-	): Array<Residue[]> {
+	calculateWatsonCrickPairs(chain1: Polymer, chain2: Polymer): Array<Residue[]> {
 		let pairs: Array<Residue[]> = [];
 		chain1.residues.forEach((r1) => {
 			let smallestDistance = Infinity;
@@ -136,8 +121,7 @@ export class InteractionsFinder {
 			if (
 				bestR2 !== undefined &&
 				// Allow tiny bit of random error
-				smallestDistance <=
-					WATSON_CRICK_PAIR_CALCULATION_THRESHOLD + Math.random() &&
+				smallestDistance <= WATSON_CRICK_PAIR_CALCULATION_THRESHOLD + Math.random() &&
 				isWatsonCrickPair(bestR2, r1)
 			) {
 				pairs.push([r1, bestR2]);
@@ -188,10 +172,7 @@ export class InteractionsFinder {
 			nacid.residues.forEach((nacidResidue, nacidResidueI) => {
 				this.proteins.forEach((p) => {
 					p.residues.forEach((pResidue) => {
-						const distanceResidues = distanceBetween2Points(
-							nacidResidue.center,
-							pResidue.center,
-						);
+						const distanceResidues = distanceBetween2Points(nacidResidue.center, pResidue.center);
 
 						// Residues might contain atoms that are less than
 						// THRESHOLD_DISTANCE amount apart even if
@@ -199,14 +180,9 @@ export class InteractionsFinder {
 						if (distanceResidues <= THRESHOLD_DISTANCE * 2) {
 							nacidResidue.atoms.forEach((nacidAtom) => {
 								pResidue.atoms.forEach((pAtom) => {
-									const distanceAtoms = distanceBetween2Points(
-										nacidAtom.coords,
-										pAtom.coords,
-									);
+									const distanceAtoms = distanceBetween2Points(nacidAtom.coords, pAtom.coords);
 									if (distanceAtoms <= THRESHOLD_DISTANCE) {
-										this.nucleicAcids[nacidI].residues[
-											nacidResidueI
-										].interactions.push({
+										this.nucleicAcids[nacidI].residues[nacidResidueI].interactions.push({
 											residue: ResidueMetaFromResidue(pResidue),
 											type: InteractionType.Threshold,
 											polymerKind: p.kind,

@@ -302,7 +302,9 @@ export class PDBHandler {
 							let oldCoords = newAtom.coords.toVec();
 							let newCoords = Vector.infinity();
 
-							// Matrix and vector multiplication for rotation
+							// Matrix and vector multiplication for
+							// rotation
+							console.log("Coorinates before:", oldCoords);
 							newCoords.x =
 								oldCoords.x * rotation[0][0] +
 								oldCoords.y * rotation[0][1] +
@@ -318,8 +320,11 @@ export class PDBHandler {
 
 							// TODO translations
 							// Each rotation must have a translation
-							// const t = ts[rotationIndex];
-							// oldCoords.add(t);
+							const t = ts[rotationIndex];
+							newCoords = newCoords.add(t);
+
+							console.log("Coords after:", newCoords);
+							console.log("Distance between atoms: ", newCoords.distanceTo(oldCoords));
 
 							// Update coords
 							newAtom.coords = newCoords.toCoord();
@@ -330,6 +335,9 @@ export class PDBHandler {
 						chainClone.residues[rindex] = newResidue;
 					});
 
+					// Since we have new coordinates for transformed
+					// chains, plane vectors must be recalculated
+					chainClone = calculateNucleotidePlaneVectors(chainClone);
 					result.push(chainClone);
 				});
 			});

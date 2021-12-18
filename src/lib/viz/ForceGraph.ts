@@ -98,10 +98,7 @@ export function ForceGraph(
 	// Compute values.
 	const N = d3.map(nodes, nodeId).map(intern);
 	if (nodeTitle === undefined) nodeTitle = (_: never, i: number) => N[i];
-	const W =
-		typeof linkStrokeWidth !== "function"
-			? null
-			: d3.map(links, linkStrokeWidth);
+	const W = typeof linkStrokeWidth !== "function" ? null : d3.map(links, linkStrokeWidth);
 
 	// Replace the input nodes and links with mutable objects for the
 	// simulation.
@@ -154,10 +151,7 @@ export function ForceGraph(
 	const link = g
 		.append("g")
 		.attr("stroke-opacity", linkStrokeOpacity)
-		.attr(
-			"stroke-width",
-			typeof linkStrokeWidth !== "function" ? linkStrokeWidth : null,
-		)
+		.attr("stroke-width", typeof linkStrokeWidth !== "function" ? linkStrokeWidth : null)
 		.attr("stroke-linecap", linkStrokeLinecap)
 		.selectAll("line")
 		.data(links)
@@ -205,7 +199,7 @@ export function ForceGraph(
 			// transform adjusted radius if needed
 			d3.select(this).select("circle").attr("r", transformAdjusted(nodeRadius));
 
-			if (new Date().getTime() - lastEvent.getTime() > 250) {
+			if (new Date().getTime() - lastEvent.getTime() > 50) {
 				dispatch({
 					type: "selectedResidue",
 					payload: undefined,
@@ -227,9 +221,7 @@ export function ForceGraph(
 	if (invalidation != null) invalidation.then(() => simulation.stop());
 
 	function intern(value: any) {
-		return value !== null && typeof value === "object"
-			? value.valueOf()
-			: value;
+		return value !== null && typeof value === "object" ? value.valueOf() : value;
 	}
 
 	function ticked() {
@@ -260,11 +252,7 @@ export function ForceGraph(
 			event.subject.fy = null;
 		}
 
-		return d3
-			.drag()
-			.on("start", dragstarted)
-			.on("drag", dragged)
-			.on("end", dragended);
+		return d3.drag().on("start", dragstarted).on("drag", dragged).on("end", dragended);
 	}
 
 	// Zoom-in functionality
@@ -281,12 +269,8 @@ export function ForceGraph(
 		if (transform) {
 			transformK = Math.sqrt(transform.k);
 			g.style("stroke-width", 3 / transformK);
-			node
-				.attr("r", nodeRadius / transformK)
-				.attr("stroke-width", nodeStrokeWidth / transformK);
-			letters
-				.attr("font-size", Letters.size / transformK)
-				.attr("y", Letters.y / transformK);
+			node.attr("r", nodeRadius / transformK).attr("stroke-width", nodeStrokeWidth / transformK);
+			letters.attr("font-size", Letters.size / transformK).attr("y", Letters.y / transformK);
 		}
 	});
 
