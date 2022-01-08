@@ -19,18 +19,10 @@ export class InteractionsFinder {
 		this.prepareObjects();
 	}
 
-	// Returns unordered array of residue pairs
-	watsonCrickPairs(): Array<Residue[]> {
-		if (this.nucleicAcids.length <= 0) {
-			throw Error("Nucleic acids are not initialized");
-		}
-		if (!(this.nucleicAcids.length >= 2 && this.nucleicAcids[0].kind === PolymerKind.DNA)) {
-			throw Error("Correct DNA molecules were not found in provided structure");
-		}
-
-		const chain1 = this.nucleicAcids[0];
-		const chain2 = this.nucleicAcids[1];
-
+	// Generates complete list of watson-crick pairs for chain1-chain2.
+	// Returned result is very likely to be unordered according to
+	// original DNA/RNA sequences
+	generateWatsonCrickPairs(chain1: Polymer, chain2: Polymer): Array<Residue[]> {
 		// Chain lengths can differ, so we calculate and diff on each
 		// chain pairs. Pairs2 will have chain2 as first chain, so this
 		// has to be reordered when generating complete pairs
@@ -43,9 +35,9 @@ export class InteractionsFinder {
 		pairs2.reverse();
 
 		// Result is an array of residue pairs that are unordered. Second
-		// chain pairs are double checked for correctness and lone residues
-		// are added too as pairs1 will not have any lone residues of
-		// chain2
+		// chain pairs are double checked for correctness and lone
+		// residues are added too as pairs1 will not have any lone
+		// residues of chain2
 		let completePairs: Array<Residue[]> = pairs1;
 		pairs2.forEach((pair) => {
 			// pairs2 pairs have chain2 residues first, so we have to use
@@ -81,12 +73,36 @@ export class InteractionsFinder {
 		return completePairs;
 	}
 
+	// Returns unordered array of residue pairs for all nucleic acids.
+	// Each nucleic acid is compared with all other nucleic acids, because
+	// for example 5B2R contains DNA-RNA-DNA complex and we want to make
+	// sure that everything is calculated correctly.
+	watsonCrickPairs(): Array<Residue[]> {
+		if (this.nucleicAcids.length <= 0) {
+			throw Error("Nucleic acids are not initialized");
+		}
+
+		let allPairs: Residue[][] = [];
+		// Each chain should be compared one time with all other available
+		// chains except itself.
+		for (let i = 0; i < this.nucleicAcids.length; i++) {
+			for (let j = i + 1; j < this.nucleicAcids.length; j++) {
+				const generatePairs = this.generateWatsonCrickPairs(
+					this.nucleicAcids[i],
+					this.nucleicAcids[j],
+				);
+				allPairs.push(...generatePairs);
+			}
+		}
+		return allPairs;
+	}
+
 	/**
-	 * Calculates watson crick pairs for DNA
-	 * chain1 and chain2 must be DNA polymers.
-	 * Calculations are based on chain1 and not all chain2 residues might
-	 * be included. Most often, lone pairs of chain2 won't be included in
-	 * the result.
+	 * Calculates watson crick pairs for DNA chain1 and chain2 must be DNA
+	 * polymers. Calculations are based on chain1 (chain1 is used as
+	 * template strand) and not all chain2
+	 * residues might be included. Most often, lone pairs of chain2 won't
+	 * be included in the result.
 	 */
 	calculateWatsonCrickPairs(chain1: Polymer, chain2: Polymer): Array<Residue[]> {
 		let pairs: Array<Residue[]> = [];
@@ -122,20 +138,27 @@ export class InteractionsFinder {
 				bestR2 !== undefined &&
 				// Allow tiny bit of random error
 				smallestDistance <= WATSON_CRICK_PAIR_CALCULATION_THRESHOLD + Math.random() &&
-				isWatsonCrickPair(bestR2, r1)
+				isWatsonCrickPair(bestR2, r1) &&
+				// It looks like sometimes smallestDistance can be
+				// calculated incorrectly if the orientation of two very
+				// distant residues is similar. It looks like usually
+				// distance between residue centers is around 10-11, if
+				// this threshold is exceeded - most likely these two
+				// residues can not be pairs.
+				r1.center.toVec().distanceTo(bestR2.center.toVec()) < 15
 			) {
 				pairs.push([r1, bestR2]);
 				const r2 = bestR2;
 				console.log(
 					"Smallest distance: ",
+					`${chain1.kind}-${r1.polymerChainIdentifier}:${r1.sequenceNumber}${r1.name}`,
+					`${chain2.kind}-${r2.polymerChainIdentifier}:${r2.sequenceNumber}${r2.name}`,
 					smallestDistance,
-					`${r1.polymerChainIdentifier}:${r1.sequenceNumber}${r1.name}`,
-					`${r2.polymerChainIdentifier}:${r2.sequenceNumber}${r2.name}`,
 				);
 			} else {
 				pairs.push([r1]);
 				console.log(
-					`No pair for: ${r1.polymerChainIdentifier}:${r1.sequenceNumber}${r1.name}, smallest distance: ${smallestDistance}`,
+					`No pair for: ${chain1.kind} ${r1.polymerChainIdentifier}:${r1.sequenceNumber}${r1.name}, smallest distance: ${smallestDistance}`,
 				);
 			}
 		});

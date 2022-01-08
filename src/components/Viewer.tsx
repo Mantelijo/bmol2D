@@ -5,6 +5,8 @@ import {
 	Residue,
 	PolymerKind,
 	DNAResidues,
+	ResidueName,
+	RNAResidues,
 } from "../lib/types/atoms";
 import { context } from "../Store";
 import { InteractionsFinder } from "../lib/InteractionsFinder";
@@ -14,14 +16,21 @@ import { Node, Link, LinkType } from "./../lib/viz/ForceGraph";
 
 // Color map for DNA residues
 type cmap = {
-	[key in DNAResidues]: string;
+	[key in DNAResidues | RNAResidues]: string;
 };
 const ColorMap: cmap = {
 	[DNAResidues.DA]: "#fcb331",
 	[DNAResidues.DT]: "#5670fb",
 	[DNAResidues.DG]: "#f63c37",
 	[DNAResidues.DC]: "#03c907",
+
+	[RNAResidues.A]: "#acb331",
+	[RNAResidues.U]: "#a670fb",
+	[RNAResidues.G]: "#a63c37",
+	[RNAResidues.C]: "#a3c907",
+	[RNAResidues.I]: "#a3c907",
 };
+
 const AT_LINK = "red";
 const GC_LINK = "blue";
 const LinkColorMap: cmap = {
@@ -29,9 +38,15 @@ const LinkColorMap: cmap = {
 	[DNAResidues.DT]: AT_LINK,
 	[DNAResidues.DG]: GC_LINK,
 	[DNAResidues.DC]: GC_LINK,
+
+	[RNAResidues.A]: AT_LINK,
+	[RNAResidues.U]: AT_LINK,
+	[RNAResidues.G]: GC_LINK,
+	[RNAResidues.C]: GC_LINK,
+	[RNAResidues.I]: GC_LINK,
 };
 
-// For chain backbone
+// Chain backbone color
 const DefaultLinkColor = "#494949";
 
 export function Viewer() {
@@ -43,20 +58,12 @@ export function Viewer() {
 
 	let containerRef = useRef<HTMLDivElement>(null);
 
-	// Construct atoms from polymers that are either DNA or RNA, as we only visualize these
-	const atoms: Atom[] = [];
-	polymers
-		.filter((p) => [PolymerKind.DNA, PolymerKind.RNA].indexOf(p.kind) !== -1)
-		.map(({ residues }) => {
-			residues.map((r) => atoms.push(...r.atoms));
-		});
-
 	// Currently visualization works only for DNA residues
 	function initD3() {
 		if (!ref || polymers.length <= 0) {
 			return;
 		}
-		console.time("DNA_VIZ");
+		console.time("Nucleic_acid_VIZ");
 		const iFinder = new InteractionsFinder(polymers);
 		let pairs: Residue[][];
 		try {
@@ -69,18 +76,15 @@ export function Viewer() {
 			});
 			return;
 		}
-		const dna = iFinder.nucleicAcids;
 
 		let nodes: Node[] = [];
 		let links: Link[] = [];
-
-		const chain1 = dna[0];
-		const chain2 = dna[1];
 
 		const resToId: (r: Residue) => string = (r) => {
 			return `${r.polymerChainIdentifier}:${r.name}${r.sequenceNumber}`;
 		};
 		const CollectNodes = (chain: Polymer) => {
+			const DNAResidueIndexes = Object.values(DNAResidues);
 			chain.residues.forEach((r, index) => {
 				nodes.push({
 					...r,
@@ -105,10 +109,10 @@ export function Viewer() {
 			});
 		};
 
-		// Collect nodes
-		const DNAResidueIndexes = Object.values(DNAResidues);
-		CollectNodes(chain1);
-		CollectNodes(chain2);
+		// Collect nodes for all available nucleic acids
+		// CollectNodes(chain1);
+		// CollectNodes(chain2);
+		iFinder.nucleicAcids.forEach((chain) => CollectNodes(chain));
 
 		// Collect links for watson-crick pairs
 		pairs.forEach((p) => {
@@ -147,7 +151,7 @@ export function Viewer() {
 			} as any,
 		);
 
-		console.timeEnd("DNA_VIZ");
+		console.timeEnd("Nucleic_acid_VIZ");
 	}
 
 	useEffect(initD3, [polymers]);
@@ -169,8 +173,7 @@ export function Viewer() {
 						>
 							<div>Chain: {state.selectedResidue.polymerChainIdentifier}</div>
 							<div>
-								Residue: {state.selectedResidue.name}:
-								{state.selectedResidue.sequenceNumber}
+								Residue: {state.selectedResidue.name}:{state.selectedResidue.sequenceNumber}
 							</div>
 							<div>
 								Interactions:{" "}
@@ -183,10 +186,7 @@ export function Viewer() {
 						</div>
 					)}
 				</div>
-				<div
-					ref={tooltip}
-					style={{ position: "absolute", opacity: 0, background: "#fff" }}
-				></div>
+				<div ref={tooltip} style={{ position: "absolute", opacity: 0, background: "#fff" }}></div>
 			</div>
 		</>
 	);

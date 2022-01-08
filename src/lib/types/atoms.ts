@@ -66,6 +66,8 @@ export interface ResidueMeta {
 	sequenceNumber: number;
 	polymerChainIdentifier: string;
 	// polymerKind: PolymerKind,
+
+	meta?: any;
 }
 
 /**
@@ -152,11 +154,11 @@ export enum DNAResidues {
 }
 
 export enum RNAResidues {
-	A,
-	C,
-	G,
-	I,
-	U,
+	A = "A",
+	C = "C",
+	G = "G",
+	I = "I",
+	U = "U",
 }
 export enum ProteinResidues {
 	Ala,

@@ -1,10 +1,4 @@
-import {
-	Coordinate,
-	DNAResidues,
-	Polymer,
-	PolymerKind,
-	Residue,
-} from "./types/atoms";
+import { Coordinate, DNAResidues, Polymer, PolymerKind, Residue, RNAResidues } from "./types/atoms";
 import { Vector } from "./Math";
 
 /**
@@ -49,17 +43,35 @@ export const calculateNucleotidePlaneVectors: (p: Polymer) => Polymer = (p) => {
 };
 
 /**
- *  Only for DNA
+ *  Check if given residues can be treated as watson-crick pairs. Works on
+ *  both RNA and DNA residues.
  */
 export function isWatsonCrickPair(r1: Residue, r2: Residue): boolean {
-	return (
-		(r1.name === DNAResidues[DNAResidues.DA] &&
-			r2.name === DNAResidues[DNAResidues.DT]) ||
-		(r1.name === DNAResidues[DNAResidues.DT] &&
-			r2.name === DNAResidues[DNAResidues.DA]) ||
-		(r1.name === DNAResidues[DNAResidues.DC] &&
-			r2.name === DNAResidues[DNAResidues.DG]) ||
-		(r1.name === DNAResidues[DNAResidues.DG] &&
-			r2.name === DNAResidues[DNAResidues.DC])
-	);
+	// All possible pairs
+	const pairs = [
+		[DNAResidues.DA, DNAResidues.DT],
+		[DNAResidues.DA, RNAResidues.U],
+		[DNAResidues.DT, RNAResidues.A],
+
+		[DNAResidues.DC, DNAResidues.DG],
+		[DNAResidues.DC, RNAResidues.G],
+
+		[DNAResidues.DG, DNAResidues.DC],
+		[DNAResidues.DG, RNAResidues.C],
+
+		[RNAResidues.C, RNAResidues.G],
+		[RNAResidues.A, RNAResidues.U],
+	];
+
+	// Check if given residues can be w-c pairs
+	for (let i = 0; i < pairs.length; i++) {
+		if (
+			(r1.name === pairs[i][0] && r2.name === pairs[i][1]) ||
+			(r1.name === pairs[i][1] && r2.name === pairs[i][0])
+		) {
+			return true;
+		}
+	}
+
+	return false;
 }

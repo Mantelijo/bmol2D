@@ -1,10 +1,4 @@
-import {
-	ChangeEventHandler,
-	ChangeEvent,
-	useEffect,
-	useContext,
-	useRef,
-} from "react";
+import { ChangeEventHandler, ChangeEvent, useEffect, useContext, useRef } from "react";
 import { PDBHandler } from "../lib/PDBHandler";
 import { PDBFile, Polymer } from "../lib/types/atoms";
 import { context } from "../Store";
@@ -79,9 +73,7 @@ export function DataFetcher() {
 	}, []);
 
 	// Updates pbd file information from uploaded file, parses pdb data and performs interaction calculations
-	const handleFileChange: ChangeEventHandler<HTMLInputElement> = async (
-		event: ChangeEvent,
-	) => {
+	const handleFileChange: ChangeEventHandler<HTMLInputElement> = async (event: ChangeEvent) => {
 		let f = (event.target as HTMLInputElement).files?.item(0);
 		if (f !== null) {
 			resetState();
@@ -125,7 +117,7 @@ export function DataFetcher() {
 			loadPDBID(pdbId);
 		}
 	};
-	// Update pdbIdRef value whenever pdb id chandes
+	// Update pdbIdRef value whenever pdb id changes
 	// Render data fetcher box
 	return (
 		<div className="p-5 max-h-screen overflow-auto break-words">
@@ -182,11 +174,7 @@ export function DataFetcher() {
 								PDB file should contain <b>DNA/RNA</b> structures
 							</div>
 						</div>
-						<input
-							type="file"
-							onChange={handleFileChange}
-							className="max-w-full"
-						/>
+						<input type="file" onChange={handleFileChange} className="max-w-full" />
 					</div>
 				</div>
 			)}
