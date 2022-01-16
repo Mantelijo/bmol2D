@@ -57,6 +57,7 @@ const Letters = {
 	size: 10,
 	y: 4,
 };
+
 // Example taken from https://observablehq.com/@d3/force-directed-graph
 export function ForceGraph(
 	{

@@ -93,6 +93,17 @@ export class InteractionsFinder {
 				);
 				allPairs.push(...generatePairs);
 			}
+
+			// RNA molecules might have secondary structure - here we run
+			// generateWatsonCrickPairs on same RNA molecule to check
+			if (this.nucleicAcids[i].kind === PolymerKind.RNA) {
+				const generatePairs = this.generateWatsonCrickPairs(
+					this.nucleicAcids[i],
+					this.nucleicAcids[i],
+				);
+				console.log("SIMILAR PAIRS", generatePairs);
+				allPairs.push(...generatePairs);
+			}
 		}
 		return allPairs;
 	}
@@ -128,7 +139,9 @@ export class InteractionsFinder {
 
 				const max = Math.max(...r2DistToR1VO, ...r1DistToR2VO);
 
-				if (max < smallestDistance) {
+				// Best residue is **another** (not same) residue with
+				// smaller than current smallestDistance
+				if (max < smallestDistance && r1.hash !== r2.hash) {
 					smallestDistance = max;
 					bestR2 = r2;
 				}
@@ -154,11 +167,13 @@ export class InteractionsFinder {
 					`${chain1.kind}-${r1.polymerChainIdentifier}:${r1.sequenceNumber}${r1.name}`,
 					`${chain2.kind}-${r2.polymerChainIdentifier}:${r2.sequenceNumber}${r2.name}`,
 					smallestDistance,
+					isWatsonCrickPair(bestR2, r1),
 				);
 			} else {
 				pairs.push([r1]);
 				console.log(
 					`No pair for: ${chain1.kind} ${r1.polymerChainIdentifier}:${r1.sequenceNumber}${r1.name}, smallest distance: ${smallestDistance}`,
+					bestR2,
 				);
 			}
 		});

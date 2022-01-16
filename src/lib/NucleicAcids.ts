@@ -2,7 +2,7 @@ import { Coordinate, DNAResidues, Polymer, PolymerKind, Residue, RNAResidues } f
 import { Vector } from "./Math";
 
 /**
- * A value that is used to check if watson crick pair is
+ * A value that is used to check watson-crick pairs distance
  */
 export const WATSON_CRICK_PAIR_CALCULATION_THRESHOLD = 1.42;
 
