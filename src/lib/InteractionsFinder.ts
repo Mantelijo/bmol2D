@@ -122,22 +122,30 @@ export class InteractionsFinder {
 			let bestR2: Residue | undefined;
 
 			chain2.residues.forEach((r2) => {
+				let max = Infinity;
+				let r1DistToR2VO = [Infinity];
+				let r2DistToR1VO = [Infinity];
+
 				// r1 C2/C4/C6 atoms distance to r2 o,v vectors
 				const r1Cs = r1.findAtomsByNames(["C2", "C4", "C6"]);
-				const r1DistToR2VO = [
-					Math.abs(r1Cs[0].coords.toVec().subtract(r2.o).dot(r2.v)),
-					Math.abs(r1Cs[1].coords.toVec().subtract(r2.o).dot(r2.v)),
-					Math.abs(r1Cs[2].coords.toVec().subtract(r2.o).dot(r2.v)),
-				];
+				if (r1Cs.length == 3) {
+					r1DistToR2VO = [
+						Math.abs(r1Cs[0].coords.toVec().subtract(r2.o).dot(r2.v)),
+						Math.abs(r1Cs[1].coords.toVec().subtract(r2.o).dot(r2.v)),
+						Math.abs(r1Cs[2].coords.toVec().subtract(r2.o).dot(r2.v)),
+					];
+				}
 				// r1 C2/C4/C6 atoms distance to r2 o,v vectors
 				const r2Cs = r2.findAtomsByNames(["C2", "C4", "C6"]);
-				const r2DistToR1VO = [
-					Math.abs(r2Cs[0].coords.toVec().subtract(r1.o).dot(r1.v)),
-					Math.abs(r2Cs[1].coords.toVec().subtract(r1.o).dot(r1.v)),
-					Math.abs(r2Cs[2].coords.toVec().subtract(r1.o).dot(r1.v)),
-				];
+				if (r2Cs.length == 3) {
+					r2DistToR1VO = [
+						Math.abs(r2Cs[0].coords.toVec().subtract(r1.o).dot(r1.v)),
+						Math.abs(r2Cs[1].coords.toVec().subtract(r1.o).dot(r1.v)),
+						Math.abs(r2Cs[2].coords.toVec().subtract(r1.o).dot(r1.v)),
+					];
+				}
 
-				const max = Math.max(...r2DistToR1VO, ...r1DistToR2VO);
+				max = Math.max(...r2DistToR1VO, ...r1DistToR2VO);
 
 				// Best residue is **another** (not same) residue with
 				// smaller than current smallestDistance
