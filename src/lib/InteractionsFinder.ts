@@ -157,7 +157,8 @@ export class InteractionsFinder {
 				// distant residues is similar. It looks like usually
 				// distance between residue centers is around 10-11, if
 				// this threshold is exceeded - most likely these two
-				// residues can not be pairs.
+				// residues can not be pairs. B-DNA Diameter is ~20A and
+				// distance between bases (not their centers) is ~3.4A
 				r1.center.toVec().distanceTo(bestR2.center.toVec()) < 15
 			) {
 				pairs.push([r1, bestR2]);

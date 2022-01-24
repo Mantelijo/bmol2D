@@ -1,4 +1,4 @@
-import { ChangeEventHandler, ChangeEvent, useEffect, useContext, useRef } from "react";
+import React, { ChangeEventHandler, ChangeEvent, useEffect, useContext, useRef } from "react";
 import { PDBHandler } from "../lib/PDBHandler";
 import { PDBFile, Polymer } from "../lib/types/atoms";
 import { context } from "../Store";

@@ -188,7 +188,7 @@ export class PDBHandler {
 				currentPolymer.kind = kind;
 
 				// This must be calculated beforehand. As these values
-				// will be used in watson crick search later.
+				// will be used in watson-crick pairs calculations later.
 				currentPolymer = calculateNucleotidePlaneVectors(currentPolymer);
 
 				// Save polymer

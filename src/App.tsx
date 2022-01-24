@@ -1,8 +1,8 @@
-import { useContext, ReactElement } from 'react';
-import { Viewer } from './components/Viewer';
-import { DataFetcher } from './components/DataFetcher';
-import Spinner from './components/Spinner';
-import { StoreComponent, context } from './Store';
+import React, { useContext, ReactElement } from "react";
+import { Viewer } from "./components/Viewer";
+import { DataFetcher } from "./components/DataFetcher";
+import Spinner from "./components/Spinner";
+import { StoreComponent, context } from "./Store";
 
 export function App() {
 	const state = useContext(context)[0];
@@ -12,7 +12,7 @@ export function App() {
 			{state.isLoading === true && (
 				<div
 					className="fixed w-screen min-h-screen top-0 left-0 flex items-center justify-center z-50  h-full"
-					style={{ backgroundColor: 'rgba(0,0,0,0.75)' }}
+					style={{ backgroundColor: "rgba(0,0,0,0.75)" }}
 				>
 					<Spinner />
 				</div>
