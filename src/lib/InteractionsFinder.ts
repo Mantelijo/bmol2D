@@ -1,9 +1,10 @@
-import { Polymer, PolymerKind, Residue } from "./types/atoms";
+import { atomToId, Polymer, PolymerKind, Residue } from "./types/atoms";
 import { Action } from "../Store";
 import { calculateCenters, distanceBetween2Points, ResidueMetaFromResidue } from "./AtomsFunctions";
 import { InteractionType, THRESHOLD_DISTANCE } from "./types/interactions";
 import { Visualization } from "./types/visualization";
 import { isWatsonCrickPair, WATSON_CRICK_PAIR_CALCULATION_THRESHOLD } from "./NucleicAcids";
+import { resToId } from "./types/residues";
 
 export class InteractionsFinder {
 	nucleicAcids: Polymer[] = [];
@@ -239,6 +240,55 @@ export class InteractionsFinder {
 									}
 								});
 							});
+						}
+					});
+				});
+			});
+		});
+	}
+
+	/**
+	 * Finds all simple interactions based on distance threshold.
+	 */
+	simpleInteractions() {
+		// This is the distance between 2 atoms that is considered an interaction
+		const THRESHOLD = 4;
+
+		// Distance between nucleic acid residue and cAlpha
+		const THRESHOLD_CALPHA = 10;
+
+		this.nucleicAcids.forEach((nucleicAcid) => {
+			nucleicAcid.residues.forEach((nucleicAcidResidue) => {
+				this.proteins.forEach((protein) => {
+					protein.residues.forEach((proteinResidue) => {
+						// Find alpha carbon
+						let cAlpha = proteinResidue.findAtomsByNames(["CA"]);
+						if (cAlpha.length > 0) {
+							const c = cAlpha[0];
+							const d = nucleicAcidResidue.center.toVec().distanceTo(c.coords.toVec());
+							if (d <= THRESHOLD_CALPHA) {
+								console.log(
+									`Possible interaction between: ${resToId(proteinResidue)} and ${resToId(
+										nucleicAcidResidue,
+									)} (${d})`,
+								);
+								// Check each atom of both resiudes
+								nucleicAcidResidue.atoms.forEach((nucleicAcidAtom) => {
+									proteinResidue.atoms.forEach((proteinAtom) => {
+										const distanceBetween2Atoms = nucleicAcidAtom.coords
+											.toVec()
+											.distanceTo(proteinAtom.coords.toVec());
+
+										if (distanceBetween2Atoms <= THRESHOLD) {
+											console.log(
+												`	Interaction between: ${atomToId(proteinAtom)} and ${atomToId(
+													nucleicAcidAtom,
+												)} (${distanceBetween2Atoms})`,
+											);
+										}
+									});
+								});
+							}
 						}
 					});
 				});

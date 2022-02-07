@@ -13,6 +13,7 @@ import { InteractionsFinder } from "../lib/InteractionsFinder";
 import { ForceGraph } from "./../lib/viz/ForceGraph";
 import { useRef } from "react";
 import { Node, Link, LinkType } from "./../lib/viz/ForceGraph";
+import { resToId } from "../lib/types/residues";
 
 // Color map for DNA residues
 type cmap = {
@@ -82,9 +83,6 @@ export function Viewer() {
 		let nodes: Node[] = [];
 		let links: Link[] = [];
 
-		const resToId: (r: Residue) => string = (r) => {
-			return `${r.polymerChainIdentifier}:${r.name}${r.sequenceNumber}`;
-		};
 		const CollectNodes = (chain: Polymer) => {
 			const DNAResidueIndexes = Object.values(DNAResidues);
 			chain.residues.forEach((r, index) => {
@@ -130,6 +128,9 @@ export function Viewer() {
 				});
 			}
 		});
+
+		// Find interactions
+		iFinder.simpleInteractions();
 
 		console.log("Vizualization data:", nodes, links);
 

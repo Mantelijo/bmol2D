@@ -58,6 +58,9 @@ const Letters = {
 	y: 4,
 };
 
+// 100 ms seems the most reasonable based on performance profile
+const POPUP_TIMEOUT = 100;
+
 // Example taken from https://observablehq.com/@d3/force-directed-graph
 export function ForceGraph(
 	{
@@ -188,7 +191,7 @@ export function ForceGraph(
 			d3.select(this)
 				.select("circle")
 				.attr("r", transformAdjusted(nodeRadius * 2));
-			if (new Date().getTime() - lastEvent.getTime() > 250) {
+			if (new Date().getTime() - lastEvent.getTime() > POPUP_TIMEOUT) {
 				dispatch({
 					type: "selectedResidue",
 					payload: d,
@@ -200,12 +203,10 @@ export function ForceGraph(
 			// transform adjusted radius if needed
 			d3.select(this).select("circle").attr("r", transformAdjusted(nodeRadius));
 
-			if (new Date().getTime() - lastEvent.getTime() > 50) {
-				dispatch({
-					type: "selectedResidue",
-					payload: undefined,
-				});
-			}
+			dispatch({
+				type: "selectedResidue",
+				payload: undefined,
+			});
 		});
 
 	// Append names

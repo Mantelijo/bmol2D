@@ -249,3 +249,8 @@ export function polymerKindFromAtom(atom: Atom): PolymerKind {
 			return PolymerKind.Protein;
 	}
 }
+
+// Simple atom id
+export function atomToId(a: Atom) {
+	return `${a.residueName}${a.residueSequenceNumber}:${a.name}`;
+}
