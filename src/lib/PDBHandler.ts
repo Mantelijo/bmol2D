@@ -109,7 +109,12 @@ export class PDBHandler {
 		let transformations: Remark350Transformations[] = [];
 		// There might be multiple different groups of transformations for
 		// different chains, so we keep track of current one
-		let currentTransformation: Remark350Transformations;
+		// Note: setting this to empty value so TS does not complain.
+		let currentTransformation: Remark350Transformations = {
+			chains: [],
+			rotations: [],
+			translations: [Vector.infinity()],
+		};
 		// Indicates that we are currently processing rotation/translation
 		// lines preceded by REMARK 350: APPLY THE FOLLOWING <...>
 		let remark350TransformLines = false;
@@ -122,8 +127,35 @@ export class PDBHandler {
 			};
 		};
 
+		// NMR ensemblies usually have models.
+		// @see https://www.wwpdb.org/documentation/file-format-content/format33/sect9.html#MODEL
+		let hasModels = false;
+		let numberOfModels = 0;
+		// If file contains models, we only want to take the first model.
+		let currentModel = 0;
+
 		// Here we will process the pdb text line by line
-		text.split("\n").forEach((line) => {
+		const lines = text.split("\n");
+		for (let i = 0; i < lines.length; i++) {
+			const line = lines[i];
+
+			// Exclude non first model for NMR ensembles
+			if (hasModels && currentModel > 1) {
+				continue;
+			}
+
+			// Check if current pdb file has models
+			if (line.startsWith("NUMMDL")) {
+				hasModels = true;
+				numberOfModels = parseInt(line.slice(10, 14).trim());
+				console.log("NUMBER OF MODELS:", numberOfModels);
+			}
+
+			// Check current model. ENDMDL does not really matter here
+			if (line.startsWith("MODEL")) {
+				currentModel = parseInt(line.slice(11, 14).trim());
+			}
+
 			// Parse ATOM lines
 			if (line.startsWith("ATOM") || line.startsWith("HETATM")) {
 				// https://www.cgl.ucsf.edu/chimera/docs/UsersGuide/tutorials/pdbintro.html
@@ -278,7 +310,7 @@ export class PDBHandler {
 				// Cleanup in-memory values
 				remark350TransformLines = false;
 			}
-		});
+		}
 
 		// Generate biological assembly
 		transformations.forEach((transformation) => {

@@ -162,7 +162,7 @@ export function Viewer() {
 			<div className="p-5 flex items-center flex-col h-full" ref={containerRef}>
 				<div className="min-w-full h-full relative">
 					<svg ref={ref}></svg>
-					{/* {state.selectedResidue && (
+					{state.selectedResidue && (
 						<div
 							className="
 								text-xs p-4
@@ -184,7 +184,7 @@ export function Viewer() {
 								))}
 							</div>
 						</div>
-					)} */}
+					)}
 				</div>
 				<div ref={tooltip} style={{ position: "absolute", opacity: 0, background: "#fff" }}></div>
 			</div>
