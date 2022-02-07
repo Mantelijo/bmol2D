@@ -151,6 +151,9 @@ export enum DNAResidues {
 	DG = "DG",
 	DC = "DC",
 	DT = "DT",
+
+	// Non standard ones
+	CM = "5CM",
 }
 
 export enum RNAResidues {

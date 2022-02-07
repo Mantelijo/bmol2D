@@ -23,6 +23,7 @@ const ColorMap: cmap = {
 	[DNAResidues.DT]: "#5670fb",
 	[DNAResidues.DG]: "#f63c37",
 	[DNAResidues.DC]: "#03c907",
+	[DNAResidues.CM]: "#03c907",
 
 	[RNAResidues.A]: "#acb331",
 	[RNAResidues.U]: "#a670fb",
@@ -38,6 +39,7 @@ const LinkColorMap: cmap = {
 	[DNAResidues.DT]: AT_LINK,
 	[DNAResidues.DG]: GC_LINK,
 	[DNAResidues.DC]: GC_LINK,
+	[DNAResidues.CM]: GC_LINK,
 
 	[RNAResidues.A]: AT_LINK,
 	[RNAResidues.U]: AT_LINK,

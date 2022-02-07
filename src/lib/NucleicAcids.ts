@@ -61,6 +61,10 @@ export function isWatsonCrickPair(r1: Residue, r2: Residue): boolean {
 
 		[RNAResidues.C, RNAResidues.G],
 		[RNAResidues.A, RNAResidues.U],
+
+		// Non standard residues below
+		[DNAResidues.CM, DNAResidues.DG],
+		[DNAResidues.CM, RNAResidues.G],
 	];
 
 	// Check if given residues can be w-c pairs

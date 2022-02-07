@@ -206,8 +206,8 @@ export class PDBHandler {
 				currentResidue.atoms.push(atom);
 			}
 			// TER indicates the end of current polymer (chain of
-			// residues)
-			if (line.startsWith("TER")) {
+			// residues). Or if we are on the last line there might be no TER
+			if (line.startsWith("TER") || i === lines.length - 1) {
 				// Don't forget to push residue
 				pushResidue();
 
