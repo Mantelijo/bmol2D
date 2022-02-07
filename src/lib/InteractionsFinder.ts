@@ -96,11 +96,12 @@ export class InteractionsFinder {
 
 			// RNA molecules might have secondary structure - here we run
 			// generateWatsonCrickPairs on same RNA molecule to check
-			if (this.nucleicAcids[i].kind === PolymerKind.RNA) {
-				const generatePairs = this.generateWatsonCrickPairs(
-					this.nucleicAcids[i],
-					this.nucleicAcids[i],
-				);
+			// UPDATE: this applies not only for RNA, but also for DNA structures
+			const generatePairs = this.generateWatsonCrickPairs(
+				this.nucleicAcids[i],
+				this.nucleicAcids[i],
+			);
+			if (generatePairs.length > 0) {
 				console.log("SIMILAR PAIRS", generatePairs);
 				allPairs.push(...generatePairs);
 			}

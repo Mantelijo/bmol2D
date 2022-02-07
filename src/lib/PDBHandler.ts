@@ -13,6 +13,7 @@ import {
 import hash from "object-hash";
 import { calculateNucleotidePlaneVectors } from "./NucleicAcids";
 import { Vector } from "./Math";
+import { uuid } from "./Uuid";
 
 export class PDBHandler {
 	file?: File;
@@ -70,8 +71,8 @@ export class PDBHandler {
 		};
 		// Helper to push currentResidue to currentPolymer
 		const pushResidue = (): void => {
-			// hash will be useful to uniquely identify each residue.
-			currentResidue.hash = hash(currentResidue);
+			// Let's hope these uuid are generated in a unique manner
+			currentResidue.hash = uuid();
 			currentPolymer.residues.push(currentResidue);
 		};
 
@@ -363,7 +364,7 @@ export class PDBHandler {
 							newResidue.atoms[aindex] = newAtom;
 						});
 
-						newResidue.hash = hash(newResidue);
+						newResidue.hash = uuid();
 						chainClone.residues[rindex] = newResidue;
 					});
 
