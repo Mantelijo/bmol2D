@@ -1,6 +1,7 @@
 import React, { createContext, useReducer, ReactElement } from "react";
 import { Polymer, Residue } from "./lib/types/atoms";
 import { PDBFile } from "./lib/types/atoms";
+import { resToId } from "./lib/types/residues";
 import { Visualization } from "./lib/types/visualization";
 
 /**
@@ -16,6 +17,22 @@ const initialState: State = {
 	currentPDBId: "",
 	selectedResidue: undefined,
 	error: "",
+
+	getResidue: function (chainIdentifier, hash) {
+		if (this.polymers.length === 0) {
+			return null;
+		}
+
+		const polymer = this.polymers.filter((p) => p.chainIdentifier === chainIdentifier);
+
+		if (polymer.length > 0) {
+			const residue = polymer[0].residues.filter((r) => r.hash === hash);
+			if (residue.length > 0) {
+				return residue[0];
+			}
+		}
+		return null;
+	},
 };
 
 export type HashedResidue = {
@@ -48,6 +65,9 @@ export interface State {
 
 	// Error text to display
 	error: string;
+
+	// Residue getter
+	getResidue: (chainIdentifier: string, residueHash: string) => Residue | null;
 }
 
 /**
@@ -58,10 +78,7 @@ export interface Action {
 	payload: any;
 }
 
-const context = createContext<[State, React.Dispatch<Action>]>([
-	initialState,
-	() => {},
-]);
+const context = createContext<[State, React.Dispatch<Action>]>([initialState, () => {}]);
 
 // Reducer mutates the state
 const reducer = (state: State, { type, payload }: Action): State => {
@@ -87,9 +104,7 @@ interface Props {
 
 const StoreComponent = ({ children }: Props) => {
 	const [state, dispatch] = useReducer(reducer, initialState);
-	return (
-		<context.Provider value={[state, dispatch]}>{children}</context.Provider>
-	);
+	return <context.Provider value={[state, dispatch]}>{children}</context.Provider>;
 };
 
 export { context, StoreComponent };

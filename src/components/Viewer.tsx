@@ -14,10 +14,11 @@ import { ForceGraph } from "./../lib/viz/ForceGraph";
 import { useRef } from "react";
 import { Node, Link, LinkType } from "./../lib/viz/ForceGraph";
 import { resToId } from "../lib/types/residues";
+import { interactionToId } from "../lib/types/interactions";
 
 // Color map for DNA residues
 type cmap = {
-	[key in DNAResidues | RNAResidues]: string;
+	[key in DNAResidues | RNAResidues | "interaction"]: string;
 };
 const ColorMap: cmap = {
 	[DNAResidues.DA]: "#fcb331",
@@ -31,6 +32,8 @@ const ColorMap: cmap = {
 	[RNAResidues.G]: "#a63c37",
 	[RNAResidues.C]: "#a3c907",
 	[RNAResidues.I]: "#a3c907",
+
+	interaction: "#333",
 };
 
 const AT_LINK = "red";
@@ -47,6 +50,8 @@ const LinkColorMap: cmap = {
 	[RNAResidues.G]: GC_LINK,
 	[RNAResidues.C]: GC_LINK,
 	[RNAResidues.I]: GC_LINK,
+
+	interaction: "#718355",
 };
 
 // Chain backbone color
@@ -68,6 +73,7 @@ export function Viewer() {
 		}
 		console.time("Nucleic_acid_VIZ");
 		const iFinder = new InteractionsFinder(polymers);
+
 		let pairs: Residue[][];
 		try {
 			pairs = iFinder.watsonCrickPairs();
@@ -80,6 +86,9 @@ export function Viewer() {
 			return;
 		}
 
+		// Calculate interactions
+		iFinder.simpleInteractions();
+
 		let nodes: Node[] = [];
 		let links: Link[] = [];
 
@@ -87,7 +96,7 @@ export function Viewer() {
 			const DNAResidueIndexes = Object.values(DNAResidues);
 			chain.residues.forEach((r, index) => {
 				nodes.push({
-					...r,
+					// ...r,
 					hash: r.hash,
 					name: r.name.toString().slice(-1), // remove D from name
 					id: resToId(r),
@@ -104,6 +113,25 @@ export function Viewer() {
 						value: 1,
 						color: DefaultLinkColor,
 						linkType: LinkType.Backbone,
+					});
+				}
+
+				// Show number of interactions for each residue if any
+				if (r.interactions.length > 0) {
+					const interactionsId = resToId(r) + "-interactions";
+					nodes.push({
+						hash: r.hash,
+						name: r.interactions.length.toString(), // remove D from name
+						id: interactionsId,
+						color: ColorMap.interaction,
+						group: 5,
+					});
+					links.push({
+						source: interactionsId,
+						target: resToId(r),
+						value: 1,
+						color: LinkColorMap.interaction,
+						linkType: LinkType.Interaction,
 					});
 				}
 			});
@@ -128,9 +156,6 @@ export function Viewer() {
 				});
 			}
 		});
-
-		// Find interactions
-		iFinder.simpleInteractions();
 
 		console.log("Vizualization data:", nodes, links);
 
@@ -165,7 +190,7 @@ export function Viewer() {
 			<div className="p-5 flex items-center flex-col h-full" ref={containerRef}>
 				<div className="min-w-full h-full relative">
 					<svg ref={ref}></svg>
-					{state.selectedResidue && (
+					{/* {state.selectedResidue && (
 						<div
 							className="
 								text-xs p-4
@@ -187,7 +212,7 @@ export function Viewer() {
 								))}
 							</div>
 						</div>
-					)}
+					)} */}
 				</div>
 				<div ref={tooltip} style={{ position: "absolute", opacity: 0, background: "#fff" }}></div>
 			</div>

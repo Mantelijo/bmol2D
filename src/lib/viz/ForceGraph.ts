@@ -1,17 +1,20 @@
+import { Link } from "./ForceGraph";
 import * as d3 from "d3";
 import { Action } from "../../Store";
 import { Residue } from "../types/atoms";
 
-export interface Node extends Residue {
+export interface Node {
 	id: string;
 	color: string;
 	group: number;
 	name: string;
+	// The hash of residue
 	hash: string;
 }
 export enum LinkType {
 	Pair = "pair",
 	Backbone = "backbone",
+	Interaction = "interaction",
 }
 
 export interface Link {
@@ -38,14 +41,12 @@ type ForceGraphOpts = {
 	nodeStrokeWidth: any | never | undefined;
 	nodeStrokeOpacity: any | never | undefined;
 	nodeRadius: any | never | undefined;
-	nodeStrength: any | never | undefined;
 	linkSource: any | never | undefined;
 	linkTarget: any | never | undefined;
 	linkStroke: any | never | undefined;
 	linkStrokeOpacity: any | never | undefined;
 	linkStrokeWidth: any | never | undefined;
 	linkStrokeLinecap: any | never | undefined;
-	linkStrength: any | never | undefined;
 	colors: any | never | undefined;
 	width: any | never | undefined;
 	height: any | never | undefined;
@@ -82,14 +83,12 @@ export function ForceGraph(
 		nodeStrokeWidth = 1.5, // node stroke width, in pixels
 		nodeStrokeOpacity = 1, // node stroke opacity
 		nodeRadius = 10, // node radius, in pixels
-		nodeStrength,
 		linkStroke = (d: any) => {
 			return d.color !== undefined ? d.color : "#444";
 		}, // link stroke color
 		linkStrokeOpacity = 0.6, // link stroke opacity
 		linkStrokeWidth = 1.5, // given d in links, returns a stroke width in pixels
 		linkStrokeLinecap = "round", // link stroke linecap
-		linkStrength = 2,
 		width = 640, // outer width, in pixels
 		height = 400, // outer height, in pixels
 		invalidation, // when this promise resolves, stop the simulation
@@ -116,28 +115,35 @@ export function ForceGraph(
 		.forceLink(links)
 		.id(({ index: i }) => N[i as any])
 		.distance((d, i) => {
-			// Smaller distance values for backbone provide a better
-			// structure with better separation between chains
-			if (initialLinks[i].linkType === LinkType.Backbone) {
-				return 5;
+			switch (initialLinks[i].linkType) {
+				// Smaller distance values for backbone provide a better
+				// structure with better separation between chains
+				case LinkType.Backbone:
+					return 4;
+				case LinkType.Interaction:
+					return 10;
+				default:
+					// LinktType.Pair
+					return 30;
 			}
-			return 70;
 		})
 		.strength((d, i) => {
-			// Larger values for backbone provide a better
-			// structure with better separation between chains
-			if (initialLinks[i].linkType === LinkType.Backbone) {
-				return 5000;
+			switch (initialLinks[i].linkType) {
+				// Larger values for backbone provide a better
+				// structure with better separation between chains
+				case LinkType.Backbone:
+					return 1.8;
+				case LinkType.Interaction:
+					return 1;
+				default:
+					return 1.2;
 			}
-			return 1;
 		});
-	if (nodeStrength !== undefined) forceNode.strength(nodeStrength);
-	if (linkStrength !== undefined) forceLink.strength(linkStrength);
 
 	const simulation = d3
 		.forceSimulation(nodes as any)
 		.force("link", forceLink)
-		.force("charge", forceNode)
+		.force("nodes", forceNode)
 		.on("tick", ticked);
 
 	const svg = d3
@@ -182,6 +188,7 @@ export function ForceGraph(
 		.attr("stroke-opacity", nodeStrokeOpacity)
 		.attr("stroke-width", nodeStrokeWidth)
 		.attr("fill", nodeFill)
+		.style("cursor", "pointer")
 		.attr("r", nodeRadius);
 
 	// Tooltip information
@@ -192,10 +199,10 @@ export function ForceGraph(
 				.select("circle")
 				.attr("r", transformAdjusted(nodeRadius * 2));
 			if (new Date().getTime() - lastEvent.getTime() > POPUP_TIMEOUT) {
-				dispatch({
-					type: "selectedResidue",
-					payload: d,
-				});
+				// dispatch({
+				// 	type: "selectedResidue",
+				// 	payload: d,
+				// });
 				lastEvent = new Date();
 			}
 		})
@@ -203,10 +210,10 @@ export function ForceGraph(
 			// transform adjusted radius if needed
 			d3.select(this).select("circle").attr("r", transformAdjusted(nodeRadius));
 
-			dispatch({
-				type: "selectedResidue",
-				payload: undefined,
-			});
+			// dispatch({
+			// 	type: "selectedResidue",
+			// 	payload: undefined,
+			// });
 		});
 
 	// Append names

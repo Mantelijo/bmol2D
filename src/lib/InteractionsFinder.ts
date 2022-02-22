@@ -1,7 +1,7 @@
 import { atomToId, Polymer, PolymerKind, Residue } from "./types/atoms";
 import { Action } from "../Store";
 import { calculateCenters, distanceBetween2Points, ResidueMetaFromResidue } from "./AtomsFunctions";
-import { InteractionType, THRESHOLD_DISTANCE } from "./types/interactions";
+import { Interaction, InteractionType, THRESHOLD_DISTANCE } from "./types/interactions";
 import { Visualization } from "./types/visualization";
 import { isWatsonCrickPair, WATSON_CRICK_PAIR_CALCULATION_THRESHOLD } from "./NucleicAcids";
 import { resToId } from "./types/residues";
@@ -216,36 +216,36 @@ export class InteractionsFinder {
 	// between centers is smaller than defined THRESHOLD_DISTANCE times 2,
 	// we can try to search for THRESHOLD_DISTANCE distance between
 	// nucleic acid and protein residue atoms
-	thresholdInteractions() {
-		this.nucleicAcids.forEach((nacid, nacidI) => {
-			nacid.residues.forEach((nacidResidue, nacidResidueI) => {
-				this.proteins.forEach((p) => {
-					p.residues.forEach((pResidue) => {
-						const distanceResidues = distanceBetween2Points(nacidResidue.center, pResidue.center);
+	// thresholdInteractions() {
+	// 	this.nucleicAcids.forEach((nacid, nacidI) => {
+	// 		nacid.residues.forEach((nacidResidue, nacidResidueI) => {
+	// 			this.proteins.forEach((p) => {
+	// 				p.residues.forEach((pResidue) => {
+	// 					const distanceResidues = distanceBetween2Points(nacidResidue.center, pResidue.center);
 
-						// Residues might contain atoms that are less than
-						// THRESHOLD_DISTANCE amount apart even if
-						// residues themselves are 2 times further.
-						if (distanceResidues <= THRESHOLD_DISTANCE * 2) {
-							nacidResidue.atoms.forEach((nacidAtom) => {
-								pResidue.atoms.forEach((pAtom) => {
-									const distanceAtoms = distanceBetween2Points(nacidAtom.coords, pAtom.coords);
-									if (distanceAtoms <= THRESHOLD_DISTANCE) {
-										this.nucleicAcids[nacidI].residues[nacidResidueI].interactions.push({
-											residue: ResidueMetaFromResidue(pResidue),
-											type: InteractionType.Threshold,
-											polymerKind: p.kind,
-											meta: { distance: distanceAtoms },
-										});
-									}
-								});
-							});
-						}
-					});
-				});
-			});
-		});
-	}
+	// 					// Residues might contain atoms that are less than
+	// 					// THRESHOLD_DISTANCE amount apart even if
+	// 					// residues themselves are 2 times further.
+	// 					if (distanceResidues <= THRESHOLD_DISTANCE * 2) {
+	// 						nacidResidue.atoms.forEach((nacidAtom) => {
+	// 							pResidue.atoms.forEach((pAtom) => {
+	// 								const distanceAtoms = distanceBetween2Points(nacidAtom.coords, pAtom.coords);
+	// 								if (distanceAtoms <= THRESHOLD_DISTANCE) {
+	// 									this.nucleicAcids[nacidI].residues[nacidResidueI].interactions.push({
+	// 										residue: ResidueMetaFromResidue(pResidue),
+	// 										type: InteractionType.Threshold,
+	// 										polymerKind: p.kind,
+	// 										meta: { distance: distanceAtoms },
+	// 									});
+	// 								}
+	// 							});
+	// 						});
+	// 					}
+	// 				});
+	// 			});
+	// 		});
+	// 	});
+	// }
 
 	/**
 	 * Finds all simple interactions based on distance threshold.
@@ -279,12 +279,21 @@ export class InteractionsFinder {
 											.toVec()
 											.distanceTo(proteinAtom.coords.toVec());
 
+										// Here we have an interaction
 										if (distanceBetween2Atoms <= THRESHOLD) {
 											console.log(
 												`	Interaction between: ${atomToId(proteinAtom)} and ${atomToId(
 													nucleicAcidAtom,
 												)} (${distanceBetween2Atoms})`,
 											);
+											const interaction: Interaction = {
+												polymerKind: PolymerKind.Protein,
+												type: InteractionType.Threshold,
+												polymerChainIdentifier: proteinResidue.polymerChainIdentifier,
+												residueHash: proteinResidue.hash,
+												atom: proteinAtom,
+											};
+											nucleicAcidResidue.interactions.push(interaction);
 										}
 									});
 								});

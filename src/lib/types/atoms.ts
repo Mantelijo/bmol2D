@@ -214,6 +214,10 @@ export interface Polymer {
 	generatedFromTransform?: boolean;
 }
 
+export class PolymerImplementation {
+	constructor() {}
+}
+
 export interface Remark350Transformations {
 	// Chain identifiers that should apply this transformation
 	chains: string[];

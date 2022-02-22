@@ -128,7 +128,7 @@ export class PDBHandler {
 			};
 		};
 
-		// NMR ensemblies usually have models.
+		// NMR ensembles usually have models.
 		// @see https://www.wwpdb.org/documentation/file-format-content/format33/sect9.html#MODEL
 		let hasModels = false;
 		let numberOfModels = 0;
