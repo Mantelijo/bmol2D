@@ -10,7 +10,15 @@ export interface Node {
 	name: string;
 	// The hash of residue
 	hash: string;
+	type?: NodeType;
 }
+
+export enum NodeType {
+	Residue = "residue",
+	InteractionsNumber = "interactions_number",
+	InteractionResidue = "interaction_residue",
+}
+
 export enum LinkType {
 	Pair = "pair",
 	Backbone = "backbone",
@@ -194,6 +202,15 @@ export function ForceGraph(
 	// Tooltip information
 	let lastEvent = new Date();
 	nodeGs
+		.on("click", function (event, d: Node) {
+			if (d.type && -1 !== [NodeType.InteractionsNumber, NodeType.Residue].indexOf(d.type)) {
+				dispatch({
+					type: "selectedResidueHash",
+					payload: d.hash,
+				});
+				console.log("Clicked interaction bubble");
+			}
+		})
 		.on("mouseover", function (event, d: Node) {
 			d3.select(this)
 				.select("circle")
@@ -274,13 +291,15 @@ export function ForceGraph(
 	let transform = undefined;
 	let transformK: undefined | number = undefined;
 	const zoom = d3.zoom().on("zoom", (e) => {
-		g.attr("transform", (transform = e.transform));
-		if (transform) {
-			transformK = Math.sqrt(transform.k);
-			g.style("stroke-width", 3 / transformK);
-			node.attr("r", nodeRadius / transformK).attr("stroke-width", nodeStrokeWidth / transformK);
-			letters.attr("font-size", Letters.size / transformK).attr("y", Letters.y / transformK);
-		}
+		requestAnimationFrame(() => {
+			g.attr("transform", (transform = e.transform));
+			if (transform) {
+				transformK = Math.sqrt(transform.k);
+				g.style("stroke-width", 3 / transformK);
+				node.attr("r", nodeRadius / transformK).attr("stroke-width", nodeStrokeWidth / transformK);
+				letters.attr("font-size", Letters.size / transformK).attr("y", Letters.y / transformK);
+			}
+		});
 	});
 
 	svg.call(zoom as any).call(zoom.transform as any, d3.zoomIdentity);

@@ -1,4 +1,4 @@
-import React, { useContext, useEffect } from "react";
+import React, { useCallback, useContext, useEffect, useMemo } from "react";
 import {
 	Atom,
 	Polymer,
@@ -10,11 +10,16 @@ import {
 } from "../lib/types/atoms";
 import { context } from "../Store";
 import { InteractionsFinder } from "../lib/InteractionsFinder";
-import { ForceGraph } from "./../lib/viz/ForceGraph";
+import { ForceGraph, NodeType } from "./../lib/viz/ForceGraph";
 import { useRef } from "react";
 import { Node, Link, LinkType } from "./../lib/viz/ForceGraph";
 import { resToId } from "../lib/types/residues";
-import { interactionToId } from "../lib/types/interactions";
+
+declare global {
+	interface Window {
+		iFinder: InteractionsFinder;
+	}
+}
 
 // Color map for DNA residues
 type cmap = {
@@ -66,13 +71,22 @@ export function Viewer() {
 
 	let containerRef = useRef<HTMLDivElement>(null);
 
+	// Construct interactions finder
+	const iFinder = useMemo<InteractionsFinder | undefined>(() => {
+		if (polymers.length > 0) {
+			const iFinder = new InteractionsFinder(polymers);
+			// make it accessible globally
+			window.iFinder = iFinder;
+			return iFinder;
+		}
+	}, [polymers]);
+
 	// Currently visualization works only for DNA residues
 	function initD3() {
-		if (!ref || polymers.length <= 0) {
+		if (!ref || polymers.length <= 0 || !iFinder) {
 			return;
 		}
 		console.time("Nucleic_acid_VIZ");
-		const iFinder = new InteractionsFinder(polymers);
 
 		let pairs: Residue[][];
 		try {
@@ -96,12 +110,12 @@ export function Viewer() {
 			const DNAResidueIndexes = Object.values(DNAResidues);
 			chain.residues.forEach((r, index) => {
 				nodes.push({
-					// ...r,
 					hash: r.hash,
-					name: r.name.toString().slice(-1), // remove D from name
+					name: r.name.toString().slice(-1), // remove first charcter from name
 					id: resToId(r),
 					color: ColorMap[r.name as DNAResidues],
 					group: DNAResidueIndexes.indexOf(r.name as DNAResidues) + 1,
+					type: NodeType.Residue,
 				});
 
 				// Collect links to previous residue in same chain
@@ -120,11 +134,12 @@ export function Viewer() {
 				if (r.interactions.length > 0) {
 					const interactionsId = resToId(r) + "-interactions";
 					nodes.push({
-						hash: r.hash,
-						name: r.interactions.length.toString(), // remove D from name
+						hash: r.hash, // This node still has it's residue's hash
+						name: r.interactions.length.toString(),
 						id: interactionsId,
 						color: ColorMap.interaction,
 						group: 5,
+						type: NodeType.InteractionsNumber,
 					});
 					links.push({
 						source: interactionsId,
@@ -138,8 +153,6 @@ export function Viewer() {
 		};
 
 		// Collect nodes for all available nucleic acids
-		// CollectNodes(chain1);
-		// CollectNodes(chain2);
 		iFinder.nucleicAcids.forEach((chain) => CollectNodes(chain));
 
 		// Collect links for watson-crick pairs
@@ -184,13 +197,19 @@ export function Viewer() {
 
 	useEffect(initD3, [polymers]);
 
+	const selectedResidue = useMemo<Residue | undefined>(() => {
+		if (iFinder && state.selectedResidueHash) {
+			return iFinder.findResidueByHash(state.selectedResidueHash);
+		}
+	}, [state.selectedResidueHash]);
+
 	return (
 		<>
 			<div>{state.simpleStuffy}</div>
 			<div className="p-5 flex items-center flex-col h-full" ref={containerRef}>
 				<div className="min-w-full h-full relative">
 					<svg ref={ref}></svg>
-					{/* {state.selectedResidue && (
+					{selectedResidue && (
 						<div
 							className="
 								text-xs p-4
@@ -199,20 +218,18 @@ export function Viewer() {
 								overflow-auto text-white rounded-lg
 							"
 						>
-							<div>Chain: {state.selectedResidue.polymerChainIdentifier}</div>
+							<div>Chain: {selectedResidue.polymerChainIdentifier}</div>
 							<div>
-								Residue: {state.selectedResidue.name}:{state.selectedResidue.sequenceNumber}
+								Residue: {selectedResidue.name}:{selectedResidue.sequenceNumber}
 							</div>
 							<div>
 								Interactions:{" "}
-								{state.selectedResidue.interactions.map((i) => (
-									<div>
-										{i.polymerKind} - {i.residue}
-									</div>
+								{selectedResidue.interactions.map((i) => (
+									<div>{JSON.stringify(i)}</div>
 								))}
 							</div>
 						</div>
-					)} */}
+					)}
 				</div>
 				<div ref={tooltip} style={{ position: "absolute", opacity: 0, background: "#fff" }}></div>
 			</div>

@@ -1,7 +1,6 @@
 import React, { createContext, useReducer, ReactElement } from "react";
 import { Polymer, Residue } from "./lib/types/atoms";
 import { PDBFile } from "./lib/types/atoms";
-import { resToId } from "./lib/types/residues";
 import { Visualization } from "./lib/types/visualization";
 
 /**
@@ -15,8 +14,10 @@ const initialState: State = {
 	hashedNucleicAcidResidues: {},
 	viz: { chain1: null, chain2: null },
 	currentPDBId: "",
-	selectedResidue: undefined,
+	// selectedResidue: undefined,
 	error: "",
+
+	selectedResidueHash: undefined,
 
 	getResidue: function (chainIdentifier, hash) {
 		if (this.polymers.length === 0) {
@@ -61,7 +62,8 @@ export interface State {
 	currentPDBId: string;
 
 	// Currently displayed residue information
-	selectedResidue?: Residue;
+	// selectedResidue?: Residue;
+	selectedResidueHash?: string;
 
 	// Error text to display
 	error: string;

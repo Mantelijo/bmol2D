@@ -3,13 +3,7 @@
  * process atoms, residues, polymers and related functionality.
  */
 
-import {
-	Coordinate,
-	Coord,
-	Polymer,
-	Residue,
-	ResidueMeta,
-} from './types/atoms';
+import { Coordinate, Coord, Polymer, Residue, ResidueMeta } from "./types/atoms";
 
 // Calculate centers for residues and returns same polymer with
 // calculated center coordinates
@@ -32,11 +26,7 @@ export function calculateCenters(p: Polymer): Polymer {
 
 // Calculates arithmetic distance between 2 coordinates
 export function distanceBetween2Points(p1: Coordinate, p2: Coordinate): number {
-	return Math.sqrt(
-		Math.pow(p1.x - p2.x, 2) +
-			Math.pow(p1.y - p2.y, 2) +
-			Math.pow(p1.z - p2.z, 2)
-	);
+	return Math.sqrt(Math.pow(p1.x - p2.x, 2) + Math.pow(p1.y - p2.y, 2) + Math.pow(p1.z - p2.z, 2));
 }
 
 // Helper function, since I could not find a Typescript'y way to do this
