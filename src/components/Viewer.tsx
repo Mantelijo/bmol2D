@@ -81,7 +81,6 @@ export function Viewer() {
 		}
 	}, [polymers]);
 
-	// Currently visualization works only for DNA residues
 	function initD3() {
 		if (!ref || polymers.length <= 0 || !iFinder) {
 			return;
@@ -111,7 +110,7 @@ export function Viewer() {
 			chain.residues.forEach((r, index) => {
 				nodes.push({
 					hash: r.hash,
-					name: r.name.toString().slice(-1), // remove first charcter from name
+					name: r.name.toString().slice(-1), // remove first character from name
 					id: resToId(r),
 					color: ColorMap[r.name as DNAResidues],
 					group: DNAResidueIndexes.indexOf(r.name as DNAResidues) + 1,
