@@ -5,7 +5,7 @@ from urllib.error import HTTPError
 from Bio.PDB import PDBParser
 import urllib
 
-# uses forgi v1.0
+# latest forgi release from git
 import forgi.threedee.utilities.pdb as ftup
 import forgi.threedee.model.coarse_grain as ftmc
 

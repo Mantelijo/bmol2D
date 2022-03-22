@@ -2,6 +2,7 @@
  * Formats of spatial data for visualization
  */
 
+import { randomIrwinHall } from "d3";
 import { Vector } from "../Math";
 import { Interaction } from "./interactions";
 
@@ -92,6 +93,11 @@ export interface Residue extends ResidueMeta {
 	v: Vector;
 	o: Vector;
 
+	// RNA is displayed in secondary structure
+	// And secondary structure has initial coordinates
+	initial_x?: number;
+	initial_y?: number;
+
 	/**
 	 * Finds all atoms of this residue which match the given names. Atoms
 	 * are returned as array in the order the names were provided. Only
@@ -111,6 +117,8 @@ export class ResidueImplementation implements Residue {
 	public name: ResidueName;
 	public sequenceNumber: number;
 	public polymerChainIdentifier: string;
+	public initial_x: number;
+	public initial_y: number;
 
 	constructor() {
 		this.atoms = [];
@@ -122,10 +130,12 @@ export class ResidueImplementation implements Residue {
 		this.polymerChainIdentifier = "";
 		this.v = Vector.infinity();
 		this.o = Vector.infinity();
+		this.initial_x = 0;
+		this.initial_y = 0;
 	}
 
 	findAtomsByNames(names: string[]): Atom[] {
-		let ret: Atoms = [];
+		const ret: Atoms = [];
 
 		this.atoms.forEach((a) => {
 			if (names.indexOf(a.name) !== -1) {

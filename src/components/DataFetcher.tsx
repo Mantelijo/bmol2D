@@ -1,3 +1,7 @@
+import {
+	fillSecondaryStructureInitialCoordinates,
+	getSecondaryStructure,
+} from "@/lib/RNASecondaryStruct";
 import React, { ChangeEventHandler, ChangeEvent, useEffect, useContext, useRef } from "react";
 import { PDBHandler } from "../lib/PDBHandler";
 import { PDBFile, Polymer } from "../lib/types/atoms";
@@ -57,6 +61,10 @@ export function DataFetcher() {
 		startLoading();
 		const pdb = new PDBHandler().format(await fetchPDBFile(id));
 		updatePDBState(pdb);
+		
+		const secondaryStructure = await getSecondaryStructure({ pdbId: id });
+		fillSecondaryStructureInitialCoordinates(pdb.polymers, secondaryStructure);
+
 		updatePolymers(pdb.polymers);
 		updateCurrentPDBId(id);
 		stopLoading();
@@ -74,7 +82,7 @@ export function DataFetcher() {
 
 	// Updates pbd file information from uploaded file, parses pdb data and performs interaction calculations
 	const handleFileChange: ChangeEventHandler<HTMLInputElement> = async (event: ChangeEvent) => {
-		let f = (event.target as HTMLInputElement).files?.item(0);
+		const f = (event.target as HTMLInputElement).files?.item(0);
 		if (f !== null) {
 			resetState();
 			// Show spinner while loading
@@ -102,7 +110,7 @@ export function DataFetcher() {
 			<div className="mt-5">
 				<div className="mb-1">Provided input file</div>
 				<textarea
-					className="text-sm w-full border h-96 border-blue-100"
+					className="w-full text-sm border border-blue-100 h-96"
 					value={state.pdb?.raw}
 					readOnly
 				/>
@@ -120,18 +128,18 @@ export function DataFetcher() {
 	// Update pdbIdRef value whenever pdb id changes
 	// Render data fetcher box
 	return (
-		<div className="p-5 max-h-screen overflow-auto break-words">
+		<div className="max-h-screen p-5 overflow-auto break-words">
 			{!state.isLoading && (
 				<div>
 					{state.error.length > 0 && (
 						<div className="mb-4">
-							<div className="text-red-700 font-bold text-lg">
+							<div className="text-lg font-bold text-red-700">
 								Something went wrong: {state.error}
 							</div>
 						</div>
 					)}
 					{state.pdb === undefined && (
-						<div className="text-sm text-gray-600 mb-4 bg-red-200 p-2">
+						<div className="p-2 mb-4 text-sm text-gray-600 bg-red-200">
 							Choose a PDB file which contains DNA/RNA with Proteins
 						</div>
 					)}
@@ -143,7 +151,7 @@ export function DataFetcher() {
 							</div>
 						)}
 						<div className="mb-4">
-							<div className="text-normal font-bold text-gray-600 mb-2">
+							<div className="mb-2 font-bold text-gray-600 text-normal">
 								Enter PDB file ID:
 								<div className="text-xs font-normal">
 									PDB file should contain <b>DNA/RNA</b> structures
@@ -158,7 +166,7 @@ export function DataFetcher() {
 									}}
 									ref={pdbIdRef}
 									placeholder="1ZS4"
-									className="border-r-0 outline-none ring-indigo-200 focus:ring-2 transition-all block py-1 px-2 outline-0 border border-indigo-300 rounded rounded-tr-none rounded-br-none"
+									className="block px-2 py-1 transition-all border border-r-0 border-indigo-300 rounded rounded-tr-none rounded-br-none outline-none ring-indigo-200 focus:ring-2 outline-0"
 								/>
 								<button
 									onClick={handlePDBIdChange}
@@ -168,7 +176,7 @@ export function DataFetcher() {
 								</button>
 							</div>
 						</div>
-						<div className="text-normal font-bold text-gray-600 mb-2">
+						<div className="mb-2 font-bold text-gray-600 text-normal">
 							Or choose a PDB file to display:
 							<div className="text-xs font-normal">
 								PDB file should contain <b>DNA/RNA</b> structures

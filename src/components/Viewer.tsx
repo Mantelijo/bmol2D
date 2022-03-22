@@ -66,10 +66,10 @@ export function Viewer() {
 	const [state, dispatch] = useContext(context);
 	const polymers = state.polymers;
 
-	let ref = React.createRef<SVGSVGElement>();
-	let tooltip = React.createRef<HTMLDivElement>();
+	const ref = React.createRef<SVGSVGElement>();
+	const tooltip = React.createRef<HTMLDivElement>();
 
-	let containerRef = useRef<HTMLDivElement>(null);
+	const containerRef = useRef<HTMLDivElement>(null);
 
 	// Construct interactions finder
 	const iFinder = useMemo<InteractionsFinder | undefined>(() => {
@@ -102,8 +102,8 @@ export function Viewer() {
 		// Calculate interactions
 		iFinder.simpleInteractions();
 
-		let nodes: Node[] = [];
-		let links: Link[] = [];
+		const nodes: Node[] = [];
+		const links: Link[] = [];
 
 		const CollectNodes = (chain: Polymer) => {
 			const DNAResidueIndexes = Object.values(DNAResidues);
@@ -115,10 +115,13 @@ export function Viewer() {
 					color: ColorMap[r.name as DNAResidues],
 					group: DNAResidueIndexes.indexOf(r.name as DNAResidues) + 1,
 					type: NodeType.Residue,
+
+					initial_x: r.initial_x,
+					initial_y: r.initial_y,
 				});
 
 				// Collect links to previous residue in same chain
-				let residues = chain.residues;
+				const residues = chain.residues;
 				if (index > 0 && index < residues.length) {
 					links.push({
 						source: resToId(residues[index - 1]),
@@ -172,7 +175,7 @@ export function Viewer() {
 		console.log("Vizualization data:", nodes, links);
 
 		// svg dimensions should fit the container
-		let [w, h] = [
+		const [w, h] = [
 			(containerRef.current as HTMLDivElement).offsetWidth,
 			(containerRef.current as HTMLDivElement).offsetHeight,
 		];
@@ -205,8 +208,8 @@ export function Viewer() {
 	return (
 		<>
 			<div>{state.simpleStuffy}</div>
-			<div className="p-5 flex items-center flex-col h-full" ref={containerRef}>
-				<div className="min-w-full h-full relative">
+			<div className="flex flex-col items-center h-full p-5" ref={containerRef}>
+				<div className="relative h-full min-w-full">
 					<svg ref={ref}></svg>
 					{selectedResidue && (
 						<div

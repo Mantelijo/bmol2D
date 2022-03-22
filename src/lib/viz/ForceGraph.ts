@@ -11,6 +11,13 @@ export interface Node {
 	// The hash of residue
 	hash: string;
 	type?: NodeType;
+
+	// Initial RNA secondary structure coordinates
+	initial_x?: number;
+	initial_y?: number;
+
+	x?: number;
+	y?: number;
 }
 
 export enum NodeType {
@@ -252,12 +259,12 @@ export function ForceGraph(
 
 	function ticked() {
 		link
-			.attr("x1", (d: any) => d.source.x)
-			.attr("y1", (d: any) => d.source.y)
-			.attr("x2", (d: any) => d.target.x)
-			.attr("y2", (d: any) => d.target.y);
+			.attr("x1", (d: any) => d.initial_x)
+			.attr("y1", (d: any) => d.initial_y)
+			.attr("x2", (d: any) => d.initial_x)
+			.attr("y2", (d: any) => d.initial_y);
 
-		nodeGs.attr("transform", (d: any) => `translate(${d.x}, ${d.y})`);
+		nodeGs.attr("transform", (d: any) => `translate(${d.initial_x}, ${d.initial_y})`);
 	}
 
 	function drag(simulation: d3.Simulation<d3.SimulationNodeDatum, undefined>) {
