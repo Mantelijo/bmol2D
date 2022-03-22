@@ -1,4 +1,4 @@
-import { State } from "@/Store";
+import * as d3 from "d3";
 import { Polymer, PolymerKind } from "./types/atoms";
 
 interface params {
@@ -27,6 +27,10 @@ export const getSecondaryStructure: (o: params) => Promise<SecondaryStructureDat
 	return data;
 };
 
+// lastMaxXCoordinate is used for calculating the position for models with
+// multiple RNA structures
+let lastMaxXCoordinate = -Infinity;
+
 // Fills in the given secondary structure initial coordinates for RNA
 export const fillSecondaryStructureInitialCoordinates: (
 	p: Polymer[],
@@ -40,6 +44,10 @@ export const fillSecondaryStructureInitialCoordinates: (
 			}
 			const coordData = coordDataArr[0] as SecondaryStructureData;
 
+			const currentMaxX = d3.max(coordData.coords.map((c) => c[0])) as number;
+			const currentMinX = d3.min(coordData.coords.map((c) => c[0])) as number;
+			const plusX = lastMaxXCoordinate != -Infinity ? lastMaxXCoordinate + currentMinX : 0;
+
 			for (let i = 0; i < p.residues.length; i++) {
 				// coordinates for this seqno residue is the nth element in
 				// coords array. We can not trust the
@@ -48,9 +56,11 @@ export const fillSecondaryStructureInitialCoordinates: (
 				// always have residues in sequence, and take residue seq
 				// number from iteration
 				const [x, y]: [number, number] = coordData.coords[i];
-				p.residues[i].initial_x = x;
+				p.residues[i].initial_x = x + plusX;
 				p.residues[i].initial_y = y;
 			}
+
+			lastMaxXCoordinate = Math.max(lastMaxXCoordinate, currentMaxX);
 		}
 	});
 

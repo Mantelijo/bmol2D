@@ -10,4 +10,5 @@ if (!array_key_exists(key: "id", array: $_GET)) {
 
 $pdbId = $_GET['id'];
 
+
 echo shell_exec("python3 positions.py {$pdbId} 2>/dev/null");
