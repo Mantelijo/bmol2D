@@ -3,21 +3,30 @@ import { Viewer } from "./components/Viewer";
 import { DataFetcher } from "./components/DataFetcher";
 import Spinner from "./components/Spinner";
 import { StoreComponent, context } from "./Store";
+// import naview from "./naview.wasm";
+
+import Naview from "./wasm/naview.js";
+
+(async () => {
+	Naview.onRuntimeInitialized = async (_) => {
+		Naview.cwrap("secondaryStruct");
+	};
+})();
 
 export function App() {
 	const state = useContext(context)[0];
 
 	return (
-		<div className="w-full flex flex-row">
+		<div className="flex flex-row w-full">
 			{state.isLoading === true && (
 				<div
-					className="fixed w-screen min-h-screen top-0 left-0 flex items-center justify-center z-50  h-full"
+					className="fixed top-0 left-0 z-50 flex items-center justify-center w-screen h-full min-h-screen"
 					style={{ backgroundColor: "rgba(0,0,0,0.75)" }}
 				>
 					<Spinner />
 				</div>
 			)}
-			<div className="z-10 w-9/12 bg-indigo-200 min-h-full h-screen">
+			<div className="z-10 w-9/12 h-screen min-h-full bg-indigo-200">
 				<Viewer />
 			</div>
 			<div className="z-10 w-3/12">

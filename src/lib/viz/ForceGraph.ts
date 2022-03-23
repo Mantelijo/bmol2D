@@ -55,7 +55,7 @@ type ForceGraphOpts = {
 	nodeStroke: any | never | undefined;
 	nodeStrokeWidth: any | never | undefined;
 	nodeStrokeOpacity: any | never | undefined;
-	nodeRadius: any | never | undefined;
+	NodeRadius: any | never | undefined;
 	linkSource: any | never | undefined;
 	linkTarget: any | never | undefined;
 	linkStroke: any | never | undefined;
@@ -77,6 +77,9 @@ const Letters = {
 // 100 ms seems the most reasonable based on performance profile
 const POPUP_TIMEOUT = 100;
 
+// Single residue circle radius in px
+export const NodeRadius = 9;
+
 // Example taken from https://observablehq.com/@d3/force-directed-graph
 export function ForceGraph(
 	{
@@ -97,7 +100,7 @@ export function ForceGraph(
 		nodeStroke = "#fff", // node stroke color
 		nodeStrokeWidth = 1.5, // node stroke width, in pixels
 		nodeStrokeOpacity = 1, // node stroke opacity
-		nodeRadius = 10, // node radius, in pixels
+		// NodeRadius = 10, // node radius, in pixels
 		linkStroke = (d: any) => {
 			return d.color !== undefined ? d.color : "#444";
 		}, // link stroke color
@@ -204,7 +207,7 @@ export function ForceGraph(
 		.attr("stroke-width", nodeStrokeWidth)
 		.attr("fill", nodeFill)
 		.style("cursor", "pointer")
-		.attr("r", nodeRadius);
+		.attr("r", NodeRadius);
 
 	// Tooltip information
 	let lastEvent = new Date();
@@ -221,7 +224,7 @@ export function ForceGraph(
 		.on("mouseover", function (event, d: Node) {
 			d3.select(this)
 				.select("circle")
-				.attr("r", transformAdjusted(nodeRadius * 2));
+				.attr("r", transformAdjusted(NodeRadius * 2));
 			if (new Date().getTime() - lastEvent.getTime() > POPUP_TIMEOUT) {
 				// dispatch({
 				// 	type: "selectedResidue",
@@ -232,7 +235,7 @@ export function ForceGraph(
 		})
 		.on("mouseout", function (event, d: Node) {
 			// transform adjusted radius if needed
-			d3.select(this).select("circle").attr("r", transformAdjusted(nodeRadius));
+			d3.select(this).select("circle").attr("r", transformAdjusted(NodeRadius));
 
 			// dispatch({
 			// 	type: "selectedResidue",
@@ -303,7 +306,7 @@ export function ForceGraph(
 			if (transform) {
 				transformK = Math.sqrt(transform.k);
 				g.style("stroke-width", 3 / transformK);
-				node.attr("r", nodeRadius / transformK).attr("stroke-width", nodeStrokeWidth / transformK);
+				node.attr("r", NodeRadius / transformK).attr("stroke-width", nodeStrokeWidth / transformK);
 				letters.attr("font-size", Letters.size / transformK).attr("y", Letters.y / transformK);
 			}
 		});

@@ -1,5 +1,6 @@
 import * as d3 from "d3";
 import { Polymer, PolymerKind } from "./types/atoms";
+import { NodeRadius } from "./viz/ForceGraph";
 
 interface params {
 	pdbId?: string;
@@ -27,15 +28,15 @@ export const getSecondaryStructure: (o: params) => Promise<SecondaryStructureDat
 	return data;
 };
 
-// lastMaxXCoordinate is used for calculating the position for models with
-// multiple RNA structures
-let lastMaxXCoordinate = -Infinity;
-
 // Fills in the given secondary structure initial coordinates for RNA
 export const fillSecondaryStructureInitialCoordinates: (
 	p: Polymer[],
 	c: SecondaryStructureData[],
 ) => Polymer[] = (polymers, coords) => {
+	// lastMaxXCoordinate is used for calculating the position for models with
+	// multiple RNA structures
+	let lastMaxXCoordinate = 0;
+
 	polymers.filter((p) => {
 		if (p.kind === PolymerKind.RNA) {
 			const coordDataArr = coords.filter((c) => c.chain_id === p.chainIdentifier);
@@ -44,19 +45,26 @@ export const fillSecondaryStructureInitialCoordinates: (
 			}
 			const coordData = coordDataArr[0] as SecondaryStructureData;
 
-			const currentMaxX = d3.max(coordData.coords.map((c) => c[0])) as number;
+			// Here we make sure that molecules do not overlap
+			let currentMaxX = 0;
 			const currentMinX = d3.min(coordData.coords.map((c) => c[0])) as number;
-			const plusX = lastMaxXCoordinate != -Infinity ? lastMaxXCoordinate + currentMinX : 0;
+			const plusX = lastMaxXCoordinate != 0 ? lastMaxXCoordinate - currentMinX + NodeRadius * 3 : 0;
 
-			for (let i = 0; i < p.residues.length; i++) {
+			// If we got less coords than there are residues - ignore non
+			// available coords
+			for (let i = 0; i < Math.min(p.residues.length, coordData.coords.length); i++) {
 				// coordinates for this seqno residue is the nth element in
 				// coords array. We can not trust the
 				// residue.sequenceNumber, since we don't know exactly at
 				// which number it will starts, so we assume that we
 				// always have residues in sequence, and take residue seq
 				// number from iteration
+				console.log(coordData, p.residues.length, i, p.residues[i], p.residues);
 				const [x, y]: [number, number] = coordData.coords[i];
-				p.residues[i].initial_x = x + plusX;
+				const currentX = x + plusX;
+				currentMaxX = Math.max(currentMaxX, currentX);
+
+				p.residues[i].initial_x = currentX;
 				p.residues[i].initial_y = y;
 			}
 
