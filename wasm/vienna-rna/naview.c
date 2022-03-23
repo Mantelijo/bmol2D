@@ -43,6 +43,7 @@
 #include <math.h>
 
 #include "utils/basic.h"
+#include "utils/structure.h"
 #include "naview.h"
 
 typedef int LOGICAL;
