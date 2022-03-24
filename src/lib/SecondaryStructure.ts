@@ -1,3 +1,4 @@
+import { calculateSecondaryStructureCoordinates } from "./Wasm";
 import * as d3 from "d3";
 import { Polymer, PolymerKind } from "./types/atoms";
 import { NodeRadius } from "./viz/ForceGraph";
@@ -7,11 +8,13 @@ interface params {
 	pdbText?: string;
 }
 
-// Response/Calculation structure
-export interface SecondaryStructureData {
-	coords: Array<[number, number]>;
+interface ChainDotBraket {
 	chain_id: string;
 	dot_braket: string;
+}
+
+export interface SecondaryStructureData extends ChainDotBraket {
+	coords: Array<[number, number]>;
 }
 
 // Calculate the secondary structure coordinates and dot-braket
@@ -21,11 +24,22 @@ export const getSecondaryStructure: (o: params) => Promise<SecondaryStructureDat
 }) => {
 	const data = (await (
 		await fetch(`http://localhost:8001?id=${pdbId}`)
-	).json()) as SecondaryStructureData[];
+	).json()) as ChainDotBraket[];
 
-	// TODO implement this for pdbText
+	// Attempt to generate coordinates
+	const result: SecondaryStructureData[] = [];
+	data.forEach((_, key) => {
+		const coords = calculateSecondaryStructureCoordinates(data[key].dot_braket);
+		console.log(coords);
 
-	return data;
+		result[key] = {
+			chain_id: data[key].chain_id,
+			dot_braket: data[key].dot_braket,
+			coords,
+		};
+	});
+
+	return result;
 };
 
 // Fills in the given secondary structure initial coordinates for RNA
@@ -33,8 +47,8 @@ export const fillSecondaryStructureInitialCoordinates: (
 	p: Polymer[],
 	c: SecondaryStructureData[],
 ) => Polymer[] = (polymers, coords) => {
-	// lastMaxXCoordinate is used for calculating the position for models with
-	// multiple RNA structures
+	// lastMaxXCoordinate is used for calculating the position for models
+	// with multiple RNA structures
 	let lastMaxXCoordinate = 0;
 
 	polymers.filter((p) => {
@@ -53,13 +67,14 @@ export const fillSecondaryStructureInitialCoordinates: (
 			// If we got less coords than there are residues - ignore non
 			// available coords
 			for (let i = 0; i < Math.min(p.residues.length, coordData.coords.length); i++) {
-				// coordinates for this seqno residue is the nth element in
-				// coords array. We can not trust the
-				// residue.sequenceNumber, since we don't know exactly at
-				// which number it will starts, so we assume that we
-				// always have residues in sequence, and take residue seq
-				// number from iteration
-				console.log(coordData, p.residues.length, i, p.residues[i], p.residues);
+				// coordinates for this seqno residue is the nth element
+				// in coords array. We can not trust the
+				// residue.sequenceNumber, since it's taken directly from
+				// pdb file and we don't know exactly at which number it
+				// will starts, so we assume that we always have residues
+				// in sequence, and take residue seq number from iteration
+				// console.log(coordData, p.residues.length, i,
+				// p.residues[i], p.residues);
 				const [x, y]: [number, number] = coordData.coords[i];
 				const currentX = x + plusX;
 				currentMaxX = Math.max(currentMaxX, currentX);

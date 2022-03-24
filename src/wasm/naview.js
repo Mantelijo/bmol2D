@@ -19,7 +19,14 @@ var Module = typeof Module != 'undefined' ? Module : {};
 
 // --pre-jses are emitted after the Module integration code, so that they can
 // refer to Module (if they choose; they can also define Module)
-// {{PRE_JSES}}
+import naviewWasmAsUrl from "../../src/wasm/naview.wasm?url";
+
+Module["locateFile"] = function (path, prefix) {
+	return naviewWasmAsUrl;
+};
+
+window.Module = Module;
+
 
 // Sometimes an existing Module object exists with properties
 // meant to overwrite the default module functionality. Here
@@ -1948,7 +1955,7 @@ var asm = createWasm();
 var ___wasm_call_ctors = Module["___wasm_call_ctors"] = createExportWrapper("__wasm_call_ctors");
 
 /** @type {function(...*):?} */
-var _secondaryStruct = Module["_secondaryStruct"] = createExportWrapper("secondaryStruct");
+var _secondaryStructure = Module["_secondaryStructure"] = createExportWrapper("secondaryStructure");
 
 /** @type {function(...*):?} */
 var ___errno_location = Module["___errno_location"] = createExportWrapper("__errno_location");
@@ -1996,10 +2003,10 @@ var dynCall_jiji = Module["dynCall_jiji"] = createExportWrapper("dynCall_jiji");
 
 unexportedRuntimeFunction('intArrayFromString', false);
 unexportedRuntimeFunction('intArrayToString', false);
-unexportedRuntimeFunction('ccall', false);
-unexportedRuntimeFunction('cwrap', false);
+Module["ccall"] = ccall;
+Module["cwrap"] = cwrap;
 unexportedRuntimeFunction('setValue', false);
-unexportedRuntimeFunction('getValue', false);
+Module["getValue"] = getValue;
 unexportedRuntimeFunction('allocate', false);
 unexportedRuntimeFunction('UTF8ArrayToString', false);
 unexportedRuntimeFunction('UTF8ToString', false);

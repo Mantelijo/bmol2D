@@ -1955,7 +1955,7 @@ var asm = createWasm();
 var ___wasm_call_ctors = Module["___wasm_call_ctors"] = createExportWrapper("__wasm_call_ctors");
 
 /** @type {function(...*):?} */
-var _secondaryStruct = Module["_secondaryStruct"] = createExportWrapper("secondaryStruct");
+var _secondaryStructure = Module["_secondaryStructure"] = createExportWrapper("secondaryStructure");
 
 /** @type {function(...*):?} */
 var ___errno_location = Module["___errno_location"] = createExportWrapper("__errno_location");

@@ -71,12 +71,12 @@ def result(tempPdbFile):
                 remove_pseudoknots=True,
             )
             dotBraket = cg.to_dotbracket_string()
-            positions = fasta_to_positions(dotBraket)
+            # positions = fasta_to_positions(dotBraket)
             # print(positions)
 
             result.append({
                 "chain_id": chain.id,
-                "coords": positions,
+                # "coords": positions,
                 "dot_braket": dotBraket,
             })
     return json.dumps(result)

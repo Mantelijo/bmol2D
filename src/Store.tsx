@@ -9,7 +9,10 @@ import { Visualization } from "./lib/types/visualization";
 const initialState: State = {
 	polymers: [],
 	pdb: undefined,
+
 	isLoading: false,
+	isWasmModuleLoading: true,
+
 	simpleStuffy: "",
 	hashedNucleicAcidResidues: {},
 	viz: { chain1: null, chain2: null },
@@ -45,14 +48,17 @@ export interface State {
 	polymers: Polymer[];
 	pdb: PDBFile | undefined;
 
-	// Determine if process is currently loading or not
+	// Determine if any calculation process is currently loading or not
 	isLoading: boolean;
+
+	// Initially, wasm module must be set to loading
+	isWasmModuleLoading: boolean;
 
 	simpleStuffy: string;
 
-	// This is used for faster lookups of nucleic acid residues.
-	// Since nucleic acids are the central parts of visualization,
-	// we might need to do many lookups, when searching for interactions.
+	// This is used for faster lookups of nucleic acid residues. Since
+	// nucleic acids are the central parts of visualization, we might need
+	// to do many lookups, when searching for interactions.
 	hashedNucleicAcidResidues: HashedResidue;
 
 	// Data to be visualized
@@ -61,8 +67,7 @@ export interface State {
 	// Currently displayed pdb id
 	currentPDBId: string;
 
-	// Currently displayed residue information
-	// selectedResidue?: Residue;
+	// Currently displayed residue information selectedResidue?: Residue;
 	selectedResidueHash?: string;
 
 	// Error text to display

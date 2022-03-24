@@ -1,7 +1,7 @@
 import {
 	fillSecondaryStructureInitialCoordinates,
 	getSecondaryStructure,
-} from "@/lib/RNASecondaryStruct";
+} from "@/lib/SecondaryStructure";
 import React, { ChangeEventHandler, ChangeEvent, useEffect, useContext, useRef } from "react";
 import { PDBHandler } from "../lib/PDBHandler";
 import { PDBFile, Polymer } from "../lib/types/atoms";

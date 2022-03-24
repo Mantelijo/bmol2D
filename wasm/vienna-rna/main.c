@@ -13,7 +13,7 @@ typedef struct {
 // This function must be exported when compiling to wasm
 // structure is provided as a dot-braket string. Result is flattened array
 // of X,Y coordinate pairs
-COORDINATE* secondaryStruct(char *structure){
+COORDINATE* secondaryStructure(char *structure){
     int i;
     short *table = vrna_ptable(structure);
     short length = (short) strlen(structure);
@@ -53,7 +53,7 @@ int main(){
   char* dot = "((((((((((..(((((..((((((((((....))))).))))).............((((......((((((((((.....)))))(((((....)))))((...(((((.............(((((((((((....)))))))))..)).......((((((.......))))))..(((((((....)))))))....)))..)))))))))))))...((((.....((((...(((........)))....)))).....))))......((((((((....))))))))...........))))).....................))))))))))....";
   size_t len = strlen(dot);
 
-  COORDINATE* c = secondaryStruct(dot);
+  COORDINATE* c = secondaryStructure(dot);
   
   for (int i=1; i<len;i++){
     printf("x:%f y:%f \n", c[i].X, c[i].Y);
