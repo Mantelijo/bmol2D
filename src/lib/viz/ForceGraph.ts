@@ -298,21 +298,23 @@ export function ForceGraph(
 		}
 		return val;
 	};
-	let transform = undefined;
-	let transformK: undefined | number = undefined;
-	const zoom = d3.zoom().on("zoom", (e) => {
-		requestAnimationFrame(() => {
-			g.attr("transform", (transform = e.transform));
-			if (transform) {
-				transformK = Math.sqrt(transform.k);
+	
+	let transformK = 1;
+	const zoom = d3
+		.zoom()
+		.scaleExtent([0.001, 100])
+		.on("zoom", ({ transform }) => {
+			console.log("Transform", transform);
+			g.attr("transform", transform);
+			const newK = Math.sqrt(transform.k);
+			if (Math.abs(newK - transformK) > 0.1) {
+				transformK = newK;
 				g.style("stroke-width", 3 / transformK);
 				node.attr("r", NodeRadius / transformK).attr("stroke-width", nodeStrokeWidth / transformK);
 				letters.attr("font-size", Letters.size / transformK).attr("y", Letters.y / transformK);
 			}
 		});
-	});
-
-	svg.call(zoom as any).call(zoom.transform as any, d3.zoomIdentity);
+	svg.call(zoom as any);
 
 	return Object.assign(svg.node(), { scales: { color: null } });
 }
