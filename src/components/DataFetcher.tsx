@@ -1,7 +1,4 @@
-import {
-	fillSecondaryStructureInitialCoordinates,
-	getSecondaryStructure,
-} from "@/lib/SecondaryStructure";
+import { fetchDotBraket } from "@/lib/SecondaryStructure";
 import React, { ChangeEventHandler, ChangeEvent, useEffect, useContext, useRef } from "react";
 import { PDBHandler } from "../lib/PDBHandler";
 import { PDBFile, Polymer } from "../lib/types/atoms";
@@ -61,13 +58,8 @@ export function DataFetcher() {
 		startLoading();
 		const pdb = new PDBHandler().format(await fetchPDBFile(id));
 		updatePDBState(pdb);
-		
-		const secondaryStructure = await getSecondaryStructure({ pdbId: id });
-		fillSecondaryStructureInitialCoordinates(pdb.polymers, secondaryStructure);
-
 		updatePolymers(pdb.polymers);
 		updateCurrentPDBId(id);
-		stopLoading();
 	};
 
 	// Fetch PDB file by given id parameter. Must run only once
@@ -100,7 +92,6 @@ export function DataFetcher() {
 
 			// Some fake loading time, so we get to see the spinner :)
 			console.timeEnd("TIME_TO_PARSE_EVERYTHING");
-			setTimeout(stopLoading, 2000);
 		}
 	};
 
@@ -125,6 +116,25 @@ export function DataFetcher() {
 			loadPDBID(pdbId);
 		}
 	};
+
+	// Fetch the dot braket information for given pdb file
+	useEffect(() => {
+		(async () => {
+			if (state.pdb) {
+				try {
+					const dotBraket = await fetchDotBraket(state.pdb);
+				} catch (e) {
+					dispatch({
+						type: "error",
+						payload: e,
+					});
+				}
+
+				stopLoading();
+			}
+		})();
+	}, [state.pdb?.raw]);
+
 	// Update pdbIdRef value whenever pdb id changes
 	// Render data fetcher box
 	return (

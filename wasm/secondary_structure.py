@@ -83,4 +83,33 @@ def result(tempPdbFile):
 
 
 if __name__ == "__main__":
-    print(main())
+    from http.server import HTTPServer, BaseHTTPRequestHandler
+
+    class HTTPHandler(BaseHTTPRequestHandler):
+        def do_POST(self):
+            self.send_header("content-type", "application/json")
+            self.send_header("Access-Control-Allow-Origin", "*")
+
+            length = self.headers["content-length"]
+            pdbPayload = self.rfile.read(int(length))
+            f = tempfile.NamedTemporaryFile("w+b")
+            f.write(pdbPayload)
+            f.seek(0)
+
+            print(pdbPayload)
+
+            # attempt to generate data
+            res = bytes(result(f), "utf-8")
+            print(res)
+            self.send_header('content-length', len(res))
+            self.send_response(200)
+            self.end_headers()
+
+            self.wfile.write(res)
+            self.wfile.flush()
+
+    # print(main())
+
+    httpd = HTTPServer(('localhost', 8001), HTTPHandler)
+    print("Listening for secondary structure requests on http://localhost:8001")
+    httpd.serve_forever()

@@ -1,4 +1,5 @@
 import React, { createContext, useReducer, ReactElement } from "react";
+import { DotBraket } from "./lib/SecondaryStructure";
 import { Polymer, Residue } from "./lib/types/atoms";
 import { PDBFile } from "./lib/types/atoms";
 import { Visualization } from "./lib/types/visualization";
@@ -72,6 +73,10 @@ export interface State {
 
 	// Error text to display
 	error: string;
+
+	// Here we store secondary structure information in dot braket
+	// notation. This information comes from secondary_structure.py file
+	secondaryStructures: DotBraket[];
 
 	// Residue getter
 	getResidue: (chainIdentifier: string, residueHash: string) => Residue | null;

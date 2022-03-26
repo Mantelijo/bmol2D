@@ -10,20 +10,26 @@ typedef struct {
   float Y;  /* Y coords */
 } COORDINATE;
 
-// This function must be exported when compiling to wasm
-// structure is provided as a dot-braket string. Result is flattened array
-// of X,Y coordinate pairs
-COORDINATE* secondaryStructure(char *structure){
-    int i;
-    short *table = vrna_ptable(structure);
-    short length = (short) strlen(structure);
+// This function must be exported when compiling to wasm structure is
+// provided as a dot-braket string. Result is flattened array of X,Y
+// coordinate pairs
+COORDINATE* secondaryStructureFromPairTable(short *table){
+  int i;
+  short length = table[0];
+  
+  // Print out the table structure
+  printf("pair table from pair table:\n[");
+  for(int i=0;i<length;i++){
+    printf("%hu,", table[i]);
+  }
+  printf("]\n");
+
+
+  printf("The lenght of array: %hu\n", length);
 
     COORDINATE *coords = (COORDINATE *) vrna_alloc((length+1)*sizeof(COORDINATE));
     float *X = (float *) vrna_alloc((length+1)*sizeof(float));
     float *Y = (float *) vrna_alloc((length+1)*sizeof(float));
-    float* returnCoords = malloc(sizeof(float) * 2 * length); 
-    returnCoords[0] = 12312.23;
-    printf("this is some great test! %f %p \n", returnCoords[0], returnCoords);
 
     naview_xy_coordinates(table, X, Y);
 
@@ -32,18 +38,41 @@ COORDINATE* secondaryStructure(char *structure){
       coords[i].Y = Y[i];
     }
 
-    // Here we pack coordinates into one dimensional array. X is first, Y
-    // is second.
-    // float* returnCoords = malloc(sizeof(float) * 2 * length); 
-    // for(i=1;i<=length*2;i+=2){
-    //   returnCoords[i-1] =  X[(i-1)/2];
-    //   returnCoords[i] = Y[(i-1)/2];
-    // }
     free(table);
     free(X);
     free(Y);
 
     return coords;
+}
+
+COORDINATE* secondaryStructureFromDotBraket(char *structure){
+  int i;
+  short *table = vrna_ptable(structure);
+  short length = (short) strlen(structure);
+
+    // Print out the table structure
+  printf("pair table from dot braket:\n["); 
+  for(int i=0;i<length;i++){
+    printf("%hu,", table[i]);
+  }
+  printf("]\n");
+
+
+  COORDINATE *coords = (COORDINATE *) vrna_alloc((length+1)*sizeof(COORDINATE));
+  float *X = (float *) vrna_alloc((length+1)*sizeof(float));
+  float *Y = (float *) vrna_alloc((length+1)*sizeof(float));
+
+  naview_xy_coordinates(table, X, Y);
+
+  for(i=0;i<=length;i++){
+    coords[i].X = X[i];
+    coords[i].Y = Y[i];
+  }
+  free(table);
+  free(X);
+  free(Y);
+
+  return coords;
 }
 
 
@@ -53,13 +82,12 @@ int main(){
   char* dot = "((((((((((..(((((..((((((((((....))))).))))).............((((......((((((((((.....)))))(((((....)))))((...(((((.............(((((((((((....)))))))))..)).......((((((.......))))))..(((((((....)))))))....)))..)))))))))))))...((((.....((((...(((........)))....)))).....))))......((((((((....))))))))...........))))).....................))))))))))....";
   size_t len = strlen(dot);
 
-  COORDINATE* c = secondaryStructure(dot);
+  COORDINATE* c = secondaryStructureFromDotBraket(dot);
   
   for (int i=1; i<len;i++){
     printf("x:%f y:%f \n", c[i].X, c[i].Y);
   }
-  // for (int i=1; i<len*2;i+=2){
-  //   printf("x:%f y:%f \n", c[i-1], c[i]);
+  // for (int i=1; i<len*2;i+=2){ printf("x:%f y:%f \n", c[i-1], c[i]);
   // }
 
   return 0;

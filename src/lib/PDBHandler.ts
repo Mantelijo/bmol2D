@@ -67,7 +67,7 @@ export class PDBHandler {
 			};
 		};
 		const newResidue = (): Residue => {
-			return new ResidueImplementation();
+			return new ResidueImplementation(currentPolymer.residues.length);
 		};
 		// Helper to push currentResidue to currentPolymer
 		const pushResidue = (): void => {
@@ -107,10 +107,10 @@ export class PDBHandler {
 		let currentPolymerKindCounter = determinePolymerKindAndReset() as currentPolymerKind;
 
 		// REMARK 350 transformations information
-		let transformations: Remark350Transformations[] = [];
+		const transformations: Remark350Transformations[] = [];
 		// There might be multiple different groups of transformations for
-		// different chains, so we keep track of current one
-		// Note: setting this to empty value so TS does not complain.
+		// different chains, so we keep track of current one Note: setting
+		// this to empty value so TS does not complain.
 		let currentTransformation: Remark350Transformations = {
 			chains: [],
 			rotations: [],
@@ -128,8 +128,8 @@ export class PDBHandler {
 			};
 		};
 
-		// NMR ensembles usually have models.
-		// @see https://www.wwpdb.org/documentation/file-format-content/format33/sect9.html#MODEL
+		// NMR ensembles usually have models. @see
+		// https://www.wwpdb.org/documentation/file-format-content/format33/sect9.html#MODEL
 		let hasModels = false;
 		let numberOfModels = 0;
 		// If file contains models, we only want to take the first model.
@@ -160,17 +160,17 @@ export class PDBHandler {
 			// Parse ATOM lines
 			if (line.startsWith("ATOM") || line.startsWith("HETATM")) {
 				// https://www.cgl.ucsf.edu/chimera/docs/UsersGuide/tutorials/pdbintro.html
-				let x = parseFloat(line.slice(30, 38).trim());
-				let y = parseFloat(line.slice(38, 46).trim());
-				let z = parseFloat(line.slice(46, 54).trim());
+				const x = parseFloat(line.slice(30, 38).trim());
+				const y = parseFloat(line.slice(38, 46).trim());
+				const z = parseFloat(line.slice(46, 54).trim());
 
-				let name = line.slice(12, 16).trim();
-				let residueName = line.slice(17, 20).trim();
-				let element = line.slice(76, 78).trim();
-				let residueSequenceNumber = parseInt(line.slice(22, 26).trim());
+				const name = line.slice(12, 16).trim();
+				const residueName = line.slice(17, 20).trim();
+				const element = line.slice(76, 78).trim();
+				const residueSequenceNumber = parseInt(line.slice(22, 26).trim());
 
 				// Chain identifier for current polymer is 1 letter
-				let chainIdentifier = line.slice(21, 22);
+				const chainIdentifier = line.slice(21, 22);
 				currentPolymer.chainIdentifier = chainIdentifier;
 
 				// Construct new atom entry
@@ -207,13 +207,14 @@ export class PDBHandler {
 				currentResidue.atoms.push(atom);
 			}
 			// TER indicates the end of current polymer (chain of
-			// residues). Or if we are on the last line there might be no TER
+			// residues). Or if we are on the last line there might be no
+			// TER
 			if (line.startsWith("TER") || i === lines.length - 1) {
 				// Don't forget to push residue
 				pushResidue();
 
 				// Get polymer kind and reset counter
-				let [c, kind] = determinePolymerKindAndReset(currentPolymerKindCounter) as [
+				const [c, kind] = determinePolymerKindAndReset(currentPolymerKindCounter) as [
 					currentPolymerKind,
 					PolymerKind,
 				];
@@ -351,8 +352,8 @@ export class PDBHandler {
 								oldCoords.y * rotation[2][1] +
 								oldCoords.z * rotation[2][2];
 
-							// TODO translations
-							// Each rotation must have a translation
+							// TODO translations Each rotation must have a
+							// translation
 							const t = ts[rotationIndex];
 							newCoords = newCoords.add(t);
 

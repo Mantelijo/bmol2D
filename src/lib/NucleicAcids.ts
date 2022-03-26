@@ -67,7 +67,7 @@ export function isWatsonCrickPair(r1: Residue, r2: Residue): boolean {
 		[DNAResidues.CM, RNAResidues.G],
 
 		// GU Wobble pairs in RNA
-		[RNAResidues.C, RNAResidues.U],
+		[RNAResidues.G, RNAResidues.U],
 	];
 
 	// Check if given residues can be w-c pairs

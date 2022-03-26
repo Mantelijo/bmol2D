@@ -4,6 +4,7 @@ import { Interaction, InteractionType } from "./types/interactions";
 import { Visualization } from "./types/visualization";
 import { isWatsonCrickPair, WATSON_CRICK_PAIR_CALCULATION_THRESHOLD } from "./NucleicAcids";
 import { resToId } from "./types/residues";
+import { fillSecondaryStructureInitialCoordinates } from "./SecondaryStructure";
 
 export class InteractionsFinder {
 	nucleicAcids: Polymer[] = [];
@@ -26,7 +27,11 @@ export class InteractionsFinder {
 	// Generates complete list of watson-crick pairs for chain1-chain2.
 	// Returned result is very likely to be unordered according to
 	// original DNA/RNA sequences
-	generateWatsonCrickPairs(chain1: Polymer, chain2: Polymer): Array<Residue[]> {
+	generateWatsonCrickPairs(
+		chain1: Polymer,
+		chain2: Polymer,
+		isSameMolecule = false,
+	): Array<Residue[]> {
 		// Chain lengths can differ, so we calculate and diff on each
 		// chain pairs. Pairs2 will have chain2 as first chain, so this
 		// has to be reordered when generating complete pairs
@@ -83,10 +88,10 @@ export class InteractionsFinder {
 	// sure that everything is calculated correctly.
 	watsonCrickPairs(): Array<Residue[]> {
 		if (this.nucleicAcids.length <= 0) {
-			throw Error("Nucleic acids are not initialized");
+			throw Error("No nucleic acids are present in given PDB structure");
 		}
 
-		let allPairs: Residue[][] = [];
+		const allPairs: Residue[][] = [];
 		// Each chain should be compared one time with all other available
 		// chains except itself.
 		for (let i = 0; i < this.nucleicAcids.length; i++) {
@@ -114,14 +119,17 @@ export class InteractionsFinder {
 	}
 
 	/**
-	 * Calculates watson crick pairs for DNA chain1 and chain2 must be DNA
+	 * Calculates watson crick pairs for DNA/RNA chain1 and chain2 must be DNA/RNA
 	 * polymers. Calculations are based on chain1 (chain1 is used as
 	 * template strand) and not all chain2
 	 * residues might be included. Most often, lone pairs of chain2 won't
 	 * be included in the result.
+	 *
+	 * This also calculates intrastrand pairs for both RNA and DNA when
+	 * chain1 and chain2 is the same polymer.
 	 */
 	calculateWatsonCrickPairs(chain1: Polymer, chain2: Polymer): Array<Residue[]> {
-		let pairs: Array<Residue[]> = [];
+		const pairs: Array<Residue[]> = [];
 		chain1.residues.forEach((r1) => {
 			let smallestDistance = Infinity;
 			let bestR2: Residue | undefined;
@@ -174,6 +182,13 @@ export class InteractionsFinder {
 				// distance between bases (not their centers) is ~3.4A
 				r1.center.toVec().distanceTo(bestR2.center.toVec()) < 15
 			) {
+				// If we are checking for internal watson crick-pairs, set
+				// the indexes of pairs.
+				if (chain1 === chain2) {
+					r1.watsonCrickPairResidueIndex = bestR2.indexInPolymer;
+					bestR2.watsonCrickPairResidueIndex = r1.indexInPolymer;
+				}
+
 				pairs.push([r1, bestR2]);
 				const r2 = bestR2;
 				console.log(
@@ -183,6 +198,8 @@ export class InteractionsFinder {
 					smallestDistance,
 					isWatsonCrickPair(bestR2, r1),
 				);
+
+				// Fill in the
 			} else {
 				pairs.push([r1]);
 				console.log(
@@ -227,6 +244,13 @@ export class InteractionsFinder {
 
 	findResidueByHash(hash: string): Residue | undefined {
 		return this.residues.get(hash);
+	}
+
+	// After watsonCrick
+	fillInSecondaryStructure() {
+		this.nucleicAcids.forEach((nacid) => {
+			fillSecondaryStructureInitialCoordinates(nacid);
+		});
 	}
 
 	/**

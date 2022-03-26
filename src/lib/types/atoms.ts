@@ -98,6 +98,20 @@ export interface Residue extends ResidueMeta {
 	initial_x?: number;
 	initial_y?: number;
 
+	// If this residue (of RNA/DNA polymer) is paired with another residue
+	// within same polymer, this will be the index of it's pair residue
+	// Undefined or 0 means that this residue does not have intramolecular
+	// pair in this polymer. This value is used to generate vrna pair
+	// table which is later used to generate dot-braket structure
+	// @see
+	// https://www.tbi.univie.ac.at/RNA/ViennaRNA/doc/html/group__struct__utils__pair__table.html#gab124ba58014a97d2fb8c21831e19f107
+	// -1 (instead of 0 as in viennaRNA) means no pair.
+	watsonCrickPairResidueIndex: number;
+
+	// For fast index lookups, so we don't need to loop through all
+	// residues in polymer.
+	indexInPolymer: number;
+
 	/**
 	 * Finds all atoms of this residue which match the given names. Atoms
 	 * are returned as array in the order the names were provided. Only
@@ -117,10 +131,11 @@ export class ResidueImplementation implements Residue {
 	public name: ResidueName;
 	public sequenceNumber: number;
 	public polymerChainIdentifier: string;
-	public initial_x: number;
-	public initial_y: number;
+	public initial_x = 0;
+	public initial_y = 0;
+	public watsonCrickPairResidueIndex = -1;
 
-	constructor() {
+	constructor(public indexInPolymer: number) {
 		this.atoms = [];
 		this.name = "";
 		this.sequenceNumber = -1;

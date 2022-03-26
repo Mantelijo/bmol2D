@@ -62,10 +62,10 @@ short * vrna_ptable_from_string(const char    *string)
   n = strlen(string);
 
   if (n > SHRT_MAX) {
-    // vrna_message_warning("vrna_ptable_from_string: "
-    //                      "Structure too long to be converted to pair table (n=%d, max=%d)",
-    //                      n,
-    //                      SHRT_MAX);
+    vrna_message_warning("vrna_ptable_from_string: "
+                         "Structure too long to be converted to pair table (n=%d, max=%d)",
+                         n,
+                         SHRT_MAX);
     return NULL;
   }
 

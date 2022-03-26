@@ -99,6 +99,11 @@ export function Viewer() {
 			return;
 		}
 
+		iFinder.fillInSecondaryStructure();
+		
+		// Console log the pairs that we have
+		iFinder.nucleicAcids
+
 		// Calculate interactions
 		iFinder.simpleInteractions();
 
@@ -171,8 +176,6 @@ export function Viewer() {
 				});
 			}
 		});
-
-		console.log("Vizualization data:", nodes, links);
 
 		// svg dimensions should fit the container
 		const [w, h] = [

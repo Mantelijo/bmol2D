@@ -267,7 +267,7 @@ export function ForceGraph(
 			.attr("x2", (d: any) => d.initial_x)
 			.attr("y2", (d: any) => d.initial_y);
 
-		nodeGs.attr("transform", (d: any) => `translate(${d.initial_x}, ${d.initial_y})`);
+		nodeGs.attr("transform", (d: any) => `translate(${d.initial_x ?? d.x}, ${d.initial_y ?? d.y})`);
 	}
 
 	function drag(simulation: d3.Simulation<d3.SimulationNodeDatum, undefined>) {
@@ -298,15 +298,23 @@ export function ForceGraph(
 		}
 		return val;
 	};
-	
+
 	let transformK = 1;
+	let [x, y] = [0, 0];
+	const coordThreshold = 5;
 	const zoom = d3
 		.zoom()
 		.scaleExtent([0.001, 100])
 		.on("zoom", ({ transform }) => {
-			console.log("Transform", transform);
-			g.attr("transform", transform);
+			const xDiff = Math.abs(transform.x - x);
+			const yDiff = Math.abs(transform.y - y);
+			if (xDiff > coordThreshold || yDiff > coordThreshold) {
+				x = transform.x;
+				y = transform.y;
+				g.attr("transform", transform);
+			}
 			const newK = Math.sqrt(transform.k);
+
 			if (Math.abs(newK - transformK) > 0.1) {
 				transformK = newK;
 				g.style("stroke-width", 3 / transformK);

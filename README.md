@@ -1,48 +1,49 @@
 # BMol2D
 
-Schematic 2D biomolecule interactions visualizer.
+Schematic RNA/DNA secondary structure visualization tool working entirely in your browser.
 
-## Source structure
+# Building project
 
-- **src** project source code
-  - **components** react components
-  - **lib**
-    - **viz** visualization specific functionality
-    - **types** interfaces and type definitions for atoms, polymers, visualization data structure etc.
+Install `npm_modules`
 
-## TODO List
+```bash
+yarn install
+```
 
-- Universal data structure to accommodate data for visualizations.
-- Correct double stranded DNA interactions between sister strands.
-- Universal Visualization system, that can adapted for multiple types of visualizations.
-  - Visualization types:
-    - Double Stranded DNA - protein interactions
-    - Single Stranded RNA - protein interactions
-    - Double stranded RNA (TBD)
-- Ignore engineered chains DNA/RNA (examples: 5x11)
-- Searching for PDB files via API
-  - Example: https://files.rcsb.org/download/3L1P.pdb (No CORS restrictions, so can be fetched)
+Compile wasm module
 
-## Done list
+```bash
+cd wasm/vienna-rna/ && ./compile_wasm.sh
+```
 
-## Questions
+To compile js assets
 
-- 2dgc - only 1 strand in PDB file (too old format maybe?)
-- Do we always need to reverse the second DNA strand?
-- 1zs4 - long protrusions, is there any generic way to implement correctly?
+```
+yarn build
+```
 
-## TODO
+# Secondary structures
 
-- HETATM pasiziureti (gali buti grandines viduj)
-- 2dgc - biological assemblies MODEL keywordai
-- Pasiziureti su DSSR RNA kaip jie daro (http://wdssr.x3dna.org/index.php/doc/citation)
+RNR secondary structures information generation currently requires globally available
+[MC-Annotate](https://github.com/major-lab/MC-Annotate) executable with python3. To start the
+secondary structure generator, run the following command:
 
-# Aprasymas
+```bash
+python3 ./wasm/coordinates_server.py
+```
 
-- Literaturos apzvalgai - saveikos, amino r, nukleotidu strukturos, viskas kuo daugiau apie chemija o ne software developmentas.
-- Praktikos aprasymas - chemijos ziniu pritaikymas sprendziant ir vizualizuojant
-- Prie rezultatu - pavyzdziai kazokie tyrinejant saveikas
+# Project structure
 
-# Sample structures
+```
+├── build - build directory
+├── public - web assets
+├── src -
+└── wasm
+```
 
-- 5BK4 - very large structure, takes few minutes to load
+# Acknowledgments
+
+- [ViennaRNA](https://github.com/ViennaRNA/ViennaRNA)
+- [MC-Annotate](https://github.com/major-lab/MC-Annotate)
+- [Forgi](https://github.com/ViennaRNA/forgi)
+- [VU Department of Bioinformatics](http://www.bti.vu.lt/en/departments/department-of-bioinformatics)
