@@ -42,6 +42,16 @@ const initialState: State = {
 		}
 		return null;
 	},
+
+	getPolymer: function (chainIdentifier) {
+		if (this.polymers) {
+			const ps = this.polymers.filter((p) => p.chainIdentifier === chainIdentifier);
+			if (ps.length > 0) {
+				return ps[0];
+			}
+		}
+		return null;
+	},
 };
 
 export type HashedResidue = {
@@ -84,8 +94,9 @@ export interface State {
 
 	iFinderInstance?: InteractionsFinder;
 
-	// Residue getter
+	// Residue, Poolymer getters
 	getResidue: (chainIdentifier: string, residueHash: string) => Residue | null;
+	getPolymer: (chainIdentifier: string) => Polymer | null;
 }
 
 /**

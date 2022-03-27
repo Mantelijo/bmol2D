@@ -293,6 +293,8 @@ export class InteractionsFinder {
 											// 	)} (${distanceBetween2Atoms})`,
 											// );
 											const interaction: Interaction = {
+												residueAtom: nucleicAcidAtom,
+												distance: distanceBetween2Atoms,
 												polymerKind: PolymerKind.Protein,
 												type: InteractionType.Threshold,
 												polymerChainIdentifier: proteinResidue.polymerChainIdentifier,
