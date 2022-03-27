@@ -260,6 +260,8 @@ export interface Remark350Transformations {
 export interface PDBFile {
 	polymers: Polymer[];
 	raw: string;
+	// Original PDB file content
+	originalText: string;
 }
 
 /**

@@ -22,12 +22,12 @@ export const fetchDotBraket = async (f: PDBFile) => {
 	// @ts-ignore
 	const url = import.meta.env.VITE_SECONDARY_STRUCTURE_URL;
 	const response = await fetch(url, {
-		body: f.raw,
+		body: f.originalText,
 		mode: "cors",
 		method: "POST",
 	});
 	const data = await response.json();
-	console.log(data);
+	return data;
 };
 
 // Calculates pair table

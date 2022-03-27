@@ -87,8 +87,6 @@ if __name__ == "__main__":
 
     class HTTPHandler(BaseHTTPRequestHandler):
         def do_POST(self):
-            self.send_header("content-type", "application/json")
-            self.send_header("Access-Control-Allow-Origin", "*")
 
             length = self.headers["content-length"]
             pdbPayload = self.rfile.read(int(length))
@@ -96,17 +94,19 @@ if __name__ == "__main__":
             f.write(pdbPayload)
             f.seek(0)
 
-            print(pdbPayload)
-
             # attempt to generate data
             res = bytes(result(f), "utf-8")
-            print(res)
-            self.send_header('content-length', len(res))
+
             self.send_response(200)
+
+            self.send_header('content-length', len(res))
+            self.send_header("content-type", "application/json")
+            self.send_header("Access-Control-Allow-Origin", "*")
             self.end_headers()
 
             self.wfile.write(res)
             self.wfile.flush()
+
 
     # print(main())
 

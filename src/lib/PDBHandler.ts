@@ -28,12 +28,13 @@ export class PDBHandler {
 		if (this.file == undefined) {
 			throw Error("file not provided");
 		}
-		let text = await this.file.text();
+		const text = await this.file.text();
 		return this.format(text);
 	}
 
 	format(text: string): PDBFile {
 		return {
+			originalText: text,
 			raw: this.formatText(text),
 			polymers: this.formatPolymers(text),
 		};
