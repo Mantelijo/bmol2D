@@ -1,4 +1,4 @@
-import React, { useContext, ReactElement, useEffect } from "react";
+import React, { useContext, ReactElement, useEffect, useMemo } from "react";
 import { Viewer } from "./components/Viewer";
 import { DataFetcher } from "./components/DataFetcher";
 import Spinner from "./components/Spinner";
@@ -6,6 +6,8 @@ import { StoreComponent, context } from "./Store";
 
 // @ts-ignore
 import Module from "./wasm/naview.js";
+import { Residue } from "./lib/types/atoms";
+import { ResidueModal } from "./components/ResidueModal";
 
 export function App() {
 	const [state, dispatch] = useContext(context);
@@ -17,6 +19,11 @@ export function App() {
 		};
 	}, []);
 
+	const selectedResidue = useMemo<Residue | undefined>(() => {
+		if (state.iFinderInstance && state.selectedResidueHash) {
+			return state.iFinderInstance.findResidueByHash(state.selectedResidueHash);
+		}
+	}, [state.selectedResidueHash]);
 	return (
 		<div className="flex flex-row w-full">
 			{!state.isWasmModuleLoading && (
@@ -35,6 +42,7 @@ export function App() {
 					<div className="z-10 w-3/12">
 						<DataFetcher />
 					</div>
+					{selectedResidue && <ResidueModal residue={selectedResidue} />}
 				</>
 			)}
 			{state.isWasmModuleLoading && (

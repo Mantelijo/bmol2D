@@ -71,10 +71,10 @@ export class InteractionsFinder {
 				// something should be done about this, because pair
 				// discrepancies should not happen.
 				if (!pairFoundIn1) {
-					console.log(
-						`watsonCrickPairs: matching pair was not found ${pair[1].polymerChainIdentifier}:${pair[1].sequenceNumber}${pair[1].name}---${pair[0].polymerChainIdentifier}:${pair[0].sequenceNumber}${pair[0].name}`,
-						pair,
-					);
+					// console.log(
+					// 	`watsonCrickPairs: matching pair was not found ${pair[1].polymerChainIdentifier}:${pair[1].sequenceNumber}${pair[1].name}---${pair[0].polymerChainIdentifier}:${pair[0].sequenceNumber}${pair[0].name}`,
+					// 	pair,
+					// );
 				}
 			}
 		});
@@ -111,7 +111,7 @@ export class InteractionsFinder {
 				this.nucleicAcids[i],
 			);
 			if (generatePairs.length > 0) {
-				console.log("SIMILAR PAIRS", generatePairs);
+				// console.log("SIMILAR PAIRS", generatePairs);
 				allPairs.push(...generatePairs);
 			}
 		}
@@ -191,21 +191,21 @@ export class InteractionsFinder {
 
 				pairs.push([r1, bestR2]);
 				const r2 = bestR2;
-				console.log(
-					"Smallest distance: ",
-					`${chain1.kind}-${r1.polymerChainIdentifier}:${r1.sequenceNumber}${r1.name}`,
-					`${chain2.kind}-${r2.polymerChainIdentifier}:${r2.sequenceNumber}${r2.name}`,
-					smallestDistance,
-					isWatsonCrickPair(bestR2, r1),
-				);
+				// console.log(
+				// 	"Smallest distance: ",
+				// 	`${chain1.kind}-${r1.polymerChainIdentifier}:${r1.sequenceNumber}${r1.name}`,
+				// 	`${chain2.kind}-${r2.polymerChainIdentifier}:${r2.sequenceNumber}${r2.name}`,
+				// 	smallestDistance,
+				// 	isWatsonCrickPair(bestR2, r1),
+				// );
 
 				// Fill in the
 			} else {
 				pairs.push([r1]);
-				console.log(
-					`No pair for: ${chain1.kind} ${r1.polymerChainIdentifier}:${r1.sequenceNumber}${r1.name}, smallest distance: ${smallestDistance}`,
-					bestR2,
-				);
+				// console.log(
+				// 	`No pair for: ${chain1.kind} ${r1.polymerChainIdentifier}:${r1.sequenceNumber}${r1.name}, smallest distance: ${smallestDistance}`,
+				// 	bestR2,
+				// );
 			}
 		});
 		return pairs;
@@ -273,11 +273,11 @@ export class InteractionsFinder {
 							const c = cAlpha[0];
 							const d = nucleicAcidResidue.center.toVec().distanceTo(c.coords.toVec());
 							if (d <= THRESHOLD_CALPHA) {
-								console.log(
-									`Possible interaction between: ${resToId(proteinResidue)} and ${resToId(
-										nucleicAcidResidue,
-									)} (${d})`,
-								);
+								// console.log(
+								// 	`Possible interaction between: ${resToId(proteinResidue)} and ${resToId(
+								// 		nucleicAcidResidue,
+								// 	)} (${d})`,
+								// );
 								// Check each atom of both resiudes
 								nucleicAcidResidue.atoms.forEach((nucleicAcidAtom) => {
 									proteinResidue.atoms.forEach((proteinAtom) => {
@@ -287,11 +287,11 @@ export class InteractionsFinder {
 
 										// Here we have an interaction
 										if (distanceBetween2Atoms <= THRESHOLD) {
-											console.log(
-												`	Interaction between: ${atomToId(proteinAtom)} and ${atomToId(
-													nucleicAcidAtom,
-												)} (${distanceBetween2Atoms})`,
-											);
+											// console.log(
+											// 	`	Interaction between: ${atomToId(proteinAtom)} and ${atomToId(
+											// 		nucleicAcidAtom,
+											// 	)} (${distanceBetween2Atoms})`,
+											// );
 											const interaction: Interaction = {
 												polymerKind: PolymerKind.Protein,
 												type: InteractionType.Threshold,

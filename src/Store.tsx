@@ -1,4 +1,5 @@
 import React, { createContext, useReducer, ReactElement } from "react";
+import { InteractionsFinder } from "./lib/InteractionsFinder";
 import { DotBraket } from "./lib/SecondaryStructure";
 import { Polymer, Residue } from "./lib/types/atoms";
 import { PDBFile } from "./lib/types/atoms";
@@ -22,6 +23,9 @@ const initialState: State = {
 	error: "",
 
 	selectedResidueHash: undefined,
+	secondaryStructures: [],
+
+	iFinderInstance: undefined,
 
 	getResidue: function (chainIdentifier, hash) {
 		if (this.polymers.length === 0) {
@@ -65,7 +69,7 @@ export interface State {
 	// Data to be visualized
 	viz: Visualization;
 
-	// Currently displayed pdb id
+	// Currently displayed pdb id or file name
 	currentPDBId: string;
 
 	// Currently displayed residue information selectedResidue?: Residue;
@@ -77,6 +81,8 @@ export interface State {
 	// Here we store secondary structure information in dot braket
 	// notation. This information comes from secondary_structure.py file
 	secondaryStructures: DotBraket[];
+
+	iFinderInstance?: InteractionsFinder;
 
 	// Residue getter
 	getResidue: (chainIdentifier: string, residueHash: string) => Residue | null;

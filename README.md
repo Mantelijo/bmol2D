@@ -35,7 +35,7 @@ If you wish to generate secondary structures for RNA molecules, see
 
 # Secondary structures
 
-RNR secondary structures information generation currently uses
+RNA secondary structures information generation currently uses
 [Forgi Library v1.0](https://github.com/ViennaRNA/forgi/tree/v1.0) and requires globally available
 [MC-Annotate](https://github.com/major-lab/MC-Annotate) executable with python3. Make sure you have
 these dependencies installed on your system. To start the secondary structure generator, run the
@@ -56,8 +56,8 @@ coordinates that are required to display RNA secondary structures.
 ```
 ├── build - build directory
 ├── public - web assets
-├── src -
-└── wasm
+├── src - web app
+└── wasm - naview algorithm extracted from viennaRNA package and some other libraries used to generate secondary structures
 ```
 
 # Acknowledgments

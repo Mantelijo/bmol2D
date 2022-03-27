@@ -81,6 +81,13 @@ export function Viewer() {
 		}
 	}, [polymers]);
 
+	useEffect(() => {
+		dispatch({
+			payload: iFinder,
+			type: "iFinderInstance",
+		});
+	}, [iFinder]);
+
 	function initD3() {
 		if (!ref || polymers.length <= 0 || !iFinder) {
 			return;
@@ -99,10 +106,12 @@ export function Viewer() {
 			return;
 		}
 
+		// Find if we have any RNA molecules and fill in their secondary
+		// structure if possible
 		iFinder.fillInSecondaryStructure();
-		
+
 		// Console log the pairs that we have
-		iFinder.nucleicAcids
+		iFinder.nucleicAcids;
 
 		// Calculate interactions
 		iFinder.simpleInteractions();
@@ -197,16 +206,16 @@ export function Viewer() {
 			} as any,
 		);
 
+		// console.log("Visualization nodes");
+		// console.table(nodes);
+
+		// console.log("Visualization links");
+		// console.table(links);
+
 		console.timeEnd("Nucleic_acid_VIZ");
 	}
 
 	useEffect(initD3, [polymers]);
-
-	const selectedResidue = useMemo<Residue | undefined>(() => {
-		if (iFinder && state.selectedResidueHash) {
-			return iFinder.findResidueByHash(state.selectedResidueHash);
-		}
-	}, [state.selectedResidueHash]);
 
 	return (
 		<>
@@ -214,27 +223,6 @@ export function Viewer() {
 			<div className="flex flex-col items-center h-full p-5" ref={containerRef}>
 				<div className="relative h-full min-w-full">
 					<svg ref={ref}></svg>
-					{selectedResidue && (
-						<div
-							className="
-								text-xs p-4
-								absolute bottom-[10px] right-[10px]
-								w-[50%] h-[100px] bg-indigo-400
-								overflow-auto text-white rounded-lg
-							"
-						>
-							<div>Chain: {selectedResidue.polymerChainIdentifier}</div>
-							<div>
-								Residue: {selectedResidue.name}:{selectedResidue.sequenceNumber}
-							</div>
-							<div>
-								Interactions:{" "}
-								{selectedResidue.interactions.map((i) => (
-									<div>{JSON.stringify(i)}</div>
-								))}
-							</div>
-						</div>
-					)}
 				</div>
 				<div ref={tooltip} style={{ position: "absolute", opacity: 0, background: "#fff" }}></div>
 			</div>

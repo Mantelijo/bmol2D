@@ -1,4 +1,4 @@
-import { fetchDotBraket } from "@/lib/SecondaryStructure";
+import { DotBraket, fetchDotBraket, resetLastMaxX } from "@/lib/SecondaryStructure";
 import React, { ChangeEventHandler, ChangeEvent, useEffect, useContext, useRef } from "react";
 import { PDBHandler } from "../lib/PDBHandler";
 import { PDBFile, Polymer } from "../lib/types/atoms";
@@ -58,7 +58,6 @@ export function DataFetcher() {
 		startLoading();
 		const pdb = new PDBHandler().format(await fetchPDBFile(id));
 		updatePDBState(pdb);
-		updatePolymers(pdb.polymers);
 		updateCurrentPDBId(id);
 	};
 
@@ -72,9 +71,10 @@ export function DataFetcher() {
 		}
 	}, []);
 
-	// Updates pbd file information from uploaded file, parses pdb data and performs interaction calculations
+	// Updates pbd file information from uploaded file, parses pdb data
+	// and performs interaction calculations
 	const handleFileChange: ChangeEventHandler<HTMLInputElement> = async (event: ChangeEvent) => {
-		const f = (event.target as HTMLInputElement).files?.item(0);
+		const f = (event.target as HTMLInputElement).files?.item(0) as File;
 		if (f !== null) {
 			resetState();
 			// Show spinner while loading
@@ -83,14 +83,13 @@ export function DataFetcher() {
 			// Read and parse the file
 			console.time("TIME_TO_PARSE_EVERYTHING");
 			console.time("TIME_TO_PARSE_PDB");
-			const pdb = await new PDBHandler(f as File).readData();
+			const pdb = await new PDBHandler(f).readData();
 			console.timeEnd("TIME_TO_PARSE_PDB");
 
 			// Update state with parsed values
 			updatePDBState(pdb);
-			updatePolymers(pdb.polymers);
+			updateCurrentPDBId(f.name);
 
-			// Some fake loading time, so we get to see the spinner :)
 			console.timeEnd("TIME_TO_PARSE_EVERYTHING");
 		}
 	};
@@ -117,12 +116,15 @@ export function DataFetcher() {
 		}
 	};
 
-	// Fetch the dot braket information for given pdb file
+	// Fetch the dot braket information and update the polymers for freshly
+	// added pdb file. This effect should run on every pdb id/file change
 	useEffect(() => {
+		resetLastMaxX();
 		(async () => {
 			if (state.pdb) {
+				let dotBraket: undefined | DotBraket[];
 				try {
-					const dotBraket = await fetchDotBraket(state.pdb);
+					dotBraket = await fetchDotBraket(state.pdb);
 				} catch (e) {
 					dispatch({
 						type: "error",
@@ -130,13 +132,30 @@ export function DataFetcher() {
 					});
 				}
 
+				if (dotBraket) {
+					dispatch({
+						payload: dotBraket,
+						type: "secondaryStructures",
+					});
+
+					// Fill in the dot braket strings
+					state.pdb.polymers.forEach((p) => {
+						dotBraket?.forEach((d) => {
+							if (d.chain_id === p.chainIdentifier) {
+								p.dotBraket = d.dot_braket;
+							}
+						});
+					});
+				}
+
+				updatePolymers(state.pdb.polymers);
 				stopLoading();
 			}
 		})();
-	}, [state.pdb?.raw]);
+	}, [state.pdb]);
 
-	// Update pdbIdRef value whenever pdb id changes
-	// Render data fetcher box
+	// Update pdbIdRef value whenever pdb id changes Render data fetcher
+	// box
 	return (
 		<div className="max-h-screen p-5 overflow-auto break-words">
 			{!state.isLoading && (

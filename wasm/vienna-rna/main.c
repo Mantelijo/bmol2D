@@ -18,14 +18,11 @@ COORDINATE* secondaryStructureFromPairTable(short *table){
   short length = table[0];
   
   // Print out the table structure
-  printf("pair table from pair table:\n[");
-  for(int i=0;i<length;i++){
-    printf("%hu,", table[i]);
-  }
-  printf("]\n");
-
-
-  printf("The lenght of array: %hu\n", length);
+  // printf("pair table from pair table:\n[");
+  // for(int i=0;i<length;i++){
+  //   printf("%hu,", table[i]);
+  // }
+  // printf("]\n");
 
     COORDINATE *coords = (COORDINATE *) vrna_alloc((length+1)*sizeof(COORDINATE));
     float *X = (float *) vrna_alloc((length+1)*sizeof(float));
@@ -50,12 +47,12 @@ COORDINATE* secondaryStructureFromDotBraket(char *structure){
   short *table = vrna_ptable(structure);
   short length = (short) strlen(structure);
 
-    // Print out the table structure
-  printf("pair table from dot braket:\n["); 
-  for(int i=0;i<length;i++){
-    printf("%hu,", table[i]);
-  }
-  printf("]\n");
+  // Print out the table structure
+  // printf("pair table from dot braket:\n["); 
+  // for(int i=0;i<length;i++){
+  //   printf("%hu,", table[i]);
+  // }
+  // printf("]\n");
 
 
   COORDINATE *coords = (COORDINATE *) vrna_alloc((length+1)*sizeof(COORDINATE));

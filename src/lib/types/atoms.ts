@@ -237,6 +237,9 @@ export interface Polymer {
 
 	// if true - chain was generated from remark 350 transformation
 	generatedFromTransform?: boolean;
+
+	// if Polymer is RNA, we might have a dotBraket string for secondary structure.
+	dotBraket?: string;
 }
 
 export class PolymerImplementation {

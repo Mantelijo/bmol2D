@@ -7,14 +7,14 @@ const dotBraketExample =
 
 // Based on provided pairTable (see vrna_ptable), attempts to
 // calculate secondary structure coordinates for RNA/DNA
+// PAIRTABLE CALCULATION CURRENTLY DOES NOT WORK ON JS SIDE, PSEUDOKNOTS
+// MUST BE REMOVED IN ORDER TO DISPLAY CORRECT STRUCTURES, SO WE MUST
+// FETCH THE DOT-BRAKET STRUCTURE VIA PYTHON FORGI LIB.
 export const calculateSecondaryStructureCoordinates: (
 	pairTable: number[],
 ) => Array<[number, number]> = (pairTable) => {
 	const len = pairTable.length;
 	const secondaryStructure = Module.cwrap("secondaryStructureFromPairTable", "number", ["array"]);
-
-	console.log("PAIRTABLE OUR", pairTable);
-	return calculateSecondaryStructureCoordinatesFromDotBraket(dotBraketExample);
 
 	// This will be the pointer for coordinates float array. Note that
 	// the array must be of size 2*len, otherwise something went wrong.
