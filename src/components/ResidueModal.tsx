@@ -34,8 +34,6 @@ export const ResidueModal = ({ residue }: props) => {
 			payload: r.hash,
 		});
 	};
-
-	const calculateDistanceToAtom = () => {};
 	return (
 		<div>
 			<div className="fixed top-0 left-0 z-[999]">

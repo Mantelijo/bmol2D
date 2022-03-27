@@ -43,6 +43,18 @@ const initialState: State = {
 		return null;
 	},
 
+	getResidueByHashOnly: function (hash) {
+		for (let i = 0; i < this.polymers.length; i++) {
+			const p = this.polymers[i];
+			for (let j = 0; j < p.residues.length; j++) {
+				if (p.residues[j].hash === hash) {
+					return p.residues[j];
+				}
+			}
+		}
+		return null;
+	},
+
 	getPolymer: function (chainIdentifier) {
 		if (this.polymers) {
 			const ps = this.polymers.filter((p) => p.chainIdentifier === chainIdentifier);
@@ -94,8 +106,9 @@ export interface State {
 
 	iFinderInstance?: InteractionsFinder;
 
-	// Residue, Poolymer getters
+	// Residue, Polymer getters
 	getResidue: (chainIdentifier: string, residueHash: string) => Residue | null;
+	getResidueByHashOnly: (residueHash: string) => Residue | null;
 	getPolymer: (chainIdentifier: string) => Polymer | null;
 }
 

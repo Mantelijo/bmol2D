@@ -1,4 +1,4 @@
-import React, { useCallback, useContext, useEffect, useMemo } from "react";
+import React, { useCallback, useContext, useEffect, useMemo, useState } from "react";
 import {
 	Atom,
 	Polymer,
@@ -87,6 +87,16 @@ export function Viewer() {
 			type: "iFinderInstance",
 		});
 	}, [iFinder]);
+
+	// Shows some small residue information when residue bubble is hovered
+	// over in visualization
+	const [hoverResidueHash, setHoverResidueHash] = useState<string | undefined>();
+	const hoverResidue = useMemo<Residue | null>(() => {
+		if (hoverResidueHash) {
+			return state.getResidueByHashOnly(hoverResidueHash);
+		}
+		return null;
+	}, [hoverResidueHash]);
 
 	function initD3() {
 		if (!ref || polymers.length <= 0 || !iFinder) {
@@ -199,6 +209,7 @@ export function Viewer() {
 				links,
 				svgRef: ref.current as SVGSVGElement,
 				dispatch,
+				setHoverResidueHash,
 			},
 			{
 				width: w,
@@ -223,6 +234,13 @@ export function Viewer() {
 			<div className="flex flex-col items-center h-full p-5" ref={containerRef}>
 				<div className="relative h-full min-w-full">
 					<svg ref={ref}></svg>
+
+					{hoverResidue && (
+						<div className="absolute bottom-0 text-sm text-gray-800 right-4">
+							Chain {hoverResidue.polymerChainIdentifier}
+							<br /> Residue {hoverResidue.name}-{hoverResidue.sequenceNumber}
+						</div>
+					)}
 				</div>
 				<div ref={tooltip} style={{ position: "absolute", opacity: 0, background: "#fff" }}></div>
 			</div>

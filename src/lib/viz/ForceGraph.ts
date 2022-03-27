@@ -45,6 +45,7 @@ type ForceGraphParam = {
 	links: Link[];
 	svgRef: SVGSVGElement;
 	dispatch: React.Dispatch<Action>;
+	setHoverResidueHash: React.Dispatch<React.SetStateAction<string | undefined>>;
 };
 
 type ForceGraphOpts = {
@@ -87,6 +88,7 @@ export function ForceGraph(
 		links, // an iterable of link objects (typically [{source, target}, …])
 		svgRef, // d3 svg object
 		dispatch,
+		setHoverResidueHash,
 	}: ForceGraphParam,
 	opts: ForceGraphOpts,
 ) {
@@ -225,6 +227,7 @@ export function ForceGraph(
 			d3.select(this)
 				.select("circle")
 				.attr("r", transformAdjusted(NodeRadius * 2));
+			setHoverResidueHash(d.hash);
 			if (new Date().getTime() - lastEvent.getTime() > POPUP_TIMEOUT) {
 				// dispatch({
 				// 	type: "selectedResidue",
@@ -236,6 +239,7 @@ export function ForceGraph(
 		.on("mouseout", function (event, d: Node) {
 			// transform adjusted radius if needed
 			d3.select(this).select("circle").attr("r", transformAdjusted(NodeRadius));
+			setHoverResidueHash(undefined);
 
 			// dispatch({
 			// 	type: "selectedResidue",
