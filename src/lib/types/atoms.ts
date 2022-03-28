@@ -131,8 +131,8 @@ export class ResidueImplementation implements Residue {
 	public name: ResidueName;
 	public sequenceNumber: number;
 	public polymerChainIdentifier: string;
-	public initial_x = 0;
-	public initial_y = 0;
+	public initial_x:number|undefined = undefined;
+	public initial_y:number|undefined = undefined
 	public watsonCrickPairResidueIndex = -1;
 
 	constructor(public indexInPolymer: number) {
@@ -145,8 +145,6 @@ export class ResidueImplementation implements Residue {
 		this.polymerChainIdentifier = "";
 		this.v = Vector.infinity();
 		this.o = Vector.infinity();
-		this.initial_x = 0;
-		this.initial_y = 0;
 	}
 
 	findAtomsByNames(names: string[]): Atom[] {

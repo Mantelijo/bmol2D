@@ -38,7 +38,7 @@ const ColorMap: cmap = {
 	[RNAResidues.C]: "#a3c907",
 	[RNAResidues.I]: "#a3c907",
 
-	interaction: "#333",
+	interaction: "#fbf8cc",
 };
 
 const AT_LINK = "red";
@@ -56,7 +56,7 @@ const LinkColorMap: cmap = {
 	[RNAResidues.C]: GC_LINK,
 	[RNAResidues.I]: GC_LINK,
 
-	interaction: "#718355",
+	interaction: "#bbb",
 };
 
 // Chain backbone color
@@ -144,7 +144,7 @@ export function Viewer() {
 					initial_y: r.initial_y,
 				});
 
-				// Collect links to previous residue in same chain
+				// Collect backbone links to previous residue in same chain
 				const residues = chain.residues;
 				if (index > 0 && index < residues.length) {
 					links.push({
@@ -236,7 +236,7 @@ export function Viewer() {
 					<svg ref={ref}></svg>
 
 					{hoverResidue && (
-						<div className="absolute bottom-0 text-sm text-gray-800 right-4">
+						<div className="absolute bottom-0 p-4 text-sm text-gray-800 bg-white/50 right-4 rounded-xl">
 							Chain {hoverResidue.polymerChainIdentifier}
 							<br /> Residue {hoverResidue.name}-{hoverResidue.sequenceNumber}
 						</div>

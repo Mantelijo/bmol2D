@@ -55,9 +55,8 @@ def getPDBFile(pdbId):
     return out
 
 
-def result(tempPdbFile):
+def getDotBraketStructures(tempPdbFile):
     pdbparser = PDBParser()
-
     result = []
     pdbFilePath = tempPdbFile.name
     struct = pdbparser.get_structure("struct", pdbFilePath)
@@ -79,7 +78,11 @@ def result(tempPdbFile):
                 # "coords": positions,
                 "dot_braket": dotBraket,
             })
-    return json.dumps(result)
+    return result
+
+
+def result(tempPdbFile):
+    return json.dumps(getDotBraketStructures(tempPdbFile))
 
 
 if __name__ == "__main__":
@@ -106,7 +109,6 @@ if __name__ == "__main__":
 
             self.wfile.write(res)
             self.wfile.flush()
-
 
     # print(main())
 

@@ -112,7 +112,7 @@ export function DataFetcher() {
 	const handlePDBIdChange = () => {
 		const pdbId = pdbIdRef.current?.value;
 		if (pdbId) {
-			loadPDBID(pdbId);
+			loadPDBID(pdbId.toString().trim());
 		}
 	};
 
@@ -206,12 +206,30 @@ export function DataFetcher() {
 							</div>
 						</div>
 						<div className="mb-2 font-bold text-gray-600 text-normal">
-							Or choose a PDB file to display:
+							Or choose a PDB id/file/sample to display:
 							<div className="text-xs font-normal">
 								PDB file should contain <b>DNA/RNA</b> structures
 							</div>
 						</div>
 						<input type="file" onChange={handleFileChange} className="max-w-full" />
+						<div className="flex flex-row gap-1 mt-6 font-bold">
+							<div className="text-gray-600 text-normal">Or choose</div>
+							<div
+								className="text-indigo-600 cursor-pointer text-normal hover:underline hover:text-indigo-800"
+								onClick={() =>
+									dispatch({
+										type: "showSamplesModal",
+										payload: true,
+									})
+								}
+							>
+								one of pre-defined samples
+							</div>
+						</div>
+						<div className="text-xs font-normal">
+							Which will also contain secondary structures, if you can't run secondary structure
+							generator script.
+						</div>
 					</div>
 				</div>
 			)}

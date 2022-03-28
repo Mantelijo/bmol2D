@@ -8,12 +8,16 @@ import { StoreComponent, context } from "./Store";
 import Module from "./wasm/naview.js";
 import { Residue } from "./lib/types/atoms";
 import { ResidueModal } from "./components/ResidueModal";
+import { loadSamples } from "./lib/Samples";
+import { PreDefinedSamplesModal } from "./components/PreDefinedSamplesModal";
 
 export function App() {
 	const [state, dispatch] = useContext(context);
 
-	// Wait until wasm module for secondary structure is initialized
+	// Load some deps
 	useEffect(() => {
+		loadSamples(dispatch);
+		// Wait until wasm module for secondary structure is initialized
 		Module.onRuntimeInitialized = async () => {
 			dispatch({ type: "isWasmModuleLoading", payload: false });
 		};
@@ -24,6 +28,7 @@ export function App() {
 			return state.iFinderInstance.findResidueByHash(state.selectedResidueHash);
 		}
 	}, [state.selectedResidueHash]);
+
 	return (
 		<div className="flex flex-row w-full">
 			{!state.isWasmModuleLoading && (
@@ -43,6 +48,7 @@ export function App() {
 						<DataFetcher />
 					</div>
 					{selectedResidue && <ResidueModal residue={selectedResidue} />}
+					<PreDefinedSamplesModal />
 				</>
 			)}
 			{state.isWasmModuleLoading && (

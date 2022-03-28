@@ -16,8 +16,15 @@ export interface Node {
 	initial_x?: number;
 	initial_y?: number;
 
+	// d3-force specific values
 	x?: number;
 	y?: number;
+
+	vx?: number;
+	vy?: number;
+
+	fx?: number;
+	fy?: number;
 }
 
 export enum NodeType {
@@ -123,9 +130,14 @@ export function ForceGraph(
 	if (nodeTitle === undefined) nodeTitle = (_: never, i: number) => N[i];
 	const W = typeof linkStrokeWidth !== "function" ? null : d3.map(links, linkStrokeWidth);
 
-	// Replace the input nodes and links with mutable objects for the
-	// simulation.
-	nodes = initialNodes;
+	nodes = initialNodes.map((n: Node) => {
+		// Fill in fixed coordinates if initial coordinates are present
+		if (n.initial_x && n.initial_y) {
+			n.fx = n.initial_x;
+			n.fy = n.initial_y;
+		}
+		return n;
+	});
 	links = initialLinks;
 
 	// Construct the forces.
@@ -154,11 +166,29 @@ export function ForceGraph(
 				case LinkType.Backbone:
 					return 1.8;
 				case LinkType.Interaction:
-					return 1;
+					return 1.5;
 				default:
 					return 1.2;
 			}
 		});
+
+	const ticked = () => {
+		link
+			.attr("x1", (d: any) => {
+				return d.source.x;
+			})
+			.attr("y1", (d: any) => {
+				return d.source.y;
+			})
+			.attr("x2", (d: any) => {
+				return d.target.x;
+			})
+			.attr("y2", (d: any) => {
+				return d.target.y;
+			});
+
+		nodeGs.attr("transform", (d: any) => `translate(${d.x}, ${d.y})`);
+	};
 
 	const simulation = d3
 		.forceSimulation(nodes as any)
@@ -254,7 +284,15 @@ export function ForceGraph(
 		.attr("text-anchor", "middle")
 		.attr("font-size", Letters.size)
 		.attr("y", Letters.y) // more centered text
-		.attr("class", "svg-graph-text");
+		.attr("class", (d: Node) => {
+			const classes = ["svg-graph-text"];
+			if (d.type === NodeType.InteractionsNumber) {
+				classes.push("svg-graph-text-black");
+			} else {
+				classes.push("svg-graph-text-white");
+			}
+			return classes.join(" ");
+		});
 
 	if (W) link.attr("stroke-width", (d: any) => W[d.index] as any);
 	// if (T) node.append("title").text((d: any) => T[d.index] as any);
@@ -264,16 +302,7 @@ export function ForceGraph(
 		return value !== null && typeof value === "object" ? value.valueOf() : value;
 	}
 
-	function ticked() {
-		link
-			.attr("x1", (d: any) => d.initial_x)
-			.attr("y1", (d: any) => d.initial_y)
-			.attr("x2", (d: any) => d.initial_x)
-			.attr("y2", (d: any) => d.initial_y);
-
-		nodeGs.attr("transform", (d: any) => `translate(${d.initial_x ?? d.x}, ${d.initial_y ?? d.y})`);
-	}
-
+	// Drag functionality
 	function drag(simulation: d3.Simulation<d3.SimulationNodeDatum, undefined>) {
 		function dragstarted(event: any) {
 			if (!event.active) simulation.alphaTarget(0.3).restart();
@@ -288,8 +317,8 @@ export function ForceGraph(
 
 		function dragended(event: any) {
 			if (!event.active) simulation.alphaTarget(0);
-			event.subject.fx = null;
-			event.subject.fy = null;
+			// event.subject.fx = event.subject.initial_x;
+			// event.subject.fy = event.subject.initial_y;
 		}
 
 		return d3.drag().on("start", dragstarted).on("drag", dragged).on("end", dragended);

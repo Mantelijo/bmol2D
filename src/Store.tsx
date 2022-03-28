@@ -1,5 +1,6 @@
 import React, { createContext, useReducer, ReactElement } from "react";
 import { InteractionsFinder } from "./lib/InteractionsFinder";
+import { Sample } from "./lib/Samples";
 import { DotBraket } from "./lib/SecondaryStructure";
 import { Polymer, Residue } from "./lib/types/atoms";
 import { PDBFile } from "./lib/types/atoms";
@@ -26,6 +27,10 @@ const initialState: State = {
 	secondaryStructures: [],
 
 	iFinderInstance: undefined,
+	sampleStructures: [],
+
+	// ui
+	showSamplesModal: false,
 
 	getResidue: function (chainIdentifier, hash) {
 		if (this.polymers.length === 0) {
@@ -106,6 +111,14 @@ export interface State {
 
 	iFinderInstance?: InteractionsFinder;
 
+	// Samples with pre loaded secondary dot-braket structures, so user
+	// does not need to start the secondary_structure generator script
+	sampleStructures: Sample[];
+
+	// Some ui state
+	// TODO maybe extract to separate context
+	showSamplesModal: boolean;
+
 	// Residue, Polymer getters
 	getResidue: (chainIdentifier: string, residueHash: string) => Residue | null;
 	getResidueByHashOnly: (residueHash: string) => Residue | null;
@@ -126,7 +139,8 @@ const context = createContext<[State, React.Dispatch<Action>]>([initialState, ()
 const reducer = (state: State, { type, payload }: Action): State => {
 	switch (type) {
 		case "resetState":
-			return { ...initialState };
+			// Sample structures must remain unchanged
+			return { ...initialState, sampleStructures: state.sampleStructures };
 		// Default case works when type is equal state property name
 		default:
 			if (type in state) {

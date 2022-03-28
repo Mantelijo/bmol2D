@@ -5,6 +5,10 @@
 #include "utils/structure.h"
 #include "naview.h"
 
+// Expands coordinates, making the output less crowded if value > 1 and
+// more crowded if value < 1. For Bmol2D it looks like 1.5 is a good value
+float EXPAND_FACTOR = 2.0f;
+
 typedef struct {
   float X;  /* X coords */
   float Y;  /* Y coords */
@@ -17,10 +21,8 @@ COORDINATE* secondaryStructureFromPairTable(short *table){
   int i;
   short length = table[0];
   
-  // Print out the table structure
-  // printf("pair table from pair table:\n[");
-  // for(int i=0;i<length;i++){
-  //   printf("%hu,", table[i]);
+  // Print out the table structure printf("pair table from pair
+  // table:\n["); for(int i=0;i<length;i++){ printf("%hu,", table[i]);
   // }
   // printf("]\n");
 
@@ -31,8 +33,8 @@ COORDINATE* secondaryStructureFromPairTable(short *table){
     naview_xy_coordinates(table, X, Y);
 
     for(i=0;i<=length;i++){
-      coords[i].X = X[i];
-      coords[i].Y = Y[i];
+      coords[i].X = X[i] * EXPAND_FACTOR;
+      coords[i].Y = Y[i] * EXPAND_FACTOR;
     }
 
     free(table);
@@ -47,10 +49,8 @@ COORDINATE* secondaryStructureFromDotBraket(char *structure){
   short *table = vrna_ptable(structure);
   short length = (short) strlen(structure);
 
-  // Print out the table structure
-  // printf("pair table from dot braket:\n["); 
-  // for(int i=0;i<length;i++){
-  //   printf("%hu,", table[i]);
+  // Print out the table structure printf("pair table from dot
+  // braket:\n["); for(int i=0;i<length;i++){ printf("%hu,", table[i]);
   // }
   // printf("]\n");
 
@@ -62,8 +62,8 @@ COORDINATE* secondaryStructureFromDotBraket(char *structure){
   naview_xy_coordinates(table, X, Y);
 
   for(i=0;i<=length;i++){
-    coords[i].X = X[i];
-    coords[i].Y = Y[i];
+    coords[i].X = X[i] * EXPAND_FACTOR;
+    coords[i].Y = Y[i] * EXPAND_FACTOR;
   }
   free(table);
   free(X);
