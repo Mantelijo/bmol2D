@@ -11,7 +11,8 @@
 			"program": "${file}",
 			"console": "integratedTerminal",
 			"justMyCode": true,
-			"args": ["3q1q"]
+			"args": ["3q1q"],
+			"cwd": "${workspaceFolder}/wasm"
 		},
 		{
 			"type": "pwa-chrome",

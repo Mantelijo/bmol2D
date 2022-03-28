@@ -1,8 +1,9 @@
+import { Sample } from "@/lib/Samples";
 import { DotBraket, fetchDotBraket, resetLastMaxX } from "@/lib/SecondaryStructure";
 import React, { ChangeEventHandler, ChangeEvent, useEffect, useContext, useRef } from "react";
 import { PDBHandler } from "../lib/PDBHandler";
 import { PDBFile, Polymer } from "../lib/types/atoms";
-import { context } from "../Store";
+import { context, samplesContext } from "../Store";
 
 // Fetch PDB text for given id (if valid)
 const fetchPDBFile = async (id: string): Promise<string> => {
@@ -13,6 +14,7 @@ const fetchPDBFile = async (id: string): Promise<string> => {
 
 export function DataFetcher() {
 	const [state, dispatch] = useContext(context);
+	const [samplesState, samplesDispatch] = useContext(samplesContext);
 
 	const startLoading = () => {
 		dispatch({
@@ -124,7 +126,16 @@ export function DataFetcher() {
 			if (state.pdb) {
 				let dotBraket: undefined | DotBraket[];
 				try {
-					dotBraket = await fetchDotBraket(state.pdb);
+					// If we are currently viewing a sample - grab it's
+					// dot braket from samplesState
+					if (samplesState.currentlySelectedSamplePDBID) {
+						const sample = samplesState.sampleStructures.get(
+							samplesState.currentlySelectedSamplePDBID,
+						) as Sample;
+						dotBraket = sample.chains;
+					} else {
+						dotBraket = await fetchDotBraket(state.pdb);
+					}
 				} catch (e) {
 					dispatch({
 						type: "error",
@@ -150,9 +161,24 @@ export function DataFetcher() {
 
 				updatePolymers(state.pdb.polymers);
 				stopLoading();
+
+				// Make sure we clean up sample information so later
+				// request don't take old information from
+				// currentlySelectedSamplePDBID
+				samplesDispatch({
+					type: "currentlySelectedSamplePDBID",
+					payload: undefined,
+				});
 			}
 		})();
 	}, [state.pdb]);
+
+	// Start sample loading process
+	useEffect(() => {
+		if (samplesState.currentlySelectedSamplePDBID) {
+			loadPDBID(samplesState.currentlySelectedSamplePDBID);
+		}
+	}, [samplesState.currentlySelectedSamplePDBID]);
 
 	// Update pdbIdRef value whenever pdb id changes Render data fetcher
 	// box
@@ -217,7 +243,7 @@ export function DataFetcher() {
 							<div
 								className="text-indigo-600 cursor-pointer text-normal hover:underline hover:text-indigo-800"
 								onClick={() =>
-									dispatch({
+									samplesDispatch({
 										type: "showSamplesModal",
 										payload: true,
 									})

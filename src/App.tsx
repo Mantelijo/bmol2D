@@ -2,7 +2,7 @@ import React, { useContext, ReactElement, useEffect, useMemo } from "react";
 import { Viewer } from "./components/Viewer";
 import { DataFetcher } from "./components/DataFetcher";
 import Spinner from "./components/Spinner";
-import { StoreComponent, context } from "./Store";
+import { StoreComponent, context, samplesContext } from "./Store";
 
 // @ts-ignore
 import Module from "./wasm/naview.js";
@@ -13,10 +13,11 @@ import { PreDefinedSamplesModal } from "./components/PreDefinedSamplesModal";
 
 export function App() {
 	const [state, dispatch] = useContext(context);
+	const samplesDispatch = useContext(samplesContext)[1];
 
 	// Load some deps
 	useEffect(() => {
-		loadSamples(dispatch);
+		loadSamples(samplesDispatch);
 		// Wait until wasm module for secondary structure is initialized
 		Module.onRuntimeInitialized = async () => {
 			dispatch({ type: "isWasmModuleLoading", payload: false });

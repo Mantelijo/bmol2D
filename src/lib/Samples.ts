@@ -1,16 +1,25 @@
 import SampleFile from "@/data/samples.json";
-import { Action } from "@/Store";
-
+import { Action, SamplesAction } from "@/Store";
+export interface SampleChains {
+	chain_id: string;
+	dot_braket: string;
+}
 export interface Sample {
-	pbdId: string;
-	chains: {
-		chain_id: string;
-		dot_braket: string;
-	};
-	description?: string;
+	pdbId: string;
+	chains: SampleChains[];
 }
 
 // Load sample dot braket structures to store
-export const loadSamples: (dispatch: React.Dispatch<Action>) => void = () => {
-	console.log(SampleFile);
+export const loadSamples: (dispatch: React.Dispatch<SamplesAction>) => void = (dispatch) => {
+	const samplesStructure: Map<string, Sample> = new Map<string, Sample>();
+	Object.keys(SampleFile).forEach((pdbId) => {
+		samplesStructure.set(pdbId, {
+			pdbId,
+			chains: SampleFile[pdbId as keyof typeof SampleFile] as SampleChains[],
+		});
+	});
+	dispatch({
+		type: "sampleStructures",
+		payload: samplesStructure,
+	});
 };

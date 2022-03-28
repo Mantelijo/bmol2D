@@ -27,10 +27,6 @@ const initialState: State = {
 	secondaryStructures: [],
 
 	iFinderInstance: undefined,
-	sampleStructures: [],
-
-	// ui
-	showSamplesModal: false,
 
 	getResidue: function (chainIdentifier, hash) {
 		if (this.polymers.length === 0) {
@@ -111,14 +107,6 @@ export interface State {
 
 	iFinderInstance?: InteractionsFinder;
 
-	// Samples with pre loaded secondary dot-braket structures, so user
-	// does not need to start the secondary_structure generator script
-	sampleStructures: Sample[];
-
-	// Some ui state
-	// TODO maybe extract to separate context
-	showSamplesModal: boolean;
-
 	// Residue, Polymer getters
 	getResidue: (chainIdentifier: string, residueHash: string) => Residue | null;
 	getResidueByHashOnly: (residueHash: string) => Residue | null;
@@ -133,14 +121,13 @@ export interface Action {
 	payload: any;
 }
 
-const context = createContext<[State, React.Dispatch<Action>]>([initialState, () => {}]);
+export const context = createContext<[State, React.Dispatch<Action>]>([initialState, () => {}]);
 
 // Reducer mutates the state
 const reducer = (state: State, { type, payload }: Action): State => {
 	switch (type) {
 		case "resetState":
-			// Sample structures must remain unchanged
-			return { ...initialState, sampleStructures: state.sampleStructures };
+			return { ...initialState };
 		// Default case works when type is equal state property name
 		default:
 			if (type in state) {
@@ -158,9 +145,59 @@ interface Props {
 	children: ReactElement;
 }
 
-const StoreComponent = ({ children }: Props) => {
-	const [state, dispatch] = useReducer(reducer, initialState);
-	return <context.Provider value={[state, dispatch]}>{children}</context.Provider>;
+export interface SamplesState {
+	// Samples with pre loaded secondary dot-braket structures, so user
+	// does not need to start the secondary_structure generator script
+	sampleStructures: Map<string, Sample>;
+
+	// Some ui state
+	// TODO maybe extract to separate context
+	showSamplesModal: boolean;
+
+	// Once sample structure is selected, pdb if of it will be populated
+	// this key.
+	currentlySelectedSamplePDBID?: string;
+}
+
+export const initialSamplesState: SamplesState = {
+	sampleStructures: new Map<string, Sample>(),
+	currentlySelectedSamplePDBID: undefined,
+	showSamplesModal: false,
 };
 
-export { context, StoreComponent };
+export interface SamplesAction {
+	type: keyof SamplesState;
+	payload: any;
+}
+
+export const samplesContext = createContext<[SamplesState, React.Dispatch<SamplesAction>]>([
+	initialSamplesState,
+	() => {},
+]);
+
+// Reducer mutates the state
+const samplesReducer = (state: SamplesState, { type, payload }: SamplesAction): SamplesState => {
+	switch (type) {
+		default:
+			if (type in state) {
+				(state as any)[type] = payload;
+			} else {
+				throw new Error(`${type} not found in state`);
+			}
+	}
+
+	// We must return new object, otherwise update won't be triggered
+	return { ...state };
+};
+
+export const StoreComponent = ({ children }: Props) => {
+	const [state, dispatch] = useReducer(reducer, initialState);
+	const [samplesState, samplesDispatch] = useReducer(samplesReducer, initialSamplesState);
+	return (
+		<context.Provider value={[state, dispatch]}>
+			<samplesContext.Provider value={[samplesState, samplesDispatch]}>
+				{children}
+			</samplesContext.Provider>
+		</context.Provider>
+	);
+};
