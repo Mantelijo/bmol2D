@@ -4,14 +4,14 @@ from multiprocessing import Pool
 from threading import Thread
 from secondary_structure import getDotBraketStructures, getPDBFile
 
+results = {}
+
+
 # File dirs assuming that we are executing this script in ./wasm directory
 inFile = "pdbids_list"
 outFile = "./../src/data/samples.json"
 
 NUM_THREADS = 60
-results = {}
-
-
 threads = []
 
 
@@ -52,7 +52,8 @@ def runPool(pdbID):
         with Pool(processes=numCPU) as p:
             out = p.map(func=getStructure, iterable=poolPDBIds)
             for key, pdbid in enumerate(poolPDBIds):
-                results[pdbid] = out[key] 
+                if out[key] is not None:
+                    results[pdbid] = out[key] 
             poolPDBIds = []
 
     # Get list of pdb ids from pdbids_list file and generate json file with
