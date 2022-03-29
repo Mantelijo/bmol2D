@@ -30,7 +30,7 @@ from string import ascii_lowercase, ascii_uppercase
 VALID_CHAINIDS = ascii_uppercase+ascii_lowercase
 
 import logging
-log = logging.getLogger(__name__)
+log = logging.getLogger("logger")
 from pprint import pprint, pformat
 
 from logging_exceptions import log_to_exception, log_at_caller
