@@ -2,6 +2,17 @@
 
 Schematic RNA/DNA secondary structure visualization tool working entirely in your browser.
 
+# Samples
+
+Some example structures
+
+- [3Q1Q - my favorite structure](https://bmol2d.netlify.com?id=3Q1Q)
+- [5B2R - my second favorite structure](https://bmol2d.netlify.com?id=5B2R)
+- [6XRZ](https://bmol2d.netlify.com?id=6XRZ)
+- [6C0F - ribosomal subunit, might bet slow on some computers](https://bmol2d.netlify.com?id=6C0F)
+- [2OM7](https://bmol2d.netlify.com?id=2OM7)
+- [1H1K](https://bmol2d.netlify.com?id=1H1K)
+
 # Building project
 
 Install `npm_modules`
