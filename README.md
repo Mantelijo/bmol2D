@@ -35,6 +35,14 @@ If you wish to generate secondary structures for RNA molecules, see
 
 # Secondary structures
 
+Dot-braket strings are used for generating secondary structure coordinates. Currently, dot-braket
+strings cannot be correctly generated in the browser environment and external dependencies are
+required. There are two ways to provide dot-braket strings for the app: by running included python
+script which will be queried for dot-braket automatically, or by providing the dot-braket strings
+manually (from servers such as [RNAPDBee](http://rnapdbee.cs.put.poznan.pl/) or other sources).
+
+## Python script for dot-braket structures
+
 RNA secondary structures information generation currently uses
 [Forgi Library v1.0](https://github.com/ViennaRNA/forgi/tree/v1.0) and requires globally available
 [MC-Annotate](https://github.com/major-lab/MC-Annotate) executable with python3. Make sure you have
@@ -50,6 +58,16 @@ for
 [dot-braket](https://www.tbi.univie.ac.at/RNA/ViennaRNA/doc/html/rna_structure_notations.html#sec_structure_representations)
 structures which are later provided to the wasm module, which generates the secondary structure
 coordinates that are required to display RNA secondary structures.
+
+### MC-Annotate installation
+
+MC-Annotate can be installed from
+[MC-Annotate repository](https://github.com/major-lab/MC-Annotate). It requires you to have
+[mmcore library](https://github.com/major-lab/mccore) installed on your system and cmake. Once you
+have mccore installed, make sure to include the correct paths to mmcore library in
+[MC-Annotate FindMCCORE.cmake](https://github.com/major-lab/MC-Annotate/blob/master/cmake/FindMCCORE.cmake).
+After MC-Annotate executable is built, symlink or add it to your path and make sure to name it
+exactly **MC-Annotate** as forgi library is calling it by this name.
 
 # Project structure
 
