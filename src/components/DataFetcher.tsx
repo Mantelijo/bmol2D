@@ -237,6 +237,17 @@ export function DataFetcher() {
 							</span>
 						</div>
 					)}
+					{state.pdb !== undefined && hasDotBraket === true && (
+						<div className="p-2 mb-4 text-sm text-gray-600 bg-green-200">
+							Edit dot-braket secondary structure strings{" "}
+							<span
+								className="font-bold cursor-pointer hover:underline"
+								onClick={showManualDotBraketModal}
+							>
+								here
+							</span>
+						</div>
+					)}
 					<div>
 						{state.currentPDBId.length > 0 && (
 							<div className="mb-4">
