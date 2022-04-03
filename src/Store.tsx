@@ -28,6 +28,8 @@ const initialState: State = {
 
 	iFinderInstance: undefined,
 
+	showManualDotBraketModal: false,
+
 	getResidue: function (chainIdentifier, hash) {
 		if (this.polymers.length === 0) {
 			return null;
@@ -106,6 +108,9 @@ export interface State {
 	secondaryStructures: DotBraket[];
 
 	iFinderInstance?: InteractionsFinder;
+
+	// State management for dot braket string modal
+	showManualDotBraketModal: boolean;
 
 	// Residue, Polymer getters
 	getResidue: (chainIdentifier: string, residueHash: string) => Residue | null;

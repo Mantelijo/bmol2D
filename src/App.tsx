@@ -10,6 +10,7 @@ import { Residue } from "./lib/types/atoms";
 import { ResidueModal } from "./components/ResidueModal";
 import { loadSamples } from "./lib/Samples";
 import { PreDefinedSamplesModal } from "./components/PreDefinedSamplesModal";
+import { ManualDotBraketModal } from "./components/ManualDotBraketModal";
 
 export function App() {
 	const [state, dispatch] = useContext(context);
@@ -50,6 +51,7 @@ export function App() {
 					</div>
 					{selectedResidue && <ResidueModal residue={selectedResidue} />}
 					<PreDefinedSamplesModal />
+					{state.showManualDotBraketModal && <ManualDotBraketModal />}
 				</>
 			)}
 			{state.isWasmModuleLoading && (

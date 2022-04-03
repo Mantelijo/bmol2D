@@ -131,8 +131,8 @@ export class ResidueImplementation implements Residue {
 	public name: ResidueName;
 	public sequenceNumber: number;
 	public polymerChainIdentifier: string;
-	public initial_x:number|undefined = undefined;
-	public initial_y:number|undefined = undefined
+	public initial_x: number | undefined = undefined;
+	public initial_y: number | undefined = undefined;
 	public watsonCrickPairResidueIndex = -1;
 
 	constructor(public indexInPolymer: number) {
@@ -249,7 +249,7 @@ export interface Remark350Transformations {
 	chains: string[];
 
 	// Array of rotation matrices (3x3)
-	rotations: Array<Array<number>>[];
+	rotations: Array<[number, number, number]>[];
 
 	// Array of translation vectors (3x1)
 	translations: Vector[];

@@ -99,6 +99,7 @@ export function Viewer() {
 	}, [hoverResidueHash]);
 
 	function initD3() {
+		console.log("initD3 called");
 		if (!ref || polymers.length <= 0 || !iFinder) {
 			return;
 		}
@@ -226,7 +227,7 @@ export function Viewer() {
 		console.timeEnd("Nucleic_acid_VIZ");
 	}
 
-	useEffect(initD3, [polymers]);
+	useEffect(initD3, [state.polymers]);
 
 	return (
 		<>

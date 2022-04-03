@@ -234,7 +234,7 @@ export class PDBHandler {
 				currentResidue = newResidue();
 			}
 
-			// Asymetric unit transformations & Biological assemblies
+			// Asymmetric unit transformations & Biological assemblies
 			if (line.startsWith("REMARK 350")) {
 				remark350TransformLines = true;
 
@@ -283,7 +283,7 @@ export class PDBHandler {
 						matchArray = matchArray.slice(1);
 						let nthTransformation = parseInt(matchArray[1]) - 1;
 						let nthRow = parseInt(matchArray[0]) - 1;
-						let rotationRow = [
+						const rotationRow: [number, number, number] = [
 							parseFloat(matchArray[2]),
 							parseFloat(matchArray[3]),
 							parseFloat(matchArray[4]),
@@ -339,7 +339,7 @@ export class PDBHandler {
 
 							// Matrix and vector multiplication for
 							// rotation
-							console.log("Coorinates before:", oldCoords);
+							console.log("Coordinates before:", oldCoords);
 							newCoords.x =
 								oldCoords.x * rotation[0][0] +
 								oldCoords.y * rotation[0][1] +

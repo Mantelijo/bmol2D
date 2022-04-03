@@ -1,8 +1,15 @@
 import { Sample } from "@/lib/Samples";
 import { DotBraket, fetchDotBraket, resetLastMaxX } from "@/lib/SecondaryStructure";
-import React, { ChangeEventHandler, ChangeEvent, useEffect, useContext, useRef } from "react";
+import React, {
+	ChangeEventHandler,
+	ChangeEvent,
+	useEffect,
+	useContext,
+	useRef,
+	useMemo,
+} from "react";
 import { PDBHandler } from "../lib/PDBHandler";
-import { PDBFile, Polymer } from "../lib/types/atoms";
+import { PDBFile, Polymer, PolymerKind } from "../lib/types/atoms";
 import { context, samplesContext } from "../Store";
 
 // Fetch PDB text for given id (if valid)
@@ -180,6 +187,26 @@ export function DataFetcher() {
 		}
 	}, [samplesState.currentlySelectedSamplePDBID]);
 
+	// Check if currently added polymers contain dot-braket string
+	const hasDotBraket = useMemo<boolean>(() => {
+		for (let i = 0; i < state.polymers.length; i++) {
+			const p = state.polymers[i];
+			if ([PolymerKind.RNA, PolymerKind.DNA].indexOf(p.kind) !== -1) {
+				if (!p.dotBraket) {
+					return false;
+				}
+			}
+		}
+		return true;
+	}, [state.polymers]);
+
+	const showManualDotBraketModal = () => {
+		dispatch({
+			type: "showManualDotBraketModal",
+			payload: true,
+		});
+	};
+
 	// Update pdbIdRef value whenever pdb id changes Render data fetcher
 	// box
 	return (
@@ -196,6 +223,18 @@ export function DataFetcher() {
 					{state.pdb === undefined && (
 						<div className="p-2 mb-4 text-sm text-gray-600 bg-red-200">
 							Choose a PDB file which contains DNA/RNA with Proteins
+						</div>
+					)}
+					{hasDotBraket === false && (
+						<div className="p-2 mb-4 text-sm text-gray-600 bg-red-200">
+							Dot-braket strings are not available for all chains in current structure. Not all
+							secondary structures will be displayed. You can manually add dot-braket strings{" "}
+							<span
+								className="font-bold cursor-pointer hover:underline"
+								onClick={showManualDotBraketModal}
+							>
+								here
+							</span>
 						</div>
 					)}
 					<div>
