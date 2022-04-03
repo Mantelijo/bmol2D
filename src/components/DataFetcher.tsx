@@ -75,9 +75,19 @@ export function DataFetcher() {
 	useEffect(() => {
 		const url = new URLSearchParams(window.location.search);
 		const id = url.get("id");
-		console.log("ID", id);
 		if (id !== null) {
-			loadPDBID(id);
+			// For id parameters, let's try to check if given pdb is
+			// available in samples in order to immediately provide
+			// secondary structures
+			const pdbID = id.toUpperCase();
+			if (samplesState.sampleStructures.get(pdbID)) {
+				samplesDispatch({
+					type: "currentlySelectedSamplePDBID",
+					payload: pdbID,
+				});
+			} else {
+				loadPDBID(pdbID);
+			}
 		}
 	}, []);
 

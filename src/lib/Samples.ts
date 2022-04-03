@@ -13,7 +13,7 @@ export interface Sample {
 export const loadSamples: (dispatch: React.Dispatch<SamplesAction>) => void = (dispatch) => {
 	const samplesStructure: Map<string, Sample> = new Map<string, Sample>();
 	Object.keys(SampleFile).forEach((pdbId) => {
-		samplesStructure.set(pdbId, {
+		samplesStructure.set(pdbId.toUpperCase(), {
 			pdbId,
 			chains: SampleFile[pdbId as keyof typeof SampleFile] as SampleChains[],
 		});

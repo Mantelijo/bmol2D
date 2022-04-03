@@ -152,7 +152,8 @@ interface Props {
 
 export interface SamplesState {
 	// Samples with pre loaded secondary dot-braket structures, so user
-	// does not need to start the secondary_structure generator script
+	// does not need to start the secondary_structure generator script.
+	// Keyed by PDB ID strings
 	sampleStructures: Map<string, Sample>;
 
 	// Some ui state
