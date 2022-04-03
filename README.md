@@ -75,7 +75,7 @@ exactly **MC-Annotate** as forgi library is calling it by this name.
 ├── build - build directory
 ├── public - web assets
 ├── src - web app
-└── wasm - naview algorithm extracted from viennaRNA package and some other libraries used to generate secondary structures
+└── wasm - naview algorithm extracted from ViennaRNA package and some other libraries used to generate secondary structures
 ```
 
 # Acknowledgments

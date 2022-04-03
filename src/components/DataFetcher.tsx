@@ -11,6 +11,7 @@ import React, {
 import { PDBHandler } from "../lib/PDBHandler";
 import { PDBFile, Polymer, PolymerKind } from "../lib/types/atoms";
 import { context, samplesContext } from "../Store";
+import GithubIcon from "@/github.svg?url";
 
 // Fetch PDB text for given id (if valid)
 const fetchPDBFile = async (id: string): Promise<string> => {
@@ -211,6 +212,13 @@ export function DataFetcher() {
 	// box
 	return (
 		<div className="max-h-screen p-5 overflow-auto break-words">
+			<div className="flex flex-row items-center justify-between pb-5">
+				<div className="text-2xl font-bold text-indigo-500">Bmol2D</div>
+				<a href="https://github.com/Mantelijo/bmol2D" target="_blank">
+					<img src={GithubIcon} style={{ width: "32px" }} />
+				</a>
+			</div>
+
 			{!state.isLoading && (
 				<div>
 					{state.error.length > 0 && (

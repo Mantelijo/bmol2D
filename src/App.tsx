@@ -3,7 +3,6 @@ import { Viewer } from "./components/Viewer";
 import { DataFetcher } from "./components/DataFetcher";
 import Spinner from "./components/Spinner";
 import { StoreComponent, context, samplesContext } from "./Store";
-
 // @ts-ignore
 import Module from "./wasm/naview.js";
 import { Residue } from "./lib/types/atoms";
