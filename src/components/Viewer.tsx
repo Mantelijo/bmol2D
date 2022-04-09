@@ -274,7 +274,6 @@ export function Viewer() {
 
 	const hideAminoAcidBlocks = useRef<((hide: boolean) => void) | undefined>(undefined);
 	useEffect(() => {
-		console.log("SHow state", state.showAABlocks);
 		if (hideAminoAcidBlocks.current) {
 			hideAminoAcidBlocks.current(!state.showAABlocks);
 		}
