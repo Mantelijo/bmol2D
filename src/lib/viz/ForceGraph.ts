@@ -3,6 +3,54 @@ import * as d3 from "d3";
 import { Action } from "../../Store";
 import { Residue } from "../types/atoms";
 
+const aminoAcidColors = {
+	orange: "orange",
+	green: "green",
+	magenta: "magenta",
+	red: "red",
+	blue: "blue",
+
+	nonStandard: "gray",
+};
+export const LeskCodesForAminoAcids = new Map<string, string>(
+	Object.entries({
+		ALA: aminoAcidColors.orange,
+		ARG: aminoAcidColors.blue,
+		ASN: aminoAcidColors.magenta,
+		ASP: aminoAcidColors.red,
+		CYS: aminoAcidColors.green,
+		GLN: aminoAcidColors.magenta,
+		GLU: aminoAcidColors.red,
+		GLY: aminoAcidColors.orange,
+		HIS: aminoAcidColors.magenta,
+		ILE: aminoAcidColors.green,
+		LEU: aminoAcidColors.magenta,
+		LYS: aminoAcidColors.blue,
+		MET: aminoAcidColors.magenta,
+		PHE: aminoAcidColors.magenta,
+		PRO: aminoAcidColors.magenta,
+		PYL: aminoAcidColors.nonStandard,
+		SEC: aminoAcidColors.nonStandard,
+		SER: aminoAcidColors.orange,
+		THR: aminoAcidColors.orange,
+		TRP: aminoAcidColors.magenta,
+		TYR: aminoAcidColors.magenta,
+		VAL: aminoAcidColors.magenta,
+	}),
+);
+
+// Initial opacity for AminoAcid nodes
+const AAOpacity = 0.3;
+
+export interface NodeAminoAcidInteractionData {
+	aminoAcid: string;
+	aminoAcidSeqNo: number;
+	numberOfInteractions: number;
+	polymerChainId: string;
+
+	// Residue hash of DNA/RNA which interacts with this AA
+	interactingResidueHash: string;
+}
 export interface Node {
 	id: string;
 	color: string;
@@ -15,6 +63,10 @@ export interface Node {
 	// Initial RNA secondary structure coordinates
 	initial_x?: number;
 	initial_y?: number;
+
+	// Nodes which represent amino acid interaction (squares) will have
+	// this information set
+	aminoAcidInteraction?: NodeAminoAcidInteractionData;
 
 	// d3-force specific values
 	x?: number;
@@ -30,7 +82,7 @@ export interface Node {
 export enum NodeType {
 	Residue = "residue",
 	InteractionsNumber = "interactions_number",
-	InteractionResidue = "interaction_residue",
+	InteractionAminoAcid = "interaction_aminoacid",
 }
 
 export enum LinkType {
@@ -40,8 +92,8 @@ export enum LinkType {
 }
 
 export interface Link {
-	source: string;
-	target: string;
+	source: string | Node;
+	target: string | Node;
 	value: number;
 	color: string;
 	linkType: LinkType;
@@ -82,11 +134,39 @@ const Letters = {
 	y: 4,
 };
 
-// 100 ms seems the most reasonable based on performance profile
-const POPUP_TIMEOUT = 100;
+// Dimensions for amino acid interaction rects
+const AminoAcidBoxDims = {
+	x: 90,
+	y: 20,
+	// Border radius
+	rx: 5,
+};
+
+// filter datum for given type array
+const d3FilterFn = (type: NodeType[]) => {
+	return (d: Node) => d.type !== undefined && type.indexOf(d.type) !== -1;
+};
 
 // Single residue circle radius in px
 export const NodeRadius = 9;
+
+// Sizing functions used in zooming/ticked/etc
+const sizingFns = {
+	lettersY: (d: Node, transformK = 1) => {
+		// if (d.type === NodeType.InteractionAminoAcid) {
+		// 	return (AminoAcidBoxDims.y + Letters.size * 0.75) / 2 / transformK;
+		// }
+		// more centered text
+		return Letters.y / transformK;
+	},
+	lettersX: (d: Node, transformK = 1) => {
+		// if (d.type === NodeType.InteractionAminoAcid) {
+		// 	return AminoAcidBoxDims.x / 2 / transformK;
+		// }
+		// more centered text
+		return 0;
+	},
+};
 
 // Example taken from https://observablehq.com/@d3/force-directed-graph
 export function ForceGraph(
@@ -173,6 +253,8 @@ export function ForceGraph(
 		});
 
 	const ticked = () => {
+		// Interaction (Amino acid nodes) are always source nodes, (see
+		// Viewer.tsx where interaction nodes are generated)
 		link
 			.attr("x1", (d: any) => {
 				return d.source.x;
@@ -233,6 +315,7 @@ export function ForceGraph(
 		.call(drag(simulation) as any);
 
 	const node = nodeGs
+		.filter((d: Node) => d.type === NodeType.Residue)
 		.append("circle")
 		.attr("stroke", nodeStroke)
 		.attr("stroke-opacity", nodeStrokeOpacity)
@@ -241,49 +324,80 @@ export function ForceGraph(
 		.style("cursor", "pointer")
 		.attr("r", NodeRadius);
 
+	const aminoAcids = nodeGs
+		.filter((d: Node) => d.type === NodeType.InteractionAminoAcid)
+		.append("rect")
+		.attr("width", AminoAcidBoxDims.x)
+		.attr("height", AminoAcidBoxDims.y)
+		.attr("rx", AminoAcidBoxDims.rx)
+		.attr("x", -AminoAcidBoxDims.x / 2)
+		.attr("y", -AminoAcidBoxDims.y / 2)
+		.attr("fill", (d: Node) => {
+			if (d.aminoAcidInteraction) {
+				const color = LeskCodesForAminoAcids.get(d.aminoAcidInteraction.aminoAcid);
+				if (color) {
+					return color;
+				}
+			}
+			return aminoAcidColors.nonStandard;
+		})
+		.attr("opacity", AAOpacity);
+
 	// Tooltip information
-	let lastEvent = new Date();
 	nodeGs
 		.on("click", function (event, d: Node) {
-			if (d.type && -1 !== [NodeType.InteractionsNumber, NodeType.Residue].indexOf(d.type)) {
+			if (
+				d.type &&
+				-1 !==
+					[NodeType.InteractionsNumber, NodeType.InteractionAminoAcid, NodeType.Residue].indexOf(
+						d.type,
+					)
+			) {
 				dispatch({
 					type: "selectedResidueHash",
 					payload: d.hash,
 				});
-				console.log("Clicked interaction bubble");
 			}
 		})
 		.on("mouseover", function (event, d: Node) {
-			d3.select(this)
+			const t = d3.select(this);
+			// @ts-ignore
+			t.filter(d3FilterFn([NodeType.Residue]))
 				.select("circle")
 				.attr("r", transformAdjusted(NodeRadius * 2));
+
+			// Increase opacity for AA blocks on hover
+			// @ts-ignore
+			t.filter(d3FilterFn([NodeType.InteractionAminoAcid]))
+				.select("rect")
+				.attr("opacity", 1);
+
 			setHoverResidueHash(d.hash);
-			if (new Date().getTime() - lastEvent.getTime() > POPUP_TIMEOUT) {
-				// dispatch({
-				// 	type: "selectedResidue",
-				// 	payload: d,
-				// });
-				lastEvent = new Date();
-			}
 		})
 		.on("mouseout", function (event, d: Node) {
-			// transform adjusted radius if needed
-			d3.select(this).select("circle").attr("r", transformAdjusted(NodeRadius));
-			setHoverResidueHash(undefined);
+			const t = d3.select(this);
+			// @ts-ignore
+			t.filter(d3FilterFn([NodeType.Residue]))
+				.select("circle")
+				.attr("r", transformAdjusted(NodeRadius));
+			// Decrease opacity back for AA block
+			// @ts-ignore
+			t.filter(d3FilterFn([NodeType.InteractionAminoAcid]))
+				.select("rect")
 
-			// dispatch({
-			// 	type: "selectedResidue",
-			// 	payload: undefined,
-			// });
+				.attr("opacity", AAOpacity);
+			setHoverResidueHash(undefined);
 		});
 
-	// Append names
+	// Append node titles
 	const letters = nodeGs
+		// .filter((n: Node) => n.type === NodeType.Residue)
 		.append("text")
 		.text((d) => d.name)
 		.attr("text-anchor", "middle")
 		.attr("font-size", Letters.size)
-		.attr("y", Letters.y) // more centered text
+		.attr("y", (n: Node) => sizingFns.lettersY(n))
+		.attr("x", (n: Node) => sizingFns.lettersX(n))
 		.attr("class", (d: Node) => {
 			const classes = ["svg-graph-text"];
 			if (d.type === NodeType.InteractionsNumber) {
@@ -348,14 +462,38 @@ export function ForceGraph(
 			}
 			const newK = Math.sqrt(transform.k);
 
+			// Resize nodes
 			if (Math.abs(newK - transformK) > 0.1) {
 				transformK = newK;
 				g.style("stroke-width", 3 / transformK);
 				node.attr("r", NodeRadius / transformK).attr("stroke-width", nodeStrokeWidth / transformK);
-				letters.attr("font-size", Letters.size / transformK).attr("y", Letters.y / transformK);
+				letters
+					.attr("font-size", Letters.size / transformK)
+					.attr("y", (n: Node) => sizingFns.lettersY(n, transformK))
+					.attr("x", (n: Node) => sizingFns.lettersX(n, transformK));
+				aminoAcids
+					.attr("rx", AminoAcidBoxDims.rx / transformK)
+					.attr("width", AminoAcidBoxDims.x / transformK)
+					.attr("height", AminoAcidBoxDims.y / transformK)
+					.attr("x", -(AminoAcidBoxDims.x / transformK) / 2)
+					.attr("y", -(AminoAcidBoxDims.y / transformK) / 2);
 			}
 		});
 	svg.call(zoom as any);
 
-	return Object.assign(svg.node(), { scales: { color: null } });
+	// Function to hide/show nodes
+	const hideAminoAcidBlocks = (hide: boolean) => {
+		const AABlocks = nodeGs.filter(d3FilterFn([NodeType.InteractionAminoAcid]));
+		const AABlockLinks = link.filter((l: Link) => l.linkType === LinkType.Interaction);
+		if (hide) {
+			AABlocks.attr("display", "none");
+			AABlockLinks.attr("display", "none");
+		} else {
+			AABlocks.attr("display", "initial");
+			AABlockLinks.attr("display", "initial");
+		}
+	};
+	window.hideAminoAcidBlocks = hideAminoAcidBlocks;
+
+	return hideAminoAcidBlocks;
 }

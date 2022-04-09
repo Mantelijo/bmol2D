@@ -30,6 +30,9 @@ const initialState: State = {
 
 	showManualDotBraketModal: false,
 
+	vizLoaded: false,
+	showAABlocks: false,
+
 	getResidue: function (chainIdentifier, hash) {
 		if (this.polymers.length === 0) {
 			return null;
@@ -111,6 +114,11 @@ export interface State {
 
 	// State management for dot braket string modal
 	showManualDotBraketModal: boolean;
+
+	// Set to true once visualization is loaded into DOM
+	vizLoaded: boolean;
+	// Toggle visibility of aminoacid blocks and links
+	showAABlocks: boolean;
 
 	// Residue, Polymer getters
 	getResidue: (chainIdentifier: string, residueHash: string) => Residue | null;

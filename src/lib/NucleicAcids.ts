@@ -15,11 +15,11 @@ export const calculateNucleotidePlaneVectors: (p: Polymer) => Polymer = (p) => {
 	if ([PolymerKind.DNA, PolymerKind.RNA].indexOf(p.kind) != -1) {
 		// Dna/Rna residue atoms containing these names will be selected as c2, c4, c6
 		// C's with single quote ' are of ribose so we only want specifically these.
-		let cNames = ["C2", "C4", "C6"];
+		const cNames = ["C2", "C4", "C6"];
 
 		p.residues.forEach((residue) => {
 			// Find C2, C4, C6 coordinates
-			let cAtoms: Coordinate[] = [];
+			const cAtoms: Coordinate[] = [];
 
 			const atoms = residue.findAtomsByNames(cNames);
 			atoms.forEach((a, i) => {

@@ -14,6 +14,8 @@ import { ForceGraph, NodeType } from "./../lib/viz/ForceGraph";
 import { useRef } from "react";
 import { Node, Link, LinkType } from "./../lib/viz/ForceGraph";
 import { resToId } from "../lib/types/residues";
+import { Interaction } from "@/lib/types/interactions";
+import { group } from "d3-array";
 
 declare global {
 	interface Window {
@@ -157,24 +159,61 @@ export function Viewer() {
 					});
 				}
 
-				// Show number of interactions for each residue if any
+				// Show interactions with unique amino acid for each residue if any
 				if (r.interactions.length > 0) {
-					const interactionsId = resToId(r) + "-interactions";
-					nodes.push({
-						hash: r.hash, // This node still has it's residue's hash
-						name: r.interactions.length.toString(),
-						id: interactionsId,
-						color: ColorMap.interaction,
-						group: 5,
-						type: NodeType.InteractionsNumber,
+					// Group the interactions based on amino acid
+					type groupVal = { aminoAcidResidue: Residue; interactions: Interaction[] };
+					const groups = new Map<string, groupVal>();
+					r.interactions.forEach((i) => {
+						if (i.polymerKind === PolymerKind.Protein) {
+							const residue = state.getResidue(i.polymerChainIdentifier, i.residueHash);
+							if (residue) {
+								const aminoAcidNameWithChainAnSeqno = `${residue.polymerChainIdentifier}:${residue.name}-${residue.sequenceNumber}`;
+								if (!groups.has(aminoAcidNameWithChainAnSeqno)) {
+									groups.set(aminoAcidNameWithChainAnSeqno, {
+										aminoAcidResidue: residue,
+										interactions: [],
+									});
+								}
+								(
+									(groups.get(aminoAcidNameWithChainAnSeqno) as groupVal)
+										.interactions as Interaction[]
+								).push(i);
+							}
+						}
 					});
-					links.push({
-						source: interactionsId,
-						target: resToId(r),
-						value: 1,
-						color: LinkColorMap.interaction,
-						linkType: LinkType.Interaction,
-					});
+
+					for (const [
+						aminoAcidNameWithChainAnSeqno,
+						{ interactions, aminoAcidResidue },
+					] of groups) {
+						const interactionsId = resToId(r) + "-interactions-" + aminoAcidNameWithChainAnSeqno;
+						nodes.push({
+							// This node still has it's residue's hash as we want to display residues information on click
+							hash: r.hash,
+							// Name format:
+							// ChainID:AminoAcid3Letters-SeqNo (NumberOfInteractions)
+							name: `${aminoAcidNameWithChainAnSeqno} (${interactions.length})`,
+							id: interactionsId,
+							color: ColorMap.interaction,
+							group: 5,
+							type: NodeType.InteractionAminoAcid,
+							aminoAcidInteraction: {
+								aminoAcid: aminoAcidResidue.name.toString(),
+								aminoAcidSeqNo: aminoAcidResidue.sequenceNumber,
+								numberOfInteractions: interactions.length,
+								polymerChainId: aminoAcidResidue.polymerChainIdentifier,
+								interactingResidueHash: r.hash,
+							},
+						});
+						links.push({
+							source: interactionsId,
+							target: resToId(r),
+							value: 1,
+							color: LinkColorMap.interaction,
+							linkType: LinkType.Interaction,
+						});
+					}
 				}
 			});
 		};
@@ -203,8 +242,9 @@ export function Viewer() {
 			(containerRef.current as HTMLDivElement).offsetHeight,
 		];
 
-		// Draw the visualization
-		ForceGraph(
+		// Draw the visualization. ForceGrah returns function to control
+		// AABlocks and links
+		hideAminoAcidBlocks.current = ForceGraph(
 			{
 				nodes,
 				links,
@@ -225,7 +265,20 @@ export function Viewer() {
 		// console.table(links);
 
 		console.timeEnd("Nucleic_acid_VIZ");
+
+		dispatch({
+			type: "vizLoaded",
+			payload: true,
+		});
 	}
+
+	const hideAminoAcidBlocks = useRef<((hide: boolean) => void) | undefined>(undefined);
+	useEffect(() => {
+		console.log("SHow state", state.showAABlocks);
+		if (hideAminoAcidBlocks.current) {
+			hideAminoAcidBlocks.current(!state.showAABlocks);
+		}
+	}, [state.showAABlocks]);
 
 	useEffect(initD3, [state.polymers]);
 

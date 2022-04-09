@@ -7,11 +7,13 @@ import React, {
 	useContext,
 	useRef,
 	useMemo,
+	useState,
 } from "react";
 import { PDBHandler } from "../lib/PDBHandler";
 import { PDBFile, Polymer, PolymerKind } from "../lib/types/atoms";
 import { context, samplesContext } from "../Store";
 import GithubIcon from "@/github.svg?url";
+import { Switch } from "@headlessui/react";
 
 // Fetch PDB text for given id (if valid)
 const fetchPDBFile = async (id: string): Promise<string> => {
@@ -136,8 +138,9 @@ export function DataFetcher() {
 		}
 	};
 
-	// Fetch the dot braket information and update the polymers for freshly
-	// added pdb file. This effect should run on every pdb id/file change
+	// Fetch the dot braket information and update the polymers for
+	// freshly added pdb file. This effect should run on every pdb id/file
+	// change
 	useEffect(() => {
 		resetLastMaxX();
 		(async () => {
@@ -218,6 +221,34 @@ export function DataFetcher() {
 		});
 	};
 
+	// Toggle visibility of AABlock
+	const [enabled, setEnabled] = useState(false);
+	const switchBtn = (
+		<Switch
+			checked={enabled}
+			onChange={setEnabled}
+			className={`${
+				enabled ? "bg-blue-600" : "bg-gray-200"
+			} relative inline-flex items-center h-6 rounded-full w-11`}
+		>
+			<span className="sr-only">Toggle visibility of amino acid blocks</span>
+			<span
+				className={`${
+					enabled ? "translate-x-6" : "translate-x-1"
+				} inline-block w-4 h-4 transform bg-white rounded-full`}
+			/>
+		</Switch>
+	);
+	// Weird fix for making showAABlocks value work as useFfect dep in
+	// Viewer.tsx
+	useEffect(() => setEnabled(true), []);
+	useEffect(() => {
+		dispatch({
+			type: "showAABlocks",
+			payload: enabled,
+		});
+	}, [enabled]);
+
 	// Update pdbIdRef value whenever pdb id changes Render data fetcher
 	// box
 	return (
@@ -243,6 +274,71 @@ export function DataFetcher() {
 							Choose a PDB file which contains DNA/RNA with Proteins
 						</div>
 					)}
+					<div className="mb-4">
+						<div className="mb-2 font-bold text-gray-600 text-normal">
+							Enter PDB file ID:
+							<div className="text-xs font-normal">
+								PDB file should contain <b>DNA/RNA</b> structures
+							</div>
+						</div>
+						<div className="flex flex-row max-w-full">
+							<input
+								onKeyPress={(e) => {
+									if (e.key === "Enter") {
+										handlePDBIdChange();
+									}
+								}}
+								ref={pdbIdRef}
+								placeholder="1ZS4"
+								className="block px-2 py-1 transition-all border border-r-0 border-indigo-300 rounded rounded-tr-none rounded-br-none outline-none ring-indigo-200 focus:ring-2 outline-0"
+							/>
+							<button
+								onClick={handlePDBIdChange}
+								className="bg-indigo-400 border-l-0 text-white font-bold text-sm ring-indigo-200 focus:ring-2 hover:bg-indigo-600 transition-all w-[100px]  block rounded rounded-tl-none rounded-bl-none border border-indigo-300"
+							>
+								GO
+							</button>
+						</div>
+					</div>
+					<div className="mb-2 font-bold text-gray-600 text-normal">
+						Or choose a PDB id/file/sample to display:
+						<div className="text-xs font-normal">
+							PDB file should contain <b>DNA/RNA</b> structures
+						</div>
+					</div>
+					<input type="file" onChange={handleFileChange} className="max-w-full" />
+					<div className="flex flex-row gap-1 mt-6 font-bold">
+						<div className="text-gray-600 text-normal">Or choose</div>
+						<div
+							className="text-indigo-600 cursor-pointer text-normal hover:underline hover:text-indigo-800"
+							onClick={() =>
+								samplesDispatch({
+									type: "showSamplesModal",
+									payload: true,
+								})
+							}
+						>
+							one of pre-defined samples
+						</div>
+					</div>
+					<div className="mb-8 text-xs font-normal">
+						Which will also contain secondary structures, if you cannot run secondary structure
+						generator script.
+					</div>
+
+					{/* Selected PDB file info below */}
+					{state.currentPDBId.length > 0 && (
+						<div className="mb-4">
+							<div className="mb-4 text-xl font-bold text-primary-700">
+								Currently selected PDB ID:
+								<b>{state.currentPDBId.toUpperCase()}</b>
+							</div>
+							<div className="flex flex-row items-center justify-start gap-2">
+								<div>{switchBtn}</div>
+								<div>Toggle visibility of amino acid interaction nodes</div>
+							</div>
+						</div>
+					)}
 					{hasDotBraket === false && (
 						<div className="p-2 mb-4 text-sm text-gray-600 bg-red-200">
 							Dot-braket strings are not available for all chains in current structure. Not all
@@ -266,65 +362,6 @@ export function DataFetcher() {
 							</span>
 						</div>
 					)}
-					<div>
-						{state.currentPDBId.length > 0 && (
-							<div className="mb-4">
-								Currently selected PDB ID:
-								<b>{state.currentPDBId.toUpperCase()}</b>
-							</div>
-						)}
-						<div className="mb-4">
-							<div className="mb-2 font-bold text-gray-600 text-normal">
-								Enter PDB file ID:
-								<div className="text-xs font-normal">
-									PDB file should contain <b>DNA/RNA</b> structures
-								</div>
-							</div>
-							<div className="flex flex-row max-w-full">
-								<input
-									onKeyPress={(e) => {
-										if (e.key === "Enter") {
-											handlePDBIdChange();
-										}
-									}}
-									ref={pdbIdRef}
-									placeholder="1ZS4"
-									className="block px-2 py-1 transition-all border border-r-0 border-indigo-300 rounded rounded-tr-none rounded-br-none outline-none ring-indigo-200 focus:ring-2 outline-0"
-								/>
-								<button
-									onClick={handlePDBIdChange}
-									className="bg-indigo-400 border-l-0 text-white font-bold text-sm ring-indigo-200 focus:ring-2 hover:bg-indigo-600 transition-all w-[100px]  block rounded rounded-tl-none rounded-bl-none border border-indigo-300"
-								>
-									GO
-								</button>
-							</div>
-						</div>
-						<div className="mb-2 font-bold text-gray-600 text-normal">
-							Or choose a PDB id/file/sample to display:
-							<div className="text-xs font-normal">
-								PDB file should contain <b>DNA/RNA</b> structures
-							</div>
-						</div>
-						<input type="file" onChange={handleFileChange} className="max-w-full" />
-						<div className="flex flex-row gap-1 mt-6 font-bold">
-							<div className="text-gray-600 text-normal">Or choose</div>
-							<div
-								className="text-indigo-600 cursor-pointer text-normal hover:underline hover:text-indigo-800"
-								onClick={() =>
-									samplesDispatch({
-										type: "showSamplesModal",
-										payload: true,
-									})
-								}
-							>
-								one of pre-defined samples
-							</div>
-						</div>
-						<div className="text-xs font-normal">
-							Which will also contain secondary structures, if you can't run secondary structure
-							generator script.
-						</div>
-					</div>
 				</div>
 			)}
 			{pdbText}
