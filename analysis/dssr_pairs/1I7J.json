@@ -1,0 +1,26 @@
+[
+  {
+    "nt1": "A.OMC1",
+    "nt2": "B.OMG6"
+  },
+  {
+    "nt1": "A.OMG2",
+    "nt2": "B.OMC5"
+  },
+  {
+    "nt1": "A.OMC3",
+    "nt2": "B.OMG4"
+  },
+  {
+    "nt1": "A.OMG4",
+    "nt2": "B.OMC3"
+  },
+  {
+    "nt1": "A.OMC5",
+    "nt2": "B.OMG2"
+  },
+  {
+    "nt1": "A.OMG6",
+    "nt2": "B.OMC1"
+  }
+]

@@ -1,0 +1,74 @@
+[
+  {
+    "nt1": "A.CPN1",
+    "nt2": "B.DG9"
+  },
+  {
+    "nt1": "A.TPN2",
+    "nt2": "B.DA8"
+  },
+  {
+    "nt1": "A.CPN3",
+    "nt2": "B.DG7"
+  },
+  {
+    "nt1": "A.TPN4",
+    "nt2": "B.DA6"
+  },
+  {
+    "nt1": "A.IPN5",
+    "nt2": "B.DA5"
+  },
+  {
+    "nt1": "A.CPN6",
+    "nt2": "B.DG4"
+  },
+  {
+    "nt1": "A.TPN7",
+    "nt2": "B.DA3"
+  },
+  {
+    "nt1": "A.TPN8",
+    "nt2": "B.DA2"
+  },
+  {
+    "nt1": "A.CPN9",
+    "nt2": "B.DG1"
+  },
+  {
+    "nt1": "C.CPN1",
+    "nt2": "D.DG9"
+  },
+  {
+    "nt1": "C.TPN2",
+    "nt2": "D.DA8"
+  },
+  {
+    "nt1": "C.CPN3",
+    "nt2": "D.DG7"
+  },
+  {
+    "nt1": "C.TPN4",
+    "nt2": "D.DA6"
+  },
+  {
+    "nt1": "C.IPN5",
+    "nt2": "D.DA5"
+  },
+  {
+    "nt1": "C.CPN6",
+    "nt2": "D.DG4"
+  },
+  {
+    "nt1": "C.TPN7",
+    "nt2": "D.DA3"
+  },
+  {
+    "nt1": "C.TPN8",
+    "nt2": "D.DA2"
+  },
+  {
+    "nt1": "C.CPN9",
+    "nt2": "D.DG1"
+  }
+]
