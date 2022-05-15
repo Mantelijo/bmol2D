@@ -112,6 +112,11 @@ export interface Residue extends ResidueMeta {
 	// residues in polymer.
 	indexInPolymer: number;
 
+	// DNA chains, which are paired with other DNA chain (double helix)
+	// will have this set to the pair residue. This info will be used to
+	// produce double helix residue coordinates for DNA double helices
+	dnaPairResidue?: Residue;
+
 	/**
 	 * Finds all atoms of this residue which match the given names. Atoms
 	 * are returned as array in the order the names were provided. Only
@@ -134,6 +139,7 @@ export class ResidueImplementation implements Residue {
 	public initial_x: number | undefined = undefined;
 	public initial_y: number | undefined = undefined;
 	public watsonCrickPairResidueIndex = -1;
+	public dnaPairResidue?: Residue | undefined;
 
 	constructor(public indexInPolymer: number) {
 		this.atoms = [];

@@ -5,6 +5,7 @@ import { Visualization } from "./types/visualization";
 import { isWatsonCrickPair, WATSON_CRICK_PAIR_CALCULATION_THRESHOLD } from "./NucleicAcids";
 import { resToId } from "./types/residues";
 import { fillSecondaryStructureInitialCoordinates } from "./SecondaryStructure";
+import { chain } from "mathjs";
 
 export class InteractionsFinder {
 	nucleicAcids: Polymer[] = [];
@@ -187,6 +188,15 @@ export class InteractionsFinder {
 				if (chain1 === chain2) {
 					r1.watsonCrickPairResidueIndex = bestR2.indexInPolymer;
 					bestR2.watsonCrickPairResidueIndex = r1.indexInPolymer;
+				}
+
+				// Set double-helix pairs for DNA
+				if (
+					chain1 !== chain2 &&
+					chain1.kind === PolymerKind.DNA &&
+					chain2.kind === PolymerKind.DNA
+				) {
+					r1.dnaPairResidue = bestR2;
 				}
 
 				pairs.push([r1, bestR2]);

@@ -1,3 +1,5 @@
-./pdb
-./bmol_pairs
-./dssr_pairs
+pdb
+bmol_pairs
+dssr_pairs
+dssr-*
+dssr.log

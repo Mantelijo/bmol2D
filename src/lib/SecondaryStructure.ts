@@ -1,7 +1,7 @@
-import {
-	calculateSecondaryStructureCoordinates,
-	calculateSecondaryStructureCoordinatesFromDotBraket,
-} from "./Wasm";
+// import {
+// 	calculateSecondaryStructureCoordinates,
+// 	calculateSecondaryStructureCoordinatesFromDotBraket,
+// } from "./Wasm";
 import * as d3 from "d3";
 import { PDBFile, Polymer, PolymerKind } from "./types/atoms";
 import { NodeRadius } from "./viz/ForceGraph";
@@ -63,7 +63,8 @@ export const getSecondaryStructure: (p: Polymer) => SecondaryStructureData | und
 
 	// Attempt to generate coordinates
 	if (p.dotBraket && p.dotBraket.length > 0) {
-		const coords = calculateSecondaryStructureCoordinatesFromDotBraket(p.dotBraket);
+		// const coords = calculateSecondaryStructureCoordinatesFromDotBraket(p.dotBraket);
+		const coords: [number, number][] = [];
 
 		return {
 			chain_id: p.chainIdentifier,
@@ -84,6 +85,10 @@ export const resetLastMaxX = () => (lastMaxXCoordinate = 0);
 export const fillSecondaryStructureInitialCoordinates: (p: Polymer) => void = (p) => {
 	const coordData = getSecondaryStructure(p);
 	if (!coordData) {
+		// FOR DNA, attempt to fill double-helix coordinates
+		if (p.kind === PolymerKind.DNA) {
+			DNAChainSecondaryStructureCoordinates(p);
+		}
 		return;
 	}
 
@@ -113,4 +118,21 @@ export const fillSecondaryStructureInitialCoordinates: (p: Polymer) => void = (p
 
 		lastMaxXCoordinate = Math.max(lastMaxXCoordinate, currentMaxX);
 	}
+};
+
+export const DNAChainSecondaryStructureCoordinates: (p: Polymer) => void = (p) => {
+	// const UNIT_DISTANCE = 20;
+	// for (let i = 0; i < p.residues.length; i++) {
+	// 	// If coordinates info was already set for this residue - don't
+	// 	// recalculate it, as it was set from pair chain
+	// 	if (p.residues[i].initial_x !== undefined) {
+	// 		continue;
+	// 	}
+	// 	p.residues[i].initial_x = 0;
+	// 	p.residues[i].initial_y = UNIT_DISTANCE * p.residues[i].indexInPolymer;
+	// 	if (p.residues[i].dnaPairResidue !== undefined) {
+	// 		p.residues[i].dnaPairResidue.initial_x = UNIT_DISTANCE;
+	// 		p.residues[i].dnaPairResidue.initial_y = UNIT_DISTANCE * p.residues[i].indexInPolymer;
+	// 	}
+	// }
 };
